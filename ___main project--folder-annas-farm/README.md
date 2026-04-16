@@ -1,6 +1,7 @@
 # Anna's Farm — Common Space Entry Landscape
 
-**Slug:** `annas-farm` &nbsp;•&nbsp; **Created:** 2026-04-11 &nbsp;•&nbsp; **Status:** intake → research
+**Slug:** `annas-farm` &nbsp;•&nbsp; **Created:** 2026-04-11 &nbsp;•&nbsp; **Status:** research → mockup generation
+**Contractor:** Sunrise Landscape Co. — William Held — 303-931-3760 — willheld@aol.com
 
 ## The ask
 
@@ -15,16 +16,16 @@ Two common-space entry areas at Anna's Farm, **Lafayette, Colorado** (Boulder Co
 | Perimeter | 230 ft | 194 ft |
 | Centroid | 40.000458°N, -105.110036°W | 40.001489°N, -105.109675°W |
 | Elevation | ~5,360 ft | ~5,350 ft |
-| Demo + grade | $2,000 | $1,000 |
-| Weed fabric | $1,750 | $750 |
-| Rock 3/4"–1 1/2" | $6,000 | $3,000 |
-| Rock 2"–6" | $2,000 | $1,000 |
-| Boulders | 6 tons / $4,800 | 4 tons / $3,200 |
-| Flagstone | 4 tons / $4,000 | 3 tons / $3,000 |
-| Solar lights | 10 / $500 | 10 / $500 |
-| **Subtotal** | **$21,050** | **$12,450** |
+| Demo + grade | $2,200 | $1,100 |
+| Weed fabric | $1,925 | $825 |
+| Rock 3/4"–1 1/2" | $6,600 | $3,300 |
+| Rock 2"–6" | $2,200 | $1,100 |
+| Boulders | 6 tons / $5,280 | 4 tons / $3,520 |
+| Flagstone | 4 tons / $4,400 | 3 tons / $3,300 |
+| Solar lights | 10 / $550 | 10 / $550 |
+| **Subtotal** | **$23,155** | **$13,695** |
 
-**Grand total (pre-tax):** **$33,500**
+**Grand total:** **$36,850** (no tax)
 
 ## Pipeline
 

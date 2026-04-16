@@ -4,6 +4,47 @@ Append-only. Most recent entry at top.
 
 ---
 
+## 2026-04-15 — Session 4 — full-needs consolidation, pricing, language, GitHub deployment
+
+**Owner:** Cursor Agent
+
+**What happened:** Full client-needs consolidation from the in-person on-site meeting transcript. Applied across every file in the project.
+
+**Done this session:**
+- **Extracted 93 client needs** from the full on-site meeting transcript into `Customer_Needs_TASKLIST.plan.md` at project root.
+- **Created versioned documentation** — `client-needs-v1.4.md`, `client-needs-v1.3-internal-technical-spec.md` (v1.4), `client-needs-traceability-v1.0.md` (76 requirements across 10 categories).
+- **Contractor identified** — Sunrise Landscape Co., William Held, willheld@aol.com, 303-931-3760.
+- **Payment terms confirmed** — 10% deposit, 40% at startup, 40% at 90% completion, 10% punch list. No tax.
+- **10% price increase applied** to every line item in every HTML proposal (4× SUNRISE-LANSCARPEW, proposal/index.html, proposal/proposal.html, files/annas-farm-proposal.html, files/annas-farm/proposal/proposal.html) and `brief.json`. New grand total: **$36,850** (was $33,500).
+- **Language corrections** applied across all HTML proposals:
+  - "tilted sandstone slabs" → "tilted red flagstone slabs"
+  - "A single Flatirons formation" / "a single focal cluster" → "A series of Flatirons-inspired groupings"
+  - Made this a system-wide rule: avoid deterministic language that commits to exact quantities or configurations.
+- **Nano-banana prompt fixes** — "weathered sandstone" → "weathered Colorado moss-rock" in site1_04_dusk_lights.json; removed deterministic boulder counts ("Six warm-ochre sandstone boulders" → "A series of warm-ochre Colorado moss-rock boulders"); "a single accent boulder" → "accent boulders" in site2_02_after_day.json.
+- **brief.json updated** — contractor block filled, 10% pricing, payment terms, tax = 0.
+- **GitHub repository created** — `sunrise-landscape-anna-farm-proposal` on GitHub.
+- **GitHub Pages deployed** via Actions workflow from `site/` directory.
+- **Git LFS enabled** — `.gitattributes` configured for images, video, 3D, audio, documents.
+- **Site folder** synced — all 4 proposal variants copied to `site/` with `index.html` landing page.
+
+**Design rules established (system-wide):**
+- Non-deterministic language: never commit to exact quantities of flat irons, boulders, or groupings.
+- Groupings of 2, 3, or 4 flat irons — field-determined based on weight and scale.
+- Northwesterly orientation (more west than north).
+- Colorado-sourced materials only — no Arizona references.
+- Mulch is conditional (prairie dogs may interfere).
+- Rock types: boulders, river cobbles, river rock — distinct categories, don't conflate.
+
+**Remaining:**
+- Client identity block still needed (name, email, billing address).
+- Street address for invoice header (coordinates confirmed but address needed).
+- Reference photos from contractor (strip stone, flat iron angles, rock type transitions, color-annotated markup images).
+- Run Nano Banana + Veo 3 prompts to generate mockups.
+- Logo generation for Sunrise Landscape Co.
+- NixOS pixel vision pipeline verification.
+
+---
+
 ## 2026-04-11 — Session 3 — location correction + perimeter-view extraction
 
 **Owner:** Claude Code (CLI)

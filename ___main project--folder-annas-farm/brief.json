@@ -17,10 +17,10 @@
     "notes": "Common-space entry areas at Anna's Farm. Site contact is a resident who lives on the property. HOA-style proposal assumed — confirm whether the invoice goes to an HOA, builder, property manager, or individual."
   },
   "contractor": {
-    "company": null,
-    "contact_name": null,
-    "email": null,
-    "phone": null,
+    "company": "Sunrise Landscape Co.",
+    "contact_name": "William Held",
+    "email": "willheld@aol.com",
+    "phone": "303-931-3760",
     "license": null,
     "logo_path": null,
     "brand_colors": null,
@@ -72,15 +72,15 @@
       "elevation_m_approx": 1634,
       "hero_frame": "reference/from_video/site1/site1_perimeter_hero_3500sqft_230ft_t01m37.png",
       "line_items": [
-        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 2000 },
-        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 3500, "unit": "sqft", "price_usd": 1750 },
-        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 6000 },
-        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 2000 },
-        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 6,    "unit": "ton",  "price_usd": 4800 },
-        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 4,    "unit": "ton",  "price_usd": 4000 },
-        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 2200 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 3500, "unit": "sqft", "price_usd": 1925 },
+        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 6600 },
+        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 2200 },
+        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 6,    "unit": "ton",  "price_usd": 5280 },
+        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 4,    "unit": "ton",  "price_usd": 4400 },
+        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 550  }
       ],
-      "subtotal_usd": 21050
+      "subtotal_usd": 23155
     },
     {
       "id": "site-2",
@@ -96,26 +96,26 @@
       "elevation_m_approx": 1631,
       "hero_frame": "reference/from_video/site2/site2_perimeter_hero_1577sqft_195ft_t17m22.png",
       "line_items": [
-        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 1000 },
-        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 1500, "unit": "sqft", "price_usd": 750  },
-        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 3000 },
-        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 1000 },
-        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 4,    "unit": "ton",  "price_usd": 3200 },
-        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 3,    "unit": "ton",  "price_usd": 3000 },
-        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 1100 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 1500, "unit": "sqft", "price_usd": 825  },
+        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 3300 },
+        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 1100 },
+        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 4,    "unit": "ton",  "price_usd": 3520 },
+        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 3,    "unit": "ton",  "price_usd": 3300 },
+        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 550  }
       ],
-      "subtotal_usd": 12450
+      "subtotal_usd": 13695
     }
   ],
   "totals": {
-    "site_1_subtotal_usd": 21050,
-    "site_2_subtotal_usd": 12450,
-    "grand_total_usd": 33500,
-    "tax_rate_pct": null,
-    "tax_usd": null,
-    "grand_total_with_tax_usd": null,
+    "site_1_subtotal_usd": 23155,
+    "site_2_subtotal_usd": 13695,
+    "grand_total_usd": 36850,
+    "tax_rate_pct": 0,
+    "tax_usd": 0,
+    "grand_total_with_tax_usd": 36850,
     "valid_until": null,
-    "deposit_terms": null
+    "deposit_terms": "10% deposit, 40% at startup, 40% at 90% completion, 10% punch list"
   },
   "style_direction": {
     "aesthetic": "Colorado Front Range high-plains xeriscape, low-water residential hardscape, HOA-appropriate common-entry. NOT Sonoran desert.",

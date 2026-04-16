@@ -13,7 +13,7 @@
   "materials": [
     { "element": "ground_cover", "type": "tan decomposed granite, cool blue-shadowed with warm pools near lights", "under_layer": "concealed black weed fabric" },
     { "element": "accent_rock", "type": "rust-ochre rip-rap, reading dark against warm light pools" },
-    { "element": "boulders", "type": "weathered sandstone, warm rim-light from path lights", "count": 6 },
+    { "element": "boulders", "type": "weathered Colorado moss-rock, warm rim-light from path lights", "count": 6 },
     { "element": "flagstone", "type": "buff Lyons sandstone flagstone, catching subtle specular highlights", "coverage": "4 tons" },
     { "element": "lights", "type": "matte-black solar path lights, fully glowing warm 2700K amber with visible filament, subtle lens bloom", "count": 10, "placement": "curved line along implied walkway" }
   ],

@@ -62,7 +62,7 @@
 1. **System scaffolded** — `PROJECTS/` gitignored, per-project layout defined, `project-intake` skill written.
 2. **Schemas authored** — Nano Banana, Veo 3, and project-brief JSON Schemas, all based on live research from official Google docs and practitioner repos.
 3. **4 research digests** with citations — see `research/*.md`.
-4. **`brief.json` pre-filled** from the transcript — 2 sites, full line items, $33,500 grand total, style direction, open questions.
+4. **`brief.json` pre-filled** from the transcript — 2 sites, full line items, $36,850 grand total, style direction, open questions.
 5. **8 Nano Banana JSON prompts** — before/after/hero/dusk × site1/site2. Before/after pairs share `consistency_id` and identical `camera` blocks.
 6. **2 Veo 3 JSON prompts** — 8-second cinematic before→after walkthroughs with native dual-stream audio (ambient + foley + music, no dialogue).
 7. **Typst proposal template** — `proposal/template/proposal.typ` reads `brief.json` directly and renders line items, subtotals, grand total.
@@ -91,29 +91,29 @@
 
 | Item | Qty | Unit | Price |
 |------|-----|------|-------|
-| Remove, grade, debris haul | 1 | lot | $2,000 |
-| Weed fabric w/ staples | 3,600 | sqft | $1,750 |
-| Decorative rock 3/4"–1 1/2" | — | ton | $6,000 |
-| Decorative rock 2"–6" | — | ton | $2,000 |
-| Decorative boulders | 6 | ton | $4,800 |
-| Flagstone accents | 4 | ton | $4,000 |
-| Solar path lights | 10 | each | $500 |
-| **Subtotal** | | | **$21,050** |
+| Remove, grade, debris haul | 1 | lot | $2,200 |
+| Weed fabric w/ staples | 3,600 | sqft | $1,925 |
+| Decorative rock 3/4"–1 1/2" | — | ton | $6,600 |
+| Decorative rock 2"–6" | — | ton | $2,200 |
+| Decorative boulders | 6 | ton | $5,280 |
+| Flagstone accents | 4 | ton | $4,400 |
+| Solar path lights | 10 | each | $550 |
+| **Subtotal** | | | **$23,155** |
 
 ### Site Two — 60' × 30' (1,800 sqft measured / 1,500 sqft quoted)
 
 | Item | Qty | Unit | Price |
 |------|-----|------|-------|
-| Remove, grade, debris haul | 1 | lot | $1,000 |
-| Weed fabric w/ staples | 1,800 | sqft | $750 |
-| Decorative rock 3/4"–1 1/2" | — | ton | $3,000 |
-| Decorative rock 2"–6" | — | ton | $1,000 |
-| Decorative boulders | 4 | ton | $3,200 |
-| Flagstone accents | 3 | ton | $3,000 |
-| Solar path lights | 10 | each | $500 |
-| **Subtotal** | | | **$12,450** |
+| Remove, grade, debris haul | 1 | lot | $1,100 |
+| Weed fabric w/ staples | 1,800 | sqft | $825 |
+| Decorative rock 3/4"–1 1/2" | — | ton | $3,300 |
+| Decorative rock 2"–6" | — | ton | $1,100 |
+| Decorative boulders | 4 | ton | $3,520 |
+| Flagstone accents | 3 | ton | $3,300 |
+| Solar path lights | 10 | each | $550 |
+| **Subtotal** | | | **$13,695** |
 
-### **Grand total (pre-tax): $33,500**
+### **Grand total (no tax): $36,850**
 
 ---
 
