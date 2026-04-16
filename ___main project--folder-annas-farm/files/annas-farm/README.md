@@ -1,17 +1,21 @@
 # Anna's Farm — Common Space Entry Landscape
 
-**Slug:** `annas-farm` &nbsp;•&nbsp; **Created:** 2026-04-11 &nbsp;•&nbsp; **Status:** intake → research
+**Slug:** `annas-farm` &nbsp;•&nbsp; **Created:** 2026-04-11 &nbsp;•&nbsp; **Status:** research → mockup generation
+**Contractor:** Sunrise Landscape Co. — William Held — 303-931-3760 — willheld@aol.com
 
 ## The ask
 
-Two common-space entry areas at Anna's Farm (Lafayette, CO, off Baseline Rd). Contractor has a rough line-item estimate; owner wants a polished proposal with GIS site context, AI-generated before/after mockups, a Houdini 3D scene, and a walkthrough video.
+Two common-space entry areas at Anna's Farm, **Lafayette, Colorado** (Boulder County, near Primrose School of Lafayette / Highgate Lane). Contractor has a line-item estimate; owner wants a polished proposal with GIS site context, AI-generated before/after mockups, a Houdini 3D scene, and a walkthrough video.
 
 ## At a glance
 
 | | Site One | Site Two |
 |---|---|---|
-| Dimensions | 60' × 60' | 60' × 30' |
-| Area | 3,600 sqft *(quote says 3,500)* | 1,800 sqft *(quote says 1,500)* |
+| Shape | Irregular polygon | Irregular polygon |
+| Area | **3,500 sqft** | **1,500 sqft** *(current edit 1,567; reducing)* |
+| Perimeter | 230 ft | 194 ft |
+| Centroid | 40.000458°N, -105.110036°W | 40.001489°N, -105.109675°W |
+| Elevation | ~5,360 ft | ~5,350 ft |
 | Demo + grade | $2,200 | $1,100 |
 | Weed fabric | $1,925 | $825 |
 | Rock 3/4"–1 1/2" | $6,600 | $3,300 |
@@ -21,7 +25,7 @@ Two common-space entry areas at Anna's Farm (Lafayette, CO, off Baseline Rd). Co
 | Solar lights | 10 / $550 | 10 / $550 |
 | **Subtotal** | **$23,155** | **$13,695** |
 
-**Grand total (no tax):** **$36,850**
+**Grand total:** **$36,850** (no tax)
 
 ## Pipeline
 

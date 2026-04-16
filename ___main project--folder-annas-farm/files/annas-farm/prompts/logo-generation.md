@@ -3,13 +3,15 @@
 **Company:** Sunrise Landscape Co.
 **Owner:** William Held
 **Location:** Colorado
-**Industry:** Landscape hardscape — desert xeriscape, rock, boulder, flagstone work
+**Industry:** Landscape hardscape — Colorado Front Range xeriscape, rock, boulder, flagstone work
+**Email:** willheld@aol.com
+**Phone:** 303-931-3760
 
 ---
 
 ## Brand Direction Notes
 
-Colorado-based landscape company doing hardscape work in the Front Range area. The name "Sunrise" is the core visual hook — morning light over landscape. Should feel professional, trustworthy, established — not clip-art, not overly corporate. Think: a contractor you'd hand $33K to without hesitation.
+Colorado-based landscape company doing hardscape work in the Front Range area. The name "Sunrise" is the core visual hook — morning light over landscape. Should feel professional, trustworthy, established — not clip-art, not overly corporate. Think: a contractor you'd hand $37K to without hesitation.
 
 ---
 

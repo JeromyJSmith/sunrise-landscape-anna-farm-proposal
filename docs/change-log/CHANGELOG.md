@@ -4,6 +4,43 @@ All notable changes to the Anna Farm Landscape Visualization project are documen
 
 ---
 
+## [v1.5] - April 15, 2026
+
+### Summary
+Session 4 — Applied 10% pricing, language corrections, and prompt updates across the entire project tree. All HTML proposals, JSON prompts, brief.json, and documentation updated.
+
+### Added
+- Session 4 entry in `HANDOFF.md` with full change summary
+- Contractor info in `brief.json`: Sunrise Landscape Co., William Held, 303-931-3760, willheld@aol.com
+- Payment terms in `brief.json`: 10% deposit, 40% startup, 40% at 90%, 10% punch list
+- Tax rate confirmed as 0 (no tax)
+
+### Changed
+- **10% price increase** applied to all line items in all 8 HTML proposals + `brief.json` + `proposal/index.html`:
+  - Site 1 subtotal: $21,050 → $23,155
+  - Site 2 subtotal: $12,450 → $13,695
+  - Grand total: $33,500 → $36,850
+- **Language corrections** in all HTML proposals:
+  - "tilted sandstone slabs" → "tilted red flagstone slabs"
+  - "A single Flatirons formation" → "A series of Flatirons-inspired groupings"
+  - "a single focal cluster" → "a series of Flatirons-inspired groupings"
+- **Nano-banana prompt fixes**:
+  - `site1_04_dusk_lights.json`: "weathered sandstone" → "weathered Colorado moss-rock"
+  - `site1_02_after_day.json`: removed deterministic "Six sandstone boulders" → "A series of Colorado moss-rock boulders"
+  - `site2_02_after_day.json`: "sandstone boulders" → "Colorado moss-rock boulders", "single accent boulder" → "accent boulders"
+- `README.md`: pricing table updated, contractor line added, status updated
+- `OWNER_QUESTIONS.md`: contractor, tax, payment terms marked as resolved
+- `DESKTOP_HANDOFF.md`: pricing references updated in both root and nested copies
+- `site/` folder: all 4 proposal copies synced with latest SUNRISE-LANSCARPEW versions
+- `files/annas-farm/` nested copies synced with root (HANDOFF.md, OWNER_QUESTIONS.md, README.md)
+
+### Fixed
+- Remaining "single focal cluster" in `SUNRISE-LANSCARPEW/annas-farm-proposal.html` line 724
+- Stale pricing ($33,500) in `proposal/index.html`, `proposal/proposal.html`, and `files/` copies
+- Stale nested documentation in `files/annas-farm/` (was 2 sessions behind)
+
+---
+
 ## [v1.4] - April 15, 2026
 
 ### Summary

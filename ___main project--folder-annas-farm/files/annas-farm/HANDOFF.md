@@ -4,6 +4,88 @@ Append-only. Most recent entry at top.
 
 ---
 
+## 2026-04-15 — Session 4 — full-needs consolidation, pricing, language, GitHub deployment
+
+**Owner:** Cursor Agent
+
+**What happened:** Full client-needs consolidation from the in-person on-site meeting transcript. Applied across every file in the project.
+
+**Done this session:**
+- **Extracted 93 client needs** from the full on-site meeting transcript into `Customer_Needs_TASKLIST.plan.md` at project root.
+- **Created versioned documentation** — `client-needs-v1.4.md`, `client-needs-v1.3-internal-technical-spec.md` (v1.4), `client-needs-traceability-v1.0.md` (76 requirements across 10 categories).
+- **Contractor identified** — Sunrise Landscape Co., William Held, willheld@aol.com, 303-931-3760.
+- **Payment terms confirmed** — 10% deposit, 40% at startup, 40% at 90% completion, 10% punch list. No tax.
+- **10% price increase applied** to every line item in every HTML proposal (4× SUNRISE-LANSCARPEW, proposal/index.html, proposal/proposal.html, files/annas-farm-proposal.html, files/annas-farm/proposal/proposal.html) and `brief.json`. New grand total: **$36,850** (was $33,500).
+- **Language corrections** applied across all HTML proposals:
+  - "tilted sandstone slabs" → "tilted red flagstone slabs"
+  - "A single Flatirons formation" / "a single focal cluster" → "A series of Flatirons-inspired groupings"
+  - Made this a system-wide rule: avoid deterministic language that commits to exact quantities or configurations.
+- **Nano-banana prompt fixes** — "weathered sandstone" → "weathered Colorado moss-rock" in site1_04_dusk_lights.json; removed deterministic boulder counts ("Six warm-ochre sandstone boulders" → "A series of warm-ochre Colorado moss-rock boulders"); "a single accent boulder" → "accent boulders" in site2_02_after_day.json.
+- **brief.json updated** — contractor block filled, 10% pricing, payment terms, tax = 0.
+- **GitHub repository created** — `sunrise-landscape-anna-farm-proposal` on GitHub.
+- **GitHub Pages deployed** via Actions workflow from `site/` directory.
+- **Git LFS enabled** — `.gitattributes` configured for images, video, 3D, audio, documents.
+- **Site folder** synced — all 4 proposal variants copied to `site/` with `index.html` landing page.
+
+**Design rules established (system-wide):**
+- Non-deterministic language: never commit to exact quantities of flat irons, boulders, or groupings.
+- Groupings of 2, 3, or 4 flat irons — field-determined based on weight and scale.
+- Northwesterly orientation (more west than north).
+- Colorado-sourced materials only — no Arizona references.
+- Mulch is conditional (prairie dogs may interfere).
+- Rock types: boulders, river cobbles, river rock — distinct categories, don't conflate.
+
+**Remaining:**
+- Client identity block still needed (name, email, billing address).
+- Street address for invoice header (coordinates confirmed but address needed).
+- Reference photos from contractor (strip stone, flat iron angles, rock type transitions, color-annotated markup images).
+- Run Nano Banana + Veo 3 prompts to generate mockups.
+- Logo generation for Sunrise Landscape Co.
+- NixOS pixel vision pipeline verification.
+
+---
+
+## 2026-04-11 — Session 3 — location correction + perimeter-view extraction
+
+**Owner:** Claude Code (CLI)
+
+**Owner message unblocked the location mystery.** Coordinates provided: Site 1 at 40.000458°N / -105.110036°W (3,500 ft², 230 ft perimeter), Site 2 at 40.001489°N / -105.109675°W (1,567 ft² current, 1,500 ft² target, 194 ft perimeter), ~5,350–5,360 ft elevation. **Anna's Farm is in Lafayette, Colorado** — not Phoenix AZ. My Session 1 research was wrong.
+
+**Done this session:**
+- **Extracted 14 perimeter views** from `projects.annas_farm_frames` via CLIP text-similarity against 6 aerial/polygon queries. Fixed a snag: the initial embedding index was image-only, so I rebuilt it with `string_embed` + `image_embed`.
+- **Tool:** `tools/extract_perimeter_views.py` — generic, reusable for any ingested video in any PROJECTS project.
+- **Content-confirmed site mapping** from the exported frames:
+  - **Site 1** = `perimeter_04_t01m37.png` — 3D oblique, area "3,500 ft²", perimeter "230 ft", Primrose School of Lafayette in background — exact match.
+  - **Site 2** = `perimeter_02_t17m22.png` — 3D oblique, area "1,577 ft²", perimeter "195 ft" — closest to current reducing-edit state.
+  - Plus `perimeter_07_t15m20.png` top-down with **"Primrose School of Lafayette"** and **"Highgate Lane"** labels visible — landmark confirmation.
+- **Organized frames** into `reference/from_video/{site1,site2}/` with 3 frames per site (hero + alt + context). Contact sheet at `reference/from_video/perimeter_views/contact_sheet.html`.
+- **Rewrote `brief.json` location block** — Lafayette CO, Boulder County, centroid lat/lon per site, elevation, landmarks, Boulder County GIS sources. Added `polygon_edit_session` block linking to hero frames.
+- **Fixed site shape data** — NOT 60×60 / 60×30 rectangles (my Session 1 assumption). They're irregular polygons. Site 1 area corrected to 3,500 ft² (quote was right). Site 2 billed against 1,500 ft² target.
+- **Style direction pivoted** — Sonoran desert xeriscape → **Colorado Front Range high-plains xeriscape**. Material swap: Arizona sandstone → Lyons sandstone, mesquite/palo verde → cottonwoods/blue spruces/scrub oak, Flatirons backdrop added.
+- **Bulk-rewrote all 8 Nano Banana prompts + 2 Veo 3 prompts** via `tools/relocate_prompts_to_colorado.py`. Two passes. Audit confirms only intentional `quality.avoid` keywords ("Sonoran desert", "saguaro cactus", "agave", "palm trees") remain.
+- **Rewrote `research/location-gis.md`** — Boulder County GIS sources, Colorado Front Range climate/style implications, Session 1 correction.
+- **Updated `OWNER_QUESTIONS.md`** — removed the address question, added billable-area Site 2 confirmation, swapped AZ tax for CO tax.
+
+**Remaining open questions (see OWNER_QUESTIONS.md):**
+- Street mailing address for proposal header
+- Client identity block
+- Contractor identity block
+- Confirm Site 2 = 1,500 ft² billing
+- CO tax rate
+- Deposit / valid-until / deposit terms
+- Upsells to add
+- Pascal editor confirmation
+- Claw3D viewer target
+- Reasoning-engine critique-loop iterations
+
+**Next (Desktop Claude):**
+- Build the proposal PDF with the corrected brief.json.
+- Optionally pull Boulder County GIS (`py3dep` DEM, OSM via osmnx, NAIP aerial) into `geo/`.
+- Run the Nano Banana prompts to generate the 8 mockups.
+- Run the Veo 3 prompts for the 2 walkthroughs.
+
+---
+
 ## 2026-04-11 — Session 2 — video ingestion + desktop handoff
 
 **Owner:** Claude Code (CLI) → handing off to Claude Desktop
@@ -15,7 +97,11 @@ Append-only. Most recent entry at top.
 - Wrote `DESKTOP_HANDOFF.md` with all paths, current state, line-item summary, and next-action list for the desktop session.
 
 **Status at handoff:**
-- Ingestion process (PID 50729) was actively running when the handoff was written. The desktop session should verify completion with `pxt.get_table('projects.annas_farm').count()`.
+- Ingestion **COMPLETE**. Stats:
+  - `projects.annas_farm` — 1 row
+  - `projects.annas_farm_frames` — 1,186 rows (1 fps, ~19.7 minutes of video)
+  - `projects.annas_farm_keyframes` — 1,663 rows
+  - CLIP `openai/clip-vit-base-patch32` embedding index built on `frame` column — angle similarity search is live.
 
 **Next (Desktop Claude):**
 - Build the proposal PDF. See `DESKTOP_HANDOFF.md` → "Next actions."

@@ -4,13 +4,13 @@ Answer whatever you can; leave the rest blank. I'll fill the rest from context w
 
 ## Blocking (must answer before I can run steps 3 / 5 / 7)
 
-### 1. Location — blocks GIS pull
-**I could not find "Anna's Farm" as a named place in metro Phoenix.** The only `annasfarmhoa.com` hit is in Westminster, Colorado — not AZ. Agritopia is on Ray Rd, not Baseline. The real "farms on Baseline Rd" in Phoenix are the historic Japanese flower farms (Kishiyama / Nakagawa) between 32nd and 48th St in South Phoenix.
+### 1. Location — CONFIRMED as Lafayette CO ✓
+Owner provided coordinates 2026-04-11. Confirmed by Primrose School of Lafayette + Highgate Lane labels visible in the ingested video frames.
 
-Give me one of:
-- Street address
-- Cross streets (e.g. "Baseline & 40th St")
-- Google Maps pin screenshot dropped into `PROJECTS/annas-farm/reference/`
+- Site 1: 40.000458°N, -105.110036°W — 3,500 ft² / 230 ft perimeter / ~5,360 ft elevation
+- Site 2: 40.001489°N, -105.109675°W — 1,567 ft² (reducing to 1,500) / 194 ft perimeter / ~5,350 ft elevation
+
+Still needed: **street address** for the proposal header invoice block. Coordinates unblock GIS pulls; an address unblocks the header.
 
 ### 2. Client identity — blocks proposal header
 - Client name
@@ -19,26 +19,26 @@ Give me one of:
 - Billing address (if different from site)
 - Is the invoice going to an HOA, property manager, builder, or individual?
 
-### 3. Contractor identity — blocks proposal header
-- Company name
-- Contact name
-- Email
-- Phone
-- License number
-- Logo (drop into `reference/`)
-- Brand colors (hex)
-- Tagline, if any
+### 3. Contractor identity — PARTIALLY RESOLVED ✓
+- Company name: **Sunrise Landscape Co.**
+- Contact name: **William Held**
+- Email: **willheld@aol.com**
+- Phone: **303-931-3760**
+- License number: *(still needed)*
+- Logo: *(still needed — see `files/annas-farm/prompts/logo-generation.md` for prompt concepts)*
+- Brand colors: *(still needed — see logo-generation.md for palette suggestions)*
+- Tagline: *(still needed)*
 
 ## Numeric clarifications
 
 ### 4. Billable area
-Your quote lists 3,500 sqft for Site One and 1,500 sqft for Site Two. My math on 60×60 and 60×30 is 3,600 and 1,800 sqft. Which numbers do you want to bill against?
+Site 1 is 3,500 ft² (confirmed — measured polygon matches quote). Site 2 is currently 1,567 ft² but you're still reducing it toward 1,500 ft². **I've quoted against 1,500 ft² for Site 2** — confirm or adjust.
 
-### 5. Tax rate
-AZ contractor transaction privilege tax, sales tax passthrough, or tax-exempt?
+### 5. Tax rate — RESOLVED ✓
+No tax. Confirmed per on-site meeting 2026-04-15.
 
-### 6. Deposit & payment terms
-Example: 50% deposit on signature, 50% on completion. What's yours?
+### 6. Deposit & payment terms — RESOLVED ✓
+10% deposit, 40% at startup, 40% at 90% completion, 10% punch list. Confirmed per on-site meeting 2026-04-15.
 
 ### 7. Valid-until date
 30 / 60 / 90 days from today?
