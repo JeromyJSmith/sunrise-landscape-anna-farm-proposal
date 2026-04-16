@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site2",
+  "scene": {
+    "description": "A photorealistic dusk blue-hour exterior of the completed Anna's Farm Site Two common-space entry. The ten solar path lights along the straight run are fully glowing warm 2700K amber, casting a rhythmic line of soft light pools across the tan decomposed granite. The 3+1 boulder composition is rim-lit by the nearest fixtures; flagstone clusters catch faint specular highlights. Cobalt blue sky with a faint warm horizon band. Subtle ambient fill from a distant streetlamp off-frame.",
+    "time": "blue_hour",
+    "weather": "clear, 15 minutes after sunset",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan decomposed granite, cool blue-shadowed with warm pools near lights", "under_layer": "concealed weed fabric" },
+    { "element": "accent_rock", "type": "rust rip-rap accent line, reading dark against warm pools" },
+    { "element": "boulders", "type": "warm ochre Colorado moss-rock", "count": 4 },
+    { "element": "flagstone", "type": "buff Lyons sandstone, 3 tons, catching subtle specular highlights" },
+    { "element": "lights", "type": "matte-black solar path lights at full warm 2700K glow, rhythmic along long axis, subtle bloom", "count": 10 }
+  ],
+  "lighting": {
+    "source": "ambient blue-hour skylight plus ten warm practical path lights",
+    "direction": "omnidirectional blue fill plus rhythmic warm pools",
+    "color_temperature_k": 4200,
+    "shadow_quality": "soft, diffuse",
+    "practical_lights": "full warm glow, gentle falloff, overlapping light pools across granite"
+  },
+  "camera": {
+    "lens_mm": 35,
+    "aperture": "f/2.8",
+    "iso": 800,
+    "shutter": "1/60",
+    "height_ft": 3.5,
+    "framing": "same 3/4 angle as site2_03_hero_golden, along the long axis, slightly tighter on the light rhythm",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "3/4 emotional close",
+    "rule": "leading_lines",
+    "foreground": "first warm light pool and path-light fixture",
+    "midground": "rhythm of glowing lights leading to hero cluster",
+    "background": "silhouetted stucco wall against cobalt sky"
+  },
+  "style": {
+    "primary": "photorealistic architectural dusk photography",
+    "reference": "Architectural Digest dusk exterior",
+    "film_stock": "clean digital, warm-cool contrast"
+  },
+  "quality": {
+    "include": ["rhythmic warm light pools", "cool blue ambient fill", "subtle realistic fixture bloom", "warm-cool color contrast", "clean sky gradient"],
+    "avoid": ["lens-flare starbursts", "neon oversaturation", "people", "vehicles", "text", "visible tripod", "HDR halos", "grass", "tropical plants", "harsh floodlight"]
+  },
+  "output_format": { "format": "png", "filename": "site2_04_dusk_lights.png" }
+}

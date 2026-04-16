@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "_note": "Camera block is IDENTICAL to site1_01_before_day.json — swap to edit_image and pass the before photo once it lands.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site1",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 3,500 square foot irregular polygon residential common-space entry area in Lafayette Colorado suburban Front Range, Boulder County, newly installed as a low-water Front Range xeriscape hardscape. The entire 3500 sqft irregular polygon footprint is covered in tan 3/4 to 1-1/2 inch decomposed granite with a fully concealed black woven weed fabric underlayer. Six warm-ochre weathered sandstone boulders (18 to 36 inches) are placed in asymmetric odd-numbered clusters — three near the front-left, two center-right, one accent near the back wall. Four tons of buff Lyons sandstone flagstone accents sit flat on the rock as low stepping-stone groupings and one small seating stone cluster. Ten matte-black solar path lights line the implied walkway in a gentle curve. A second band of larger 2 to 6 inch rust-ochre rip-rap rock defines a dry-riverbed accent line running diagonally through the composition.",
+    "time": "midday",
+    "weather": "clear blue sky, high Front Range alpine haze with Flatirons visible in the distance",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan 3/4\"–1 1/2\" decomposed granite", "coverage": "full 3500 sqft polygon area", "under_layer": "black woven weed fabric, fully concealed — no edges visible" },
+    { "element": "accent_rock", "type": "rust-ochre 2\"–6\" decorative rip-rap", "coverage": "diagonal dry-riverbed accent line", "placement": "curving from foreground-left to back-right" },
+    { "element": "boulders", "type": "weathered Colorado moss-rock boulders, ochre to deep red-brown with lichen dappling, 18 to 36 inches", "count": 6, "placement": "three clusters of 3/2/1, odd-numbered, asymmetric, partially buried" },
+    { "element": "flagstone", "type": "buff Lyons sandstone flagstone, irregular cleft-face slabs, 2-3 inch thick", "coverage": "4 tons across low stepping clusters and one seating grouping", "placement": "informal walkable groupings, not a continuous path" },
+    { "element": "lights", "type": "matte-black solar path lights, warm 2700K LED, 18 inch stake height", "count": 10, "placement": "gentle curve along implied walkway, off (not glowing, it's midday)" }
+  ],
+  "lighting": {
+    "source": "natural midday sun",
+    "direction": "overhead, slightly camera-left",
+    "color_temperature_k": 5600,
+    "shadow_quality": "short, hard-edged",
+    "practical_lights": "solar path lights are OFF (daytime)"
+  },
+  "camera": {
+    "lens_mm": 24,
+    "aperture": "f/8",
+    "iso": 100,
+    "shutter": "1/500",
+    "height_ft": 5.5,
+    "framing": "eye-level wide shot, rule of thirds, back wall on upper third — IDENTICAL framing to site1_01_before_day",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "wide establishing, matched to before",
+    "rule": "rule_of_thirds",
+    "foreground": "decomposed granite field with one foreground boulder cluster",
+    "midground": "flagstone groupings, dry-riverbed accent line, additional boulders",
+    "background": "stucco wall and distant cottonwoods and scrub oak (unchanged from before)"
+  },
+  "style": {
+    "primary": "photorealistic architectural exterior photography",
+    "reference": "Sunset magazine landscape feature, Landscape Architecture Magazine project photo",
+    "film_stock": "neutral digital, slight warmth"
+  },
+  "quality": {
+    "include": ["accurate rock grain and color variation across granite field", "visible cleft texture on flagstone", "realistic boulder weathering and partial burial", "asymmetric, natural-looking cluster composition", "crisp shadow edges", "invisible weed fabric under the rock"],
+    "avoid": ["visible weed fabric edges", "floating rocks with no contact shadow", "perfectly grid-aligned boulder placement", "cartoonish saturation", "people", "vehicles", "text or signage", "HDR halos", "grass lawn", "tropical plants"]
+  },
+  "output_format": { "format": "png", "filename": "site1_02_after_day.png" }
+}

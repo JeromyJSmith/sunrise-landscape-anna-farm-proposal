@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site1",
+  "scene": {
+    "description": "A photorealistic golden-hour hero exterior of the completed Anna's Farm Site One common-space entry landscape in Lafayette Colorado suburban Front Range. Three-quarter angle, low camera height, looking across the dry-riverbed accent line toward the largest boulder cluster with the stucco wall catching warm back-light. Decomposed granite glows amber in the low sun; boulder faces are rim-lit; flagstone cleft texture is emphasized by raking light. Solar path lights are just beginning to glow a soft amber along the curve.",
+    "time": "golden_hour",
+    "weather": "clear sky, 20 minutes before sunset",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan 3/4\"–1 1/2\" decomposed granite", "under_layer": "concealed black weed fabric" },
+    { "element": "accent_rock", "type": "rust-ochre 2\"–6\" rip-rap in dry-riverbed line" },
+    { "element": "boulders", "type": "weathered Colorado moss-rock, ochre with lichen, 18–36 in", "count": 6, "placement": "hero cluster foreground-left dominant" },
+    { "element": "flagstone", "type": "buff Lyons sandstone flagstone clusters, 4 tons total" },
+    { "element": "lights", "type": "matte-black solar path lights, 2700K, warm glow just activating", "count": 10 }
+  ],
+  "lighting": {
+    "source": "low golden-hour sun from camera back-left",
+    "direction": "raking across the composition, long shadows stretching camera-right",
+    "color_temperature_k": 3200,
+    "shadow_quality": "long, soft-edged",
+    "practical_lights": "solar path lights glowing warm amber, subtle bloom"
+  },
+  "camera": {
+    "lens_mm": 35,
+    "aperture": "f/5.6",
+    "iso": 200,
+    "shutter": "1/250",
+    "height_ft": 3.5,
+    "framing": "low 3/4 angle, leading-line composition along the dry riverbed toward the hero boulder cluster, stucco wall upper-right",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "3/4 hero establishing",
+    "rule": "leading_lines",
+    "foreground": "rust rip-rap dry-riverbed line cutting diagonal across frame",
+    "midground": "hero boulder cluster with flagstone seating grouping",
+    "background": "warm-lit stucco wall and silhouetted cottonwoods"
+  },
+  "style": {
+    "primary": "photorealistic architectural exterior hero photography",
+    "reference": "Landscape Architecture Magazine feature, Sunset magazine landscape cover",
+    "film_stock": "Portra 400 digital emulation, warm golden-hour bias"
+  },
+  "quality": {
+    "include": ["rim light on boulder edges", "warm raking highlights on flagstone cleft", "natural amber bloom on solar lights", "visible micro-texture in decomposed granite", "long directional shadows"],
+    "avoid": ["overblown highlights", "HDR halos", "people", "vehicles", "Sonoran desert", "saguaro cactus", "agave", "palm trees", "tropical plants", "grass lawn", "text or signage", "lens flare starbursts", "artificial orange filter look"]
+  },
+  "output_format": { "format": "png", "filename": "site1_03_hero_golden.png" }
+}

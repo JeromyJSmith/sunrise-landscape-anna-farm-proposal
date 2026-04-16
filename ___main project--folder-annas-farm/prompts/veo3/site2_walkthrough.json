@@ -1,0 +1,40 @@
+{
+  "$schema": "../../../../schemas/veo3.schema.json",
+  "video_type": "realistic",
+  "mode": "first_last_frame",
+  "first_frame_image": "renders/nano-banana/site2_01_before_day.png",
+  "last_frame_image": "renders/nano-banana/site2_03_hero_golden.png",
+  "shot": {
+    "type": "slow tracking dolly along the 60-foot long axis, ground level",
+    "camera": "slow tracking dolly, locked horizon, subtle gimbal",
+    "lens": "24mm wide transitioning to 35mm feel as push-in progresses",
+    "framing": "eye-level, emphasizing the narrower elongated polygon proportion horizontally",
+    "motion": "steady 1.5 m/s forward along the long axis, no arc, straight push reveal"
+  },
+  "subject": "Anna's Farm Site Two — 1500 sqft irregular polygon residential common-space entry area, Front Range xeriscape installation reveal",
+  "context": "Lafayette Colorado suburban Front Range, Boulder County. Narrower elongated polygon footprint. Tan decomposed granite ground, four warm-ochre sandstone boulders in a 3+1 asymmetric composition, buff Lyons sandstone flagstone stepping groupings, rust-ochre rip-rap accent line along the long edge, ten matte-black solar path lights in a rhythmic straight line parallel to the long axis.",
+  "action": "Camera starts at the empty dirt before-state and pushes along the long axis. Decomposed granite fills in underfoot; four boulders settle into place in the 3+1 composition; flagstone clusters appear as low stepping groupings; the rust rip-rap accent line traces along the far edge like a ribbon; the ten solar path lights activate in rhythmic sequence from near to far as the sun drops to golden hour in the final frame and warm rim-light catches the hero boulder cluster.",
+  "environment": {
+    "time_of_day": "midday to golden hour over 8 seconds",
+    "weather": "clear sky, light Front Range breeze",
+    "season": "late spring"
+  },
+  "lighting": "Neutral midday ramping to low golden-hour raking light from camera back-right with long shadows. Solar path lights activate in a rhythmic near-to-far sequence in the final two seconds.",
+  "style": "photorealistic architectural visualization, cinematic reveal, seamless morph, warm and clean",
+  "color_palette": "tan decomposed granite, rust ochre rip-rap, warm sandstone boulders, buff Lyons sandstone flagstone, warm 2700K path lights, cobalt shadows",
+  "composition": "long-axis tracking push with rhythmic path-light cadence as the visual beat",
+  "ambiance": "clean, professional, inviting, HOA-appropriate, Colorado modern",
+  "audio": {
+    "ambient": "soft Front Range breeze with a steady bed, faint distant traffic, mourning dove call at 4 seconds",
+    "foley": "subtle stone-settle thuds as boulders land, granular shuffle as decomposed granite fills in, rhythmic soft chimes as the ten path lights activate near to far in the final two seconds",
+    "dialogue": "none",
+    "music": "warm minimal strings pad, rising gently, matching the rhythmic path-light activation in the final beats, no percussion"
+  },
+  "negative_prompt": "people, construction workers, vehicles, trucks, text overlays, watermark, logos, cartoon style, oversaturation, lens flare starbursts, grass lawn, tropical plants, HDR halos",
+  "output": {
+    "duration_seconds": 8,
+    "aspect_ratio": "16:9",
+    "resolution": "1080p",
+    "sample_count": 2
+  }
+}

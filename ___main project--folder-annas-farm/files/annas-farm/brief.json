@@ -1,0 +1,216 @@
+{
+  "$schema": "../../schemas/project-brief.schema.json",
+  "project": {
+    "slug": "annas-farm",
+    "name": "Anna's Farm — Common Space Entry Landscape",
+    "created": "2026-04-11",
+    "type": "landscape-hardscape-proposal",
+    "status": "intake",
+    "deliverable_summary": "Professional client proposal (PDF + HTML one-pager) with line-item estimate, GIS site context, site photos, AI mockup renders, parametric Houdini 3D scene, optional Veo 3 walkthrough video, optional Claw3D browser presentation."
+  },
+  "client": {
+    "name": "TBD",
+    "email": "TBD",
+    "phone": "TBD",
+    "billing_address": "TBD",
+    "site_contact": "TBD",
+    "notes": "Client details pending — will fill in before final proposal delivery."
+  },
+  "contractor": {
+    "company": "Sunrise Landscape Co.",
+    "contact_name": "William Held",
+    "email": "willheld@aol.com",
+    "phone": "303-931-3760",
+    "license": null,
+    "logo_path": null,
+    "brand_colors": null,
+    "tagline": null,
+    "location": "Colorado"
+  },
+  "location": {
+    "venue": "Anna's Farm",
+    "city_region": "Lafayette, Boulder County, Colorado — Anna's Farm subdivision, west of Hwy 287 on Baseline Rd",
+    "likely_city": "Lafayette, CO",
+    "address": "Anna's Farm subdivision, Lafayette, CO — two common-space entry sites",
+    "cross_streets": "Baseline Rd / Anna Thomas Pkwy / Homestead St",
+    "site_addresses": {
+      "site_1": "Anna's Farm HOA — Site 1 (40.000458, -105.110036)",
+      "site_2": "Anna's Farm HOA — Site 2 (40.001489, -105.109675)"
+    },
+    "sites_geo": {
+      "site_1": {
+        "center_lat": 40.000458,
+        "center_lon": -105.110036,
+        "center_dms": "40°00'01.65\"N, 105°06'34.13\"W",
+        "elevation_m": 1634,
+        "elevation_ft": 5360,
+        "area_sqft": 3500,
+        "perimeter_ft": 230
+      },
+      "site_2": {
+        "center_lat": 40.001489,
+        "center_lon": -105.109675,
+        "center_dms": "40°00'05.36\"N, 105°06'34.83\"W",
+        "elevation_m": 1631,
+        "elevation_ft": 5350,
+        "area_sqft_current": 1567,
+        "area_sqft_target": 1500,
+        "area_delta_sqft": -67,
+        "perimeter_ft": 194
+      }
+    },
+    "parcel_id": null,
+    "confidence": "coordinates_confirmed",
+    "gis_sources_planned": [
+      "Boulder County GIS Open Data — parcel + aerial",
+      "USGS 3DEP — DEM / contours",
+      "OpenStreetMap Overpass — street network, nearby features",
+      "Google Street View or Mapillary — ground-level reference",
+      "NAIP — high-res aerial"
+    ]
+  },
+  "sites": [
+    {
+      "id": "site-1",
+      "name": "Site One — Common Space Entry A",
+      "dimensions_ft": { "width": 60, "depth": 60 },
+      "area_sqft_gis": 3500,
+      "perimeter_ft": 230,
+      "area_sqft_as_quoted": 3500,
+      "area_note": "GIS-confirmed polygon = 3,500 sqft, matches quote exactly.",
+      "line_items": [
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 2000 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 3600, "unit": "sqft", "price_usd": 1750 },
+        { "code": "rock-sm",   "item": "River rock & granite stones (dry creek bed)",       "qty": null, "unit": "ton",  "price_usd": 6000 },
+        { "code": "rock-lg",   "item": "Contrasting decorative stone 2\"–6\" (surround)",             "qty": null, "unit": "ton",  "price_usd": 2000 },
+        { "code": "boulder",   "item": "Native Colorado granite & river boulders",                 "qty": 6,    "unit": "ton",  "price_usd": 4800 },
+        { "code": "flagstone", "item": "Colorado red flagstone — vertical Flatirons-style installation",  "qty": 4,    "unit": "ton",  "price_usd": 4000 },
+        { "code": "lights",    "item": "Solar accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+      ],
+      "subtotal_usd": 21050
+    },
+    {
+      "id": "site-2",
+      "name": "Site Two — Common Space Entry B",
+      "dimensions_ft": { "width": 60, "depth": 30 },
+      "area_sqft_gis": 1567,
+      "area_sqft_billable": 1500,
+      "perimeter_ft": 194,
+      "area_sqft_as_quoted": 1500,
+      "area_note": "GIS polygon measures 1,567 sqft; billing at 1,500 sqft per owner confirmation.",
+      "line_items": [
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 1000 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 1800, "unit": "sqft", "price_usd": 750  },
+        { "code": "rock-sm",   "item": "River rock & granite stones (dry creek bed)",       "qty": null, "unit": "ton",  "price_usd": 3000 },
+        { "code": "rock-lg",   "item": "Contrasting decorative stone 2\"–6\" (surround)",             "qty": null, "unit": "ton",  "price_usd": 1000 },
+        { "code": "boulder",   "item": "Native Colorado granite & river boulders",                 "qty": 4,    "unit": "ton",  "price_usd": 3200 },
+        { "code": "flagstone", "item": "Colorado red flagstone — vertical Flatirons-style installation",  "qty": 3,    "unit": "ton",  "price_usd": 3000 },
+        { "code": "lights",    "item": "Solar accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+      ],
+      "subtotal_usd": 12450
+    }
+  ],
+  "totals": {
+    "site_1_subtotal_usd": 21050,
+    "site_2_subtotal_usd": 12450,
+    "grand_total_usd": 33500,
+    "tax": "included",
+    "tax_note": "All prices include applicable tax.",
+    "valid_until": null,
+    "payment_schedule": [
+      { "milestone": "Deposit (scheduling)", "pct": 10, "amount_usd": 3350 },
+      { "milestone": "Project start-up", "pct": 40, "amount_usd": 13400 },
+      { "milestone": "90% completion", "pct": 40, "amount_usd": 13400 },
+      { "milestone": "Punch list completion", "pct": 10, "amount_usd": 3350 }
+    ]
+  },
+  "style_direction": {
+    "aesthetic": "Colorado Front Range site-specific geological sculpture, Flatirons-inspired vertical stone installation, low-water xeriscape, HOA common-entry landmark",
+    "design_concept": {
+      "summary": "A site-specific geological sculpture referencing the Flatirons of Boulder, using native Colorado materials as a landmark for the community entry. Two distinct flagstone elements: the vertical Flatirons formation (hero) and smaller standing stepping stones in a semi-arc.",
+      "hero_element": "Vertical Colorado red flagstone slabs installed upright, varied height and tilt, clustered to create a mountain ridge silhouette — the Flatirons formation",
+      "stepping_stones": {
+        "description": "Colorado red flagstone pieces, 6-8 inches wide, standing 1-2 feet above grade, lined up side by side in a semi-arc pattern, randomly placed throughout the planting bed",
+        "site_1_count": "4-6 stones",
+        "site_2_count": "3-4 stones",
+        "note": "These are NOT flat walkable pavers — they stand upright like smaller echoes of the main Flatirons formation"
+      },
+      "visual_hierarchy": [
+        "1. Vertical Flatirons formation (hero / dominant sculptural element)",
+        "2. Standing stepping stones in semi-arc (secondary vertical rhythm)",
+        "3. Native granite boulder anchors (scale contrast)",
+        "4. Dry creek flow (river rock simulating erosion around formation)",
+        "5. Clean ground plane (decorative gravel)"
+      ],
+      "spatial_composition": {
+        "centerpiece_zone": "Flatirons flagstone formation — vertical red slabs in clustered ridge",
+        "stepping_stone_arc": "Semi-arc of 6-8 inch wide stones standing 1-2 ft above grade, randomly placed through planting bed",
+        "flow_field": "Dry creek bed wrapping through and around the slabs",
+        "edge_conditions": "Clean transitions to sidewalk and existing turf",
+        "negative_space": "Open gravel areas to emphasize verticality of stone"
+      }
+    },
+    "palette": {
+      "ground_riverbed": "river rock / granite stones shaped as a flowing dry creek bed — the primary ground feature",
+      "ground_surround": "contrasting decorative stone, 2\"–6\" diameter, on the outsides of the river bed — fills all ground area outside the creek",
+      "boulders": "native Colorado granite and river boulders — anchoring and scale contrast",
+      "flagstone_slabs": "Colorado red flagstone — LARGE vertical slabs composed like Flatirons mountains, per concept drawing",
+      "flagstone_arc": "Colorado red flagstone pieces — smaller, 6-8\" wide, 1-2 ft above grade, lined up side by side in semi-arc, also vertical, mountain range silhouette on top edge",
+      "strip_stone": "Colorado red strip stone — base transitions around vertical elements",
+      "lighting": "warm 2700–3000K solar accent lights",
+      "key_rule": "ALL flagstone and slabs are VERTICAL. Top edges have mountain range / Flatirons profile. The ONLY things on the ground are the river bed stones and the contrasting decorative stone surrounding them."
+    },
+    "vegetation": "Scope is hardscape only — no sod, no planting, no irrigation. Mockups may include existing adjacent vegetation for context.",
+    "mood_keywords": ["sculptural", "geological", "Flatirons", "landmark", "clean", "professional", "Colorado modern", "HOA approved", "natural"],
+    "negative_keywords": ["pathway", "walkable", "stepping stones", "paving", "grass lawn", "tropical", "overgrown", "busy", "kitsch", "neon", "cartoonish", "flat flagstone"]
+  },
+  "deliverables": {
+    "proposal_pdf": true,
+    "proposal_html_onepager": true,
+    "mockup_images_per_site": 4,
+    "mockup_shots": [
+      { "id": "before-day",   "label": "Existing conditions — wide daytime" },
+      { "id": "after-day",    "label": "Completed install — wide daytime (matches before framing)" },
+      { "id": "hero-golden",  "label": "Hero 3/4 angle — golden hour after" },
+      { "id": "dusk-lights",  "label": "Dusk / blue hour — solar lights glowing" }
+    ],
+    "walkthrough_video_per_site": 1,
+    "walkthrough_video": {
+      "duration_sec": 8,
+      "style": "slow cinematic push-in from entry approach to full reveal, native ambient audio"
+    },
+    "houdini_3d": {
+      "scene_per_site": true,
+      "representation": "instanced vertical geometry, NOT surface polygons",
+      "vertical_flagstone": {
+        "type": "VerticalStone instances — position, height, width, rotation, tilt",
+        "material": "colorado_red_flagstone",
+        "clustering": "Flatirons-style ridge silhouette, varied height and tilt",
+        "generation": "procedural Flatirons clustering algorithm with height + tilt variation"
+      },
+      "boulder_placement": "native granite anchors for scale contrast, hand + PDG Wedge variants",
+      "dry_creek": "river rock flow field wrapping through and around vertical slab formation",
+      "solar_light_instances": true,
+      "export": "GLB for Claw3D browser viewer"
+    },
+    "pascal_editor": {
+      "use": "If the Pascal editor integration is confirmed, author one parametric template and expose brief.json fields as editor parameters."
+    }
+  },
+  "reasoning_engine_notes": {
+    "use": "Route the brief through the Pixeltable RAG + doc_query loop to pull any relevant prior projects, material pricing references, and HOA design guidance before authoring prompts.",
+    "critique_loop": "After mockups land on disk, run the visual critique pipeline (Gemma4-Visual-Agent) and feed the JSON back into the next prompt iteration."
+  },
+  "open_questions_for_owner": [
+    "ANSWERED: Location — Lafayette, CO, GPS confirmed",
+    "ANSWERED: Contractor — Sunrise Landscape Co., William Held",
+    "ANSWERED: Tax — included in pricing",
+    "ANSWERED: Payment — 10/40/40/10 schedule",
+    "ANSWERED: Billable area — 3,500 / 1,500 sqft",
+    "ANSWERED: Design — Flatirons-inspired vertical sculpture, NOT pathways",
+    "STILL TBD: Client name, email, phone, billing address",
+    "STILL TBD: Contractor license #, logo, brand colors",
+    "STILL TBD: Proposal valid-until date",
+    "STILL TBD: Optional upsell line items"
+  ]
+}

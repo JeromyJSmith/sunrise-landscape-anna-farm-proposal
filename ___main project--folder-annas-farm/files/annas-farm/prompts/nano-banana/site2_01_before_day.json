@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "edit_image",
+  "_note": "Reference photos in reference/site-2/. Site 2 is at 411 Homestead St.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site2",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 1500 square foot neglected residential common-space entry area at 411 Homestead Street in Anna's Farm subdivision, Lafayette Colorado. Overgrown plot with bare brown soil, dead grass, scattered small ornamental trees and shrubs in poor condition, a couple existing boulders (one white-gray, one reddish), an antique metal farm implement (plow or cultivator) as decoration, wooden split-rail fence along the back boundary. Townhomes with colored siding on the right side. Open prairie field with a windmill visible behind the fence. Concrete sidewalk and curb along the front. Colorado Front Range suburban neighborhood, early spring, trees still bare.",
+    "time": "midday",
+    "weather": "partly cloudy Colorado sky, big cumulus clouds, blue sky",
+    "season": "early spring, trees bare, brown dormant grass",
+    "location": "411 Homestead St, Lafayette, Colorado"
+  },
+  "materials": [
+    { "element": "ground", "type": "brown soil, dead grass, scattered weeds, neglected ornamental plantings", "coverage": "full 1500 sqft" },
+    { "element": "existing_boulders", "type": "two boulders, one gray-white one reddish, 24-36 inch", "placement": "center of plot" },
+    { "element": "farm_implement", "type": "antique metal plow or cultivator, decorative", "placement": "near boulders" },
+    { "element": "fence", "type": "wooden split-rail fence", "placement": "back boundary" },
+    { "element": "trees", "type": "small bare ornamental trees, poor condition", "placement": "scattered throughout" }
+  ],
+  "camera": { "lens_mm": 24, "aperture": "f/8", "height_ft": 5.5, "framing": "eye-level wide from sidewalk, full plot visible" },
+  "style": { "primary": "photorealistic real-estate documentation photography" },
+  "quality": {
+    "include": ["accurate brown dead grass", "existing boulders", "antique farm implement", "split-rail fence", "Colorado spring light"],
+    "avoid": ["saguaro", "palm trees", "desert", "tropical", "green lawn", "HDR halos", "people"]
+  },
+  "output_format": { "format": "png", "filename": "site2_01_before_day.png" }
+}

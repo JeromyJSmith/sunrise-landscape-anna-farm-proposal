@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site2",
+  "scene": {
+    "description": "A photorealistic golden-hour hero exterior of the completed Anna's Farm Site Two common-space entry — the narrower 1500 sqft installation. Three-quarter angle along the long axis, camera low, looking past the foreground flagstone grouping into the main 3-boulder cluster with the stucco wall catching warm back-light. The dry-riverbed accent line of rust rip-rap traces along the long edge like a ribbon. Solar path lights along the straight run just begin to glow warm amber.",
+    "time": "golden_hour",
+    "weather": "clear, 20 minutes before sunset",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan decomposed granite", "under_layer": "concealed weed fabric" },
+    { "element": "accent_rock", "type": "rust-ochre rip-rap in long-edge accent line" },
+    { "element": "boulders", "type": "warm ochre Colorado moss-rock, 18-30 in", "count": 4, "placement": "3+1 asymmetric, hero cluster center-left" },
+    { "element": "flagstone", "type": "buff Lyons sandstone, 3 tons, low stepping clusters" },
+    { "element": "lights", "type": "matte-black 2700K solar path lights, just activating", "count": 10, "placement": "straight line along long axis" }
+  ],
+  "lighting": {
+    "source": "low golden-hour sun from camera back-right",
+    "direction": "raking along the long axis, long shadows stretching camera-left",
+    "color_temperature_k": 3200,
+    "shadow_quality": "long, soft-edged",
+    "practical_lights": "warm amber path lights beginning to glow, subtle"
+  },
+  "camera": {
+    "lens_mm": 35,
+    "aperture": "f/5.6",
+    "iso": 200,
+    "shutter": "1/250",
+    "height_ft": 3.5,
+    "framing": "low 3/4 angle along the long-axis, leading line of path lights into hero cluster, stucco wall upper background",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "3/4 hero establishing",
+    "rule": "leading_lines",
+    "foreground": "first flagstone grouping catching low sun",
+    "midground": "hero boulder cluster, path-light line",
+    "background": "warm-lit stucco wall"
+  },
+  "style": {
+    "primary": "photorealistic architectural exterior hero photography",
+    "reference": "Landscape Architecture Magazine feature",
+    "film_stock": "Portra 400 digital emulation"
+  },
+  "quality": {
+    "include": ["rim light on boulders", "warm raking highlights on flagstone cleft", "subtle light-pool activation on path lights", "long directional shadows", "natural color"],
+    "avoid": ["overblown highlights", "HDR halos", "people", "vehicles", "tropical plants", "grass", "text", "lens flare starbursts", "orange-filter look"]
+  },
+  "output_format": { "format": "png", "filename": "site2_03_hero_golden.png" }
+}

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Sun glow -->
+  <circle cx="100" cy="52" r="38" fill="url(#sunGlow)" opacity="0.3"/>
+  <!-- Sun body -->
+  <circle cx="100" cy="52" r="24" fill="url(#sunGrad)"/>
+  <!-- Sun rays -->
+  <g stroke="url(#rayGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
+    <line x1="100" y1="20" x2="100" y2="10"/>
+    <line x1="120" y1="25" x2="128" y2="17"/>
+    <line x1="132" y1="40" x2="142" y2="36"/>
+    <line x1="136" y1="58" x2="146" y2="58"/>
+    <line x1="68" y1="40" x2="58" y2="36"/>
+    <line x1="64" y1="58" x2="54" y2="58"/>
+    <line x1="80" y1="25" x2="72" y2="17"/>
+    <line x1="115" y1="22" x2="120" y2="13"/>
+    <line x1="85" y1="22" x2="80" y2="13"/>
+    <line x1="135" y1="48" x2="144" y2="46"/>
+    <line x1="65" y1="48" x2="56" y2="46"/>
+  </g>
+  <!-- Mountains -->
+  <path d="M30,95 L60,45 L75,62 L90,38 L105,55 L120,30 L140,58 L155,42 L170,95Z" fill="url(#mtGrad1)" opacity="0.9"/>
+  <path d="M15,95 L45,60 L60,72 L80,48 L95,65 L108,52 L125,70 L145,50 L160,68 L185,95Z" fill="url(#mtGrad2)" opacity="0.85"/>
+  <!-- Snow caps -->
+  <path d="M87,41 L90,38 L93,41Z" fill="rgba(255,255,255,0.5)"/>
+  <path d="M117,33 L120,30 L123,33Z" fill="rgba(255,255,255,0.4)"/>
+  <!-- Base line -->
+  <line x1="10" y1="95" x2="190" y2="95" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+  <defs>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#F2C94C" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#E8A435" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunGrad" cx="0.45" cy="0.4" r="0.5">
+      <stop offset="0%" stop-color="#FFE066"/>
+      <stop offset="50%" stop-color="#F2C94C"/>
+      <stop offset="100%" stop-color="#D4890B"/>
+    </radialGradient>
+    <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2C94C"/>
+      <stop offset="100%" stop-color="#E8A435"/>
+    </linearGradient>
+    <linearGradient id="mtGrad1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3B7DD8"/>
+      <stop offset="60%" stop-color="#2558A0"/>
+      <stop offset="100%" stop-color="#1A3F78"/>
+    </linearGradient>
+    <linearGradient id="mtGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A90E2"/>
+      <stop offset="50%" stop-color="#2E6ABF"/>
+      <stop offset="100%" stop-color="#1D4E8C"/>
+    </linearGradient>
+  </defs>
+</svg>

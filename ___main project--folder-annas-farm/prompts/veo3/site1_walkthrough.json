@@ -1,0 +1,40 @@
+{
+  "$schema": "../../../../schemas/veo3.schema.json",
+  "video_type": "realistic",
+  "mode": "first_last_frame",
+  "first_frame_image": "renders/nano-banana/site1_01_before_day.png",
+  "last_frame_image": "renders/nano-banana/site1_03_hero_golden.png",
+  "shot": {
+    "type": "slow ground-level push-in with gentle arc, transitioning into golden-hour reveal",
+    "camera": "slow dolly in, locked-off horizon, subtle gimbal float",
+    "lens": "24mm wide, deep focus",
+    "framing": "eye-level, rule of thirds, horizon on upper third",
+    "motion": "steady 1.5 m/s forward, 2 degrees per second right-to-left arc, matched to first-frame framing"
+  },
+  "subject": "Anna's Farm Site One — 3500 sqft irregular polygon residential common-space entry area, Front Range xeriscape installation reveal",
+  "context": "Lafayette Colorado suburban Front Range, Boulder County. Low stucco boundary wall, distant cottonwoods and scrub oak, tan decomposed granite ground, six warm-ochre sandstone boulders in odd-numbered clusters, buff Lyons sandstone flagstone stepping groupings, rust-ochre rip-rap dry-riverbed accent line, ten matte-black solar path lights along a curved walkway.",
+  "action": "The camera starts from the neglected bare-dirt before-state, pushes forward through the frame as the landscape transforms: decomposed granite fills the footprint, weed fabric is concealed, six boulders settle into place in asymmetric clusters, flagstone groupings appear as low stepping stones, the dry-riverbed accent line traces diagonally, and finally the ten solar path lights bloom on in sequence as the sun drops toward the horizon and golden hour hits the hero boulder cluster in the final frame.",
+  "environment": {
+    "time_of_day": "transitions from midday to golden hour over 8 seconds",
+    "weather": "clear sky, light Front Range breeze",
+    "season": "late spring"
+  },
+  "lighting": "Starts neutral midday, ramps through warm afternoon, ends in low golden-hour raking light from camera back-left with long soft shadows. Solar path lights activate in the final two seconds with a gentle warm amber bloom.",
+  "style": "photorealistic architectural visualization, cinematic reveal, seamless architectural morph, Sunset magazine cover energy",
+  "color_palette": "tan decomposed granite, rust ochre accent rock, warm sandstone boulders, buff Lyons sandstone flagstone, warm 2700K practical lights against cobalt-tinted shadows",
+  "composition": "leading-line push through the dry-riverbed accent toward the hero boulder cluster",
+  "ambiance": "clean, professional, inviting, HOA-appropriate, Colorado modern",
+  "audio": {
+    "ambient": "soft Front Range breeze with a slow swell, distant mourning dove call at the 3-second mark, faint rustle of ornamental grass off-frame",
+    "foley": "subtle stone-settle thuds as boulders land, soft granular shuffle as the decomposed granite fills in, a faint chime as the solar lights activate near the end",
+    "dialogue": "none",
+    "music": "warm cinematic swell, minimal strings and low pad, rising gently toward the final golden-hour reveal, no percussion"
+  },
+  "negative_prompt": "people, construction workers, vehicles, trucks, text overlays, watermark, logos, cartoon style, oversaturation, lens flare starbursts, grass lawn, tropical plants, HDR halos",
+  "output": {
+    "duration_seconds": 8,
+    "aspect_ratio": "16:9",
+    "resolution": "1080p",
+    "sample_count": 2
+  }
+}

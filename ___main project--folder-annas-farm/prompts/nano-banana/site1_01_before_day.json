@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "_note": "Swap to task:edit_image and add inputs[] once the owner drops a site-1 before-photo into PROJECTS/annas-farm/reference/. Until then this is a representative 'before' placeholder.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site1",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 3,500 square foot irregular polygon residential common-space entry area in Lafayette Colorado suburban Front Range, Boulder County. The ground is compacted tan soil with patchy weeds, scattered construction debris, a few stray rocks, and dry litter. No landscaping has been installed yet. A low stucco boundary wall or simple block edging frames the space at the back of frame. Mature cottonwoods and blue spruces line the distance.",
+    "time": "midday",
+    "weather": "clear blue sky, high Front Range alpine haze with Flatirons visible in the distance",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground", "type": "compacted tan native soil, patchy weeds, construction debris, dry brush", "coverage": "full 3500 sqft polygon area" },
+    { "element": "boundary", "type": "low stucco wall or concrete block edging, weathered buff color", "placement": "back and sides of frame" },
+    { "element": "context_vegetation", "type": "mature cottonwoods and blue spruces", "placement": "distant background only" }
+  ],
+  "lighting": {
+    "source": "natural midday sun",
+    "direction": "overhead, slightly camera-left",
+    "color_temperature_k": 5600,
+    "shadow_quality": "short, hard-edged",
+    "practical_lights": "none"
+  },
+  "camera": {
+    "lens_mm": 24,
+    "aperture": "f/8",
+    "iso": 100,
+    "shutter": "1/500",
+    "height_ft": 5.5,
+    "framing": "eye-level wide shot, rule of thirds, back wall on upper third, horizon slightly tilted down",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "wide establishing",
+    "rule": "rule_of_thirds",
+    "foreground": "tan dirt and scattered debris",
+    "midground": "empty common space, neglected",
+    "background": "stucco wall and distant cottonwoods and scrub oak"
+  },
+  "style": {
+    "primary": "photorealistic real-estate exterior documentation photography",
+    "reference": "MLS listing photo, natural color, no filter",
+    "film_stock": "neutral digital, no grain"
+  },
+  "quality": {
+    "include": ["accurate dry soil texture", "realistic debris and weed distribution", "crisp architectural edges on the back wall", "natural high-plains color palette"],
+    "avoid": ["cartoonish saturation", "people", "vehicles", "text or signage", "HDR halos", "lens flares", "Sonoran desert", "saguaro cactus", "agave", "palm trees", "tropical vegetation", "grass lawn"]
+  },
+  "output_format": { "format": "png", "filename": "site1_01_before_day.png" }
+}

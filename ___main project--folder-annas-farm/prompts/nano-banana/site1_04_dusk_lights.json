@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site1",
+  "scene": {
+    "description": "A photorealistic dusk blue-hour exterior of the completed Anna's Farm Site One common-space entry landscape. The sky is a deep cobalt with a fading warm band at the horizon. All ten solar path lights are fully glowing warm 2700K amber, casting soft pools of light across the decomposed granite and rimming the boulder bases. The dry-riverbed accent line reads as a darker channel; flagstone clusters catch faint specular reflections from the path lights. Subtle ambient fill from a distant streetlamp off-frame.",
+    "time": "blue_hour",
+    "weather": "clear, 15 minutes after sunset",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan decomposed granite, cool blue-shadowed with warm pools near lights", "under_layer": "concealed black weed fabric" },
+    { "element": "accent_rock", "type": "rust-ochre rip-rap, reading dark against warm light pools" },
+    { "element": "boulders", "type": "weathered sandstone, warm rim-light from path lights", "count": 6 },
+    { "element": "flagstone", "type": "buff Lyons sandstone flagstone, catching subtle specular highlights", "coverage": "4 tons" },
+    { "element": "lights", "type": "matte-black solar path lights, fully glowing warm 2700K amber with visible filament, subtle lens bloom", "count": 10, "placement": "curved line along implied walkway" }
+  ],
+  "lighting": {
+    "source": "ambient blue-hour skylight plus ten warm practical path lights",
+    "direction": "omnidirectional blue fill plus localized warm pools",
+    "color_temperature_k": 4200,
+    "shadow_quality": "soft, diffuse, deep",
+    "practical_lights": "solar path lights at full glow, warm 2700K, gentle bloom, light pooling on granite"
+  },
+  "camera": {
+    "lens_mm": 35,
+    "aperture": "f/2.8",
+    "iso": 800,
+    "shutter": "1/60",
+    "height_ft": 3.5,
+    "framing": "same 3/4 angle as hero_golden, slightly tighter on the light curve",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "3/4 emotional close",
+    "rule": "leading_lines",
+    "foreground": "warm light pool on decomposed granite, first two path lights",
+    "midground": "curve of glowing lights leading to hero boulder cluster",
+    "background": "silhouetted stucco wall against cobalt sky"
+  },
+  "style": {
+    "primary": "photorealistic architectural dusk photography",
+    "reference": "Architectural Digest dusk exterior, real-estate twilight shot",
+    "film_stock": "clean digital, warm-cool color contrast"
+  },
+  "quality": {
+    "include": ["warm 2700K light pools with soft falloff", "cool blue ambient fill from sky", "realistic solar-fixture bloom (subtle)", "warm/cool color contrast", "star-free clean sky gradient"],
+    "avoid": ["lens-flare starbursts", "neon oversaturation", "people", "vehicles", "text or signage", "visible camera tripod", "HDR halos", "grass lawn", "tropical plants", "harsh floodlight look"]
+  },
+  "output_format": { "format": "png", "filename": "site1_04_dusk_lights.png" }
+}

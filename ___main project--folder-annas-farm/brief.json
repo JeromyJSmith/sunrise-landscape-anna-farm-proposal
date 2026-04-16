@@ -1,0 +1,181 @@
+{
+  "$schema": "../../schemas/project-brief.schema.json",
+  "project": {
+    "slug": "annas-farm",
+    "name": "Anna's Farm — Common Space Entry Landscape",
+    "created": "2026-04-11",
+    "type": "landscape-hardscape-proposal",
+    "status": "intake",
+    "deliverable_summary": "Professional client proposal (PDF + HTML one-pager) with line-item estimate, GIS site context, site photos, AI mockup renders, parametric Houdini 3D scene, optional Veo 3 walkthrough video, optional Claw3D browser presentation."
+  },
+  "client": {
+    "name": null,
+    "email": null,
+    "phone": null,
+    "billing_address": null,
+    "site_contact": null,
+    "notes": "Common-space entry areas at Anna's Farm. Site contact is a resident who lives on the property. HOA-style proposal assumed — confirm whether the invoice goes to an HOA, builder, property manager, or individual."
+  },
+  "contractor": {
+    "company": null,
+    "contact_name": null,
+    "email": null,
+    "phone": null,
+    "license": null,
+    "logo_path": null,
+    "brand_colors": null,
+    "tagline": null
+  },
+  "location": {
+    "venue": "Anna's Farm",
+    "city": "Lafayette",
+    "county": "Boulder County",
+    "state": "Colorado",
+    "country": "USA",
+    "nearby_landmarks": [
+      "Primrose School of Lafayette",
+      "Highgate Lane",
+      "Indian Peaks Dental"
+    ],
+    "elevation_ft_estimate": 5330,
+    "climate_zone": "Colorado Front Range high-plains semi-arid steppe (NOT Sonoran desert). USDA hardiness ~5b/6a. 300+ days sun, winter snow, alpine back-drop at sunset.",
+    "address": null,
+    "parcel_id": null,
+    "confidence": "coordinates_confirmed_by_owner",
+    "source": "Owner provided decimal-degree coordinates 2026-04-11; Lafayette CO confirmed by Primrose School of Lafayette + Highgate Lane street labels visible in video frames perimeter_04 and perimeter_07 (see reference/from_video/site1/, site2/).",
+    "gis_sources_planned": [
+      "Boulder County GIS Open Data — parcel + zoning + aerial — https://opendata-bouldercounty.hub.arcgis.com/",
+      "USGS 3DEP 1m DEM — elevation + contours",
+      "NAIP aerial — high-res orthophoto",
+      "OpenStreetMap Overpass — street network (Highgate Lane etc.)",
+      "Google Street View / Mapillary — ground-level reference"
+    ]
+  },
+  "polygon_edit_session": {
+    "video": "projects.annas_farm",
+    "frames_table": "projects.annas_farm_frames",
+    "tool": "Google Earth Pro / web — polygon path tool",
+    "site_1_hero_frame": "reference/from_video/site1/site1_perimeter_hero_3500sqft_230ft_t01m37.png",
+    "site_2_hero_frame": "reference/from_video/site2/site2_perimeter_hero_1577sqft_195ft_t17m22.png",
+    "notes": "Video is a 19.8-minute screen recording (CleanShot) of an owner polygon-editing session in Google Earth. Site 1 polygon reaches exact 3500 sqft / 230 ft perimeter; Site 2 polygon is being reduced toward 1500 sqft target and sits at 1567 sqft at time of handoff."
+  },
+  "sites": [
+    {
+      "id": "site-1",
+      "name": "Site One — Common Space Entry A",
+      "shape": "irregular polygon (NOT a rectangle — owner-edited Google Earth polygon)",
+      "area_sqft": 3500,
+      "perimeter_ft": 230,
+      "centroid_lat": 40.000458,
+      "centroid_lon": -105.110036,
+      "elevation_ft_approx": 5360,
+      "elevation_m_approx": 1634,
+      "hero_frame": "reference/from_video/site1/site1_perimeter_hero_3500sqft_230ft_t01m37.png",
+      "line_items": [
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 2000 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 3500, "unit": "sqft", "price_usd": 1750 },
+        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 6000 },
+        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 2000 },
+        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 6,    "unit": "ton",  "price_usd": 4800 },
+        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 4,    "unit": "ton",  "price_usd": 4000 },
+        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+      ],
+      "subtotal_usd": 21050
+    },
+    {
+      "id": "site-2",
+      "name": "Site Two — Common Space Entry B",
+      "shape": "irregular polygon (NOT a rectangle — owner-edited Google Earth polygon)",
+      "area_sqft_quoted_target": 1500,
+      "area_sqft_current_edit": 1567,
+      "area_sqft_note": "Polygon still being reduced toward 1500 sqft target; current edit state is 1567 sqft and needs to come down another 67 sqft. Line items quoted against the 1500 sqft target.",
+      "perimeter_ft": 194,
+      "centroid_lat": 40.001489,
+      "centroid_lon": -105.109675,
+      "elevation_ft_approx": 5350,
+      "elevation_m_approx": 1631,
+      "hero_frame": "reference/from_video/site2/site2_perimeter_hero_1577sqft_195ft_t17m22.png",
+      "line_items": [
+        { "code": "demo",      "item": "Remove, grade, debris haul",          "qty": 1,    "unit": "lot",  "price_usd": 1000 },
+        { "code": "fabric",    "item": "Weed fabric with staples",            "qty": 1500, "unit": "sqft", "price_usd": 750  },
+        { "code": "rock-sm",   "item": "Decorative rock 3/4\"–1 1/2\"",       "qty": null, "unit": "ton",  "price_usd": 3000 },
+        { "code": "rock-lg",   "item": "Decorative rock 2\"–6\"",             "qty": null, "unit": "ton",  "price_usd": 1000 },
+        { "code": "boulder",   "item": "Decorative boulders",                 "qty": 4,    "unit": "ton",  "price_usd": 3200 },
+        { "code": "flagstone", "item": "Flagstone accents",                   "qty": 3,    "unit": "ton",  "price_usd": 3000 },
+        { "code": "lights",    "item": "Solar path / accent lights",          "qty": 10,   "unit": "each", "price_usd": 500  }
+      ],
+      "subtotal_usd": 12450
+    }
+  ],
+  "totals": {
+    "site_1_subtotal_usd": 21050,
+    "site_2_subtotal_usd": 12450,
+    "grand_total_usd": 33500,
+    "tax_rate_pct": null,
+    "tax_usd": null,
+    "grand_total_with_tax_usd": null,
+    "valid_until": null,
+    "deposit_terms": null
+  },
+  "style_direction": {
+    "aesthetic": "Colorado Front Range high-plains xeriscape, low-water residential hardscape, HOA-appropriate common-entry. NOT Sonoran desert.",
+    "regional_cues": [
+      "Flatirons / Front Range alpine backdrop at horizon for hero shots",
+      "Front Range light quality — clean high-altitude air, cool shadows",
+      "Lafayette CO architectural context — suburban single-family + townhomes, medium-density",
+      "Adjacent vegetation may include cottonwood, blue spruce, scrub oak, prairie grasses"
+    ],
+    "palette": {
+      "ground": "warm tan / buff Colorado decomposed granite or 3/4\"–1 1/2\" gold and buff path stone",
+      "accent_rock": "rust, ochre, umber 2\"–6\" river cobble or moss-rock rip-rap",
+      "boulders": "weathered Colorado moss rock / rose quartzite / Estes red sandstone, ochre to deep red-brown, lichen-dappled",
+      "flagstone": "buff Lyons sandstone or Colorado red flagstone, cleft face",
+      "lighting": "warm 2700–3000K solar path lights"
+    },
+    "vegetation": "Scope is hardscape only — no sod, no planting, no irrigation. Mockups may include existing adjacent Front Range vegetation (blue grama, rabbitbrush, scrub oak, cottonwood) for context.",
+    "mood_keywords": ["clean", "professional", "inviting", "low-maintenance", "Colorado modern", "Front Range", "HOA approved", "warm"],
+    "negative_keywords": ["Sonoran desert", "saguaro cactus", "agave", "palm trees", "grass lawn", "tropical", "overgrown", "busy", "kitsch", "neon", "cartoonish"]
+  },
+  "deliverables": {
+    "proposal_pdf": true,
+    "proposal_html_onepager": true,
+    "mockup_images_per_site": 4,
+    "mockup_shots": [
+      { "id": "before-day",   "label": "Existing conditions — wide daytime" },
+      { "id": "after-day",    "label": "Completed install — wide daytime (matches before framing)" },
+      { "id": "hero-golden",  "label": "Hero 3/4 angle — golden hour after" },
+      { "id": "dusk-lights",  "label": "Dusk / blue hour — solar lights glowing" }
+    ],
+    "walkthrough_video_per_site": 1,
+    "walkthrough_video": {
+      "duration_sec": 8,
+      "style": "slow cinematic push-in from entry approach to full reveal, native ambient audio"
+    },
+    "houdini_3d": {
+      "scene_per_site": true,
+      "parametric_rock_scatter": true,
+      "boulder_placement": "hand + PDG Wedge variants",
+      "flagstone_layout": "hand-placed guide + Voronoi fracture",
+      "solar_light_instances": true,
+      "export": "GLB for Claw3D browser viewer"
+    },
+    "pascal_editor": {
+      "use": "If the Pascal editor integration is confirmed, author one parametric template and expose brief.json fields as editor parameters."
+    }
+  },
+  "reasoning_engine_notes": {
+    "use": "Route the brief through the Pixeltable RAG + doc_query loop to pull any relevant prior projects, material pricing references, and HOA design guidance before authoring prompts.",
+    "critique_loop": "After mockups land on disk, run the visual critique pipeline (Gemma4-Visual-Agent) and feed the JSON back into the next prompt iteration."
+  },
+  "open_questions_for_owner": [
+    "Client name, email, phone, billing address — for the proposal header.",
+    "Contractor company name, contact, email, phone, license #, logo, brand colors — for the header and footer.",
+    "Street address for Anna's Farm (coordinates confirmed as Lafayette CO — just need a mailing address for the invoice header).",
+    "Confirm Site 2 should be billed at 1,500 sqft (current polygon edit is 1,567; still reducing 67 sqft).",
+    "Colorado sales tax / contractor-use tax rate — or is this project tax-exempt?",
+    "Deposit / payment terms (e.g., 50% down, 50% on completion)?",
+    "Proposal valid-until date (30 / 60 / 90 days)?",
+    "Optional upsells to include as line items: irrigation, metal edging, planting, artificial turf, Blackstone patio?",
+    "Do you want me to fetch Google Street View of the two entry areas, or will you upload reference photos yourself?"
+  ]
+}

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Sun glow (warm) -->
+  <circle cx="100" cy="48" r="42" fill="url(#gSunGlow)" opacity="0.25"/>
+  <!-- Sun disc -->
+  <circle cx="100" cy="48" r="26" fill="url(#gSunDisc)"/>
+  <!-- Rays (warm copper) -->
+  <g stroke="url(#gRay)" stroke-width="2" stroke-linecap="round" opacity="0.5">
+    <line x1="100" y1="14" x2="100" y2="6"/>
+    <line x1="122" y1="19" x2="130" y2="10"/>
+    <line x1="78" y1="19" x2="70" y2="10"/>
+    <line x1="134" y1="36" x2="144" y2="32"/>
+    <line x1="66" y1="36" x2="56" y2="32"/>
+    <line x1="138" y1="54" x2="148" y2="54"/>
+    <line x1="62" y1="54" x2="52" y2="54"/>
+    <line x1="128" y1="22" x2="136" y2="15"/>
+    <line x1="72" y1="22" x2="64" y2="15"/>
+  </g>
+  <!-- Mountains (copper/bronze tones) -->
+  <path d="M25,98 L55,50 L72,65 L88,40 L105,58 L118,32 L138,60 L152,45 L175,98Z" fill="url(#gMt1)"/>
+  <path d="M10,98 L42,62 L58,74 L78,50 L93,67 L106,54 L122,72 L142,52 L158,70 L190,98Z" fill="url(#gMt2)" opacity="0.85"/>
+  <!-- Highlights -->
+  <path d="M85,43 L88,40 L91,43Z" fill="rgba(255,220,160,0.4)"/>
+  <path d="M115,35 L118,32 L121,35Z" fill="rgba(255,220,160,0.3)"/>
+  <defs>
+    <radialGradient id="gSunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#C9952B" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#B87333" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gSunDisc" cx="0.4" cy="0.35" r="0.5">
+      <stop offset="0%" stop-color="#FFD875"/>
+      <stop offset="40%" stop-color="#E8A435"/>
+      <stop offset="100%" stop-color="#B87333"/>
+    </radialGradient>
+    <linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D4A76A"/>
+      <stop offset="100%" stop-color="#B87333"/>
+    </linearGradient>
+    <linearGradient id="gMt1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8B6F4E"/>
+      <stop offset="60%" stop-color="#6B5339"/>
+      <stop offset="100%" stop-color="#4A3828"/>
+    </linearGradient>
+    <linearGradient id="gMt2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A08060"/>
+      <stop offset="50%" stop-color="#7A6345"/>
+      <stop offset="100%" stop-color="#5A4530"/>
+    </linearGradient>
+  </defs>
+</svg>

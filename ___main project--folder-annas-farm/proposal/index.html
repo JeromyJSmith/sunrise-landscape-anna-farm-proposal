@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anna's Farm — Landscape Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-primary: #2d3436;
+  --brand-secondary: #636e72;
+  --brand-accent: #b8860b;
+  --brand-bg: #ffffff;
+  --brand-text: #2d3436;
+  --brand-card-bg: #2d3436;
+  --brand-card-text: #ffffff;
+  --brand-font: 'Inter', sans-serif;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --page-max: 960px;
+  --radius: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  color: #2d3436;
+  background: #f5f5f0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 1: BRAND SELECTOR
+   ═══════════════════════════════════════════════════════════════ */
+
+.brand-selector {
+  background: #1a1a1a;
+  padding: 40px 20px 48px;
+  text-align: center;
+}
+.brand-selector h2 {
+  font-family: var(--serif);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.brand-selector p {
+  color: #999;
+  font-size: 0.85rem;
+  margin-bottom: 28px;
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.biz-card {
+  border-radius: 10px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 2px solid transparent;
+  position: relative;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.biz-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.biz-card.selected { border-color: #ffd700; box-shadow: 0 0 0 3px rgba(255,215,0,0.25), 0 8px 32px rgba(0,0,0,0.3); }
+.biz-card.selected::after {
+  content: '✓ SELECTED';
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ffd700;
+}
+
+.card-company { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em; margin-bottom: 2px; }
+.card-tagline { font-size: 0.7rem; opacity: 0.7; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+.card-contact { font-size: 0.78rem; line-height: 1.55; opacity: 0.85; }
+.card-logo-strip { height: 3px; border-radius: 2px; margin-top: 14px; }
+
+/* Card themes */
+.card-minimal-dark { background: #1e272e; color: #ecf0f1; }
+.card-minimal-dark .card-logo-strip { background: linear-gradient(90deg, #ecf0f1 0%, transparent 100%); }
+
+.card-classic-white { background: #fafaf8; color: #2d3436; border: 1px solid #e0ddd5; }
+.card-classic-white .card-company { font-family: var(--serif); }
+.card-classic-white .card-logo-strip { background: linear-gradient(90deg, #2d3436 0%, transparent 100%); }
+
+.card-earth { background: linear-gradient(135deg, #8B7355 0%, #6B5B3E 100%); color: #f5f0e8; }
+.card-earth .card-logo-strip { background: linear-gradient(90deg, #d4a76a 0%, transparent 100%); }
+
+.card-bold-modern { background: #0a0a0a; color: #fff; border-left: 4px solid #e74c3c; }
+.card-bold-modern .card-logo-strip { background: linear-gradient(90deg, #e74c3c 0%, #c0392b 50%, transparent 100%); }
+
+.card-blueprint { background: linear-gradient(135deg, #0c2340 0%, #1a3a5c 100%); color: #c8d6e5; }
+.card-blueprint .card-company { color: #fff; }
+.card-blueprint .card-logo-strip { background: linear-gradient(90deg, #4a9eff 0%, transparent 100%); }
+
+.card-sage { background: linear-gradient(135deg, #4a6741 0%, #3d5a34 100%); color: #e8f0e4; }
+.card-sage .card-company { color: #fff; }
+.card-sage .card-logo-strip { background: linear-gradient(90deg, #a8d89a 0%, transparent 100%); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 2: PROPOSAL
+   ═══════════════════════════════════════════════════════════════ */
+
+.proposal {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 2px 40px rgba(0,0,0,0.08);
+}
+
+/* Header */
+.proposal-header {
+  background: var(--brand-card-bg);
+  color: var(--brand-card-text);
+  padding: 48px 56px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: end;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+.header-brand .company-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.header-brand .company-tagline {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.header-brand .company-contact {
+  font-size: 0.8rem;
+  margin-top: 12px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+.header-doc-type {
+  text-align: right;
+}
+.header-doc-type .doc-title {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.header-doc-type .doc-date {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+.header-accent-bar {
+  height: 4px;
+  background: var(--brand-accent);
+  transition: background 0.4s ease;
+}
+
+/* Body */
+.proposal-body { padding: 48px 56px; }
+
+.section-title {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--brand-primary);
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8e6e0;
+}
+
+.client-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin: 24px 0 40px;
+}
+.client-block label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-secondary);
+  margin-bottom: 6px;
+}
+.client-block .value {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #2d3436;
+}
+.client-block .placeholder {
+  color: #bbb;
+  font-style: italic;
+}
+
+/* Project summary */
+.project-summary {
+  background: #fafaf8;
+  border-left: 3px solid var(--brand-accent);
+  padding: 20px 24px;
+  margin: 24px 0 40px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #444;
+  transition: border-color 0.4s ease;
+}
+
+/* Mockup grid */
+.mockup-section { margin: 40px 0; }
+.mockup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.mockup-slot {
+  background: #f0ede6;
+  border-radius: var(--radius);
+  aspect-ratio: 3/2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 12px;
+  border: 1px dashed #d5d0c8;
+}
+.mockup-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+/* GIS reference */
+.geo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.geo-slot {
+  background: #f0ede6;
+  border-radius: var(--radius);
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  border: 1px solid #e0ddd5;
+}
+.geo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.geo-caption {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Line items */
+.site-section { margin: 40px 0; }
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.site-name { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; }
+.site-dims { font-size: 0.8rem; color: #888; }
+
+.line-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+.line-items thead th {
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand-secondary);
+  padding: 8px 0;
+  border-bottom: 2px solid #2d3436;
+}
+.line-items thead th:last-child { text-align: right; }
+.line-items tbody td {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0ede6;
+  vertical-align: top;
+}
+.line-items tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.line-items tbody td:nth-child(2),
+.line-items tbody td:nth-child(3) { text-align: center; color: #888; font-size: 0.8rem; }
+.line-items thead th:nth-child(2),
+.line-items thead th:nth-child(3) { text-align: center; }
+.subtotal-row td {
+  font-weight: 700;
+  border-bottom: 2px solid #2d3436;
+  padding-top: 14px;
+}
+
+/* Totals */
+.totals-section {
+  display: flex;
+  justify-content: flex-end;
+  margin: 32px 0 48px;
+}
+.totals-table {
+  border-collapse: collapse;
+  min-width: 280px;
+}
+.totals-table td {
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+.totals-table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  padding-left: 32px;
+}
+.totals-table .grand-total td {
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-top: 2px solid #2d3436;
+  padding-top: 14px;
+  color: var(--brand-primary);
+}
+
+/* Terms */
+.terms {
+  background: #fafaf8;
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin: 32px 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: #555;
+}
+.terms h3 {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-secondary);
+  margin-bottom: 10px;
+}
+
+/* Footer */
+.proposal-footer {
+  background: var(--brand-card-bg);
+  color: var(--brand-card-text);
+  padding: 28px 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Coordinates badge */
+.coords-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0ede6;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  body { background: #fff; }
+  .brand-selector { display: none; }
+  .proposal { box-shadow: none; max-width: 100%; }
+  .mockup-slot { break-inside: avoid; }
+  .site-section { break-inside: avoid; }
+}
+
+@media (max-width: 640px) {
+  .proposal-header { grid-template-columns: 1fr; padding: 32px 24px; }
+  .header-doc-type { text-align: left; }
+  .proposal-body { padding: 32px 24px; }
+  .client-grid { grid-template-columns: 1fr; }
+  .mockup-grid { grid-template-columns: 1fr; }
+  .geo-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+  .proposal-footer { flex-direction: column; gap: 8px; padding: 20px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BRAND SELECTOR
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="brand-selector" id="brandSelector">
+  <h2>Choose a Brand Identity</h2>
+  <p>Select a card style — the proposal header and footer update instantly.</p>
+  <div class="card-grid">
+
+    <div class="biz-card card-minimal-dark selected" onclick="selectBrand(this)" data-theme="minimal-dark"
+         data-bg="#1e272e" data-text="#ecf0f1" data-accent="#ecf0f1" data-primary="#1e272e">
+      <div>
+        <div class="card-company" id="cardCompany0">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+    <div class="biz-card card-classic-white" onclick="selectBrand(this)" data-theme="classic-white"
+         data-bg="#fafaf8" data-text="#2d3436" data-accent="#8B7355" data-primary="#2d3436">
+      <div>
+        <div class="card-company">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+    <div class="biz-card card-earth" onclick="selectBrand(this)" data-theme="earth"
+         data-bg="#6B5B3E" data-text="#f5f0e8" data-accent="#d4a76a" data-primary="#6B5B3E">
+      <div>
+        <div class="card-company">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+    <div class="biz-card card-bold-modern" onclick="selectBrand(this)" data-theme="bold-modern"
+         data-bg="#0a0a0a" data-text="#ffffff" data-accent="#e74c3c" data-primary="#0a0a0a">
+      <div>
+        <div class="card-company">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+    <div class="biz-card card-blueprint" onclick="selectBrand(this)" data-theme="blueprint"
+         data-bg="#0c2340" data-text="#c8d6e5" data-accent="#4a9eff" data-primary="#0c2340">
+      <div>
+        <div class="card-company">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+    <div class="biz-card card-sage" onclick="selectBrand(this)" data-theme="sage"
+         data-bg="#3d5a34" data-text="#e8f0e4" data-accent="#a8d89a" data-primary="#3d5a34">
+      <div>
+        <div class="card-company">Your Company Name</div>
+        <div class="card-tagline">Landscape &middot; Hardscape &middot; Design</div>
+        <div class="card-contact"><span class="cname">Contact Name</span><br><span class="cemail">email@company.com</span> &middot; <span class="cphone">(303) 555-0100</span></div>
+      </div>
+      <div class="card-logo-strip"></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 28px; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+      <input type="text" id="inputCompany" placeholder="Company Name" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+      <input type="text" id="inputContact" placeholder="Your Name" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <input type="email" id="inputEmail" placeholder="email@company.com" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+      <input type="tel" id="inputPhone" placeholder="(303) 555-0100" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+      <input type="text" id="inputTagline" placeholder="Tagline (e.g. Landscape · Hardscape · Design)" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+      <input type="text" id="inputLicense" placeholder="License # (optional)" oninput="updateBrandInfo()"
+             style="padding:10px 14px; border:1px solid #444; border-radius:6px; background:#222; color:#fff; font-size:0.85rem;">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PROPOSAL
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="proposal" id="proposal">
+
+  <!-- Header -->
+  <div class="proposal-header" id="proposalHeader">
+    <div class="header-brand">
+      <div class="company-name" id="headerCompany">Your Company Name</div>
+      <div class="company-tagline" id="headerTagline">Landscape &middot; Hardscape &middot; Design</div>
+      <div class="company-contact" id="headerContact">
+        Contact Name<br>
+        email@company.com &middot; (303) 555-0100
+      </div>
+    </div>
+    <div class="header-doc-type">
+      <div class="doc-title">Proposal</div>
+      <div class="doc-date" id="headerDate">April 11, 2026</div>
+    </div>
+  </div>
+  <div class="header-accent-bar" id="accentBar"></div>
+
+  <!-- Body -->
+  <div class="proposal-body">
+
+    <!-- Client + Project -->
+    <div class="section-title">Client &amp; Project</div>
+    <div class="client-grid">
+      <div class="client-block">
+        <label>Prepared For</label>
+        <div class="value">
+          <span class="placeholder">Client name pending</span><br>
+          <span class="placeholder">Anna's Farm, Lafayette CO</span>
+        </div>
+      </div>
+      <div class="client-block">
+        <label>Project Location</label>
+        <div class="value">
+          Anna's Farm<br>
+          Lafayette, Colorado 80026<br>
+          Boulder County
+          <span class="coords-badge">40.0005°N, 105.1100°W</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="project-summary" id="projectSummary">
+      Professional landscape hardscape installation across two common-space entry areas at Anna's Farm, Lafayette, Colorado. Scope includes full site demolition, grading, weed-fabric underlayment, decorative decomposed granite ground cover (3/4"–1½"), accent river cobble (2"–6"), Colorado moss-rock boulder placement, Lyons sandstone flagstone accents, and solar path lighting — delivering a low-water, HOA-compliant Front Range xeriscape with year-round curb appeal.
+    </div>
+
+    <!-- GIS / Aerial Reference -->
+    <div class="mockup-section">
+      <div class="section-title">Site Aerial Reference</div>
+      <div class="geo-grid">
+        <div>
+          <div class="geo-slot">
+            <img src="../reference/from_video/site1/site1_perimeter_hero_3500sqft_230ft_t01m37.png"
+                 alt="Site 1 — 3,500 ft² polygon" onerror="this.parentElement.innerHTML='<div style=&quot;display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:0.75rem;padding:12px;&quot;>Site 1 aerial — see reference/from_video/site1/</div>'">
+          </div>
+          <div class="geo-caption">Site 1 — 3,500 ft² &middot; 230 ft perimeter &middot; ~5,360 ft elevation</div>
+        </div>
+        <div>
+          <div class="geo-slot">
+            <img src="../reference/from_video/site2/site2_perimeter_hero_1577sqft_195ft_t17m22.png"
+                 alt="Site 2 — 1,500 ft² polygon" onerror="this.parentElement.innerHTML='<div style=&quot;display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:0.75rem;padding:12px;&quot;>Site 2 aerial — see reference/from_video/site2/</div>'">
+          </div>
+          <div class="geo-caption">Site 2 — 1,500 ft² target &middot; 194 ft perimeter &middot; ~5,350 ft elevation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mockups -->
+    <div class="mockup-section">
+      <div class="section-title">Design Visualization — Site One</div>
+      <div class="mockup-grid">
+        <div class="mockup-slot">Before — existing conditions (midday)</div>
+        <div class="mockup-slot">After — completed install (midday, matched framing)</div>
+        <div class="mockup-slot">Hero — golden hour, 3/4 angle</div>
+        <div class="mockup-slot">Dusk — solar lights glowing, blue hour</div>
+      </div>
+    </div>
+
+    <div class="mockup-section">
+      <div class="section-title">Design Visualization — Site Two</div>
+      <div class="mockup-grid">
+        <div class="mockup-slot">Before — existing conditions (midday)</div>
+        <div class="mockup-slot">After — completed install (midday, matched framing)</div>
+        <div class="mockup-slot">Hero — golden hour, 3/4 angle</div>
+        <div class="mockup-slot">Dusk — solar lights glowing, blue hour</div>
+      </div>
+    </div>
+
+    <!-- Site 1 Line Items -->
+    <div class="site-section">
+      <div class="section-title">Scope of Work</div>
+      <div style="height: 20px;"></div>
+      <div class="site-header">
+        <div class="site-name">Site One — Common Space Entry A</div>
+        <div class="site-dims">3,500 ft² &middot; 230 ft perimeter</div>
+      </div>
+      <table class="line-items">
+        <thead>
+          <tr><th>Description</th><th>Qty</th><th>Unit</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Remove, grade, debris haul — clear existing site to bare subgrade</td><td>1</td><td>lot</td><td>$2,000.00</td></tr>
+          <tr><td>Weed fabric with staples — commercial-grade woven underlayment, full coverage</td><td>3,500</td><td>sqft</td><td>$1,750.00</td></tr>
+          <tr><td>Decorative rock 3/4"–1½" — buff/gold decomposed granite ground cover</td><td>—</td><td>ton</td><td>$6,000.00</td></tr>
+          <tr><td>Decorative rock 2"–6" — rust-ochre river cobble, dry-riverbed accent line</td><td>—</td><td>ton</td><td>$2,000.00</td></tr>
+          <tr><td>Colorado moss-rock boulders — 18"–36", placed in asymmetric clusters</td><td>6</td><td>ton</td><td>$4,800.00</td></tr>
+          <tr><td>Lyons sandstone flagstone accents — cleft-face stepping groupings</td><td>4</td><td>ton</td><td>$4,000.00</td></tr>
+          <tr><td>Solar path / accent lights — matte-black, warm 2700K LED</td><td>10</td><td>ea</td><td>$500.00</td></tr>
+          <tr class="subtotal-row"><td>Site One Subtotal</td><td></td><td></td><td>$21,050.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Site 2 Line Items -->
+    <div class="site-section">
+      <div class="site-header">
+        <div class="site-name">Site Two — Common Space Entry B</div>
+        <div class="site-dims">1,500 ft² &middot; 194 ft perimeter</div>
+      </div>
+      <table class="line-items">
+        <thead>
+          <tr><th>Description</th><th>Qty</th><th>Unit</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Remove, grade, debris haul — clear existing site to bare subgrade</td><td>1</td><td>lot</td><td>$1,000.00</td></tr>
+          <tr><td>Weed fabric with staples — commercial-grade woven underlayment, full coverage</td><td>1,500</td><td>sqft</td><td>$750.00</td></tr>
+          <tr><td>Decorative rock 3/4"–1½" — buff/gold decomposed granite ground cover</td><td>—</td><td>ton</td><td>$3,000.00</td></tr>
+          <tr><td>Decorative rock 2"–6" — rust-ochre river cobble, dry-riverbed accent line</td><td>—</td><td>ton</td><td>$1,000.00</td></tr>
+          <tr><td>Colorado moss-rock boulders — 18"–30", 3+1 asymmetric composition</td><td>4</td><td>ton</td><td>$3,200.00</td></tr>
+          <tr><td>Lyons sandstone flagstone accents — cleft-face stepping groupings</td><td>3</td><td>ton</td><td>$3,000.00</td></tr>
+          <tr><td>Solar path / accent lights — matte-black, warm 2700K LED</td><td>10</td><td>ea</td><td>$500.00</td></tr>
+          <tr class="subtotal-row"><td>Site Two Subtotal</td><td></td><td></td><td>$12,450.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+      <table class="totals-table">
+        <tr><td>Site One</td><td>$21,050.00</td></tr>
+        <tr><td>Site Two</td><td>$12,450.00</td></tr>
+        <tr class="grand-total"><td>Grand Total</td><td>$33,500.00</td></tr>
+      </table>
+    </div>
+
+    <!-- Terms -->
+    <div class="terms">
+      <h3>Terms &amp; Conditions</h3>
+      <p>This proposal is valid for <strong>30 days</strong> from the date above. Material pricing is subject to market fluctuation and availability at time of scheduling.</p>
+      <p style="margin-top:8px;">Deposit and payment terms to be confirmed. Standard: 50% deposit on acceptance, 50% upon completion.</p>
+      <p style="margin-top:8px;">All work performed in accordance with Lafayette, CO building codes and Boulder County land-use regulations. Contractor is licensed, bonded, and insured in the State of Colorado.</p>
+      <p style="margin-top:8px;">Scope includes materials, labor, delivery, and site cleanup. Does not include irrigation, planting, metal edging, or patio construction unless added as separate line items.</p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="proposal-footer" id="proposalFooter">
+    <div id="footerCompany">Your Company Name &middot; Lafayette, CO</div>
+    <div id="footerContact">email@company.com &middot; (303) 555-0100</div>
+  </div>
+
+</div>
+
+<div style="text-align:center; padding:32px; color:#aaa; font-size:0.7rem;">
+  Generated by CLAW3D / Houdini work-order system &middot; Anna's Farm Project &middot; 2026-04-11
+</div>
+
+<script>
+function selectBrand(el) {
+  document.querySelectorAll('.biz-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const bg = el.dataset.bg;
+  const text = el.dataset.text;
+  const accent = el.dataset.accent;
+  const primary = el.dataset.primary;
+
+  const root = document.documentElement;
+  root.style.setProperty('--brand-card-bg', bg);
+  root.style.setProperty('--brand-card-text', text);
+  root.style.setProperty('--brand-accent', accent);
+  root.style.setProperty('--brand-primary', primary);
+
+  document.getElementById('proposalHeader').style.background = bg;
+  document.getElementById('proposalHeader').style.color = text;
+  document.getElementById('accentBar').style.background = accent;
+  document.getElementById('proposalFooter').style.background = bg;
+  document.getElementById('proposalFooter').style.color = text;
+  document.getElementById('projectSummary').style.borderLeftColor = accent;
+}
+
+function updateBrandInfo() {
+  const company = document.getElementById('inputCompany').value || 'Your Company Name';
+  const contact = document.getElementById('inputContact').value || 'Contact Name';
+  const email   = document.getElementById('inputEmail').value || 'email@company.com';
+  const phone   = document.getElementById('inputPhone').value || '(303) 555-0100';
+  const tagline = document.getElementById('inputTagline').value || 'Landscape \u00b7 Hardscape \u00b7 Design';
+  const license = document.getElementById('inputLicense').value;
+
+  document.querySelectorAll('.card-company').forEach(el => el.textContent = company);
+  document.querySelectorAll('.card-tagline').forEach(el => el.textContent = tagline);
+  document.querySelectorAll('.card-contact').forEach(el => {
+    el.innerHTML = contact + '<br>' + email + ' \u00b7 ' + phone;
+  });
+
+  document.getElementById('headerCompany').textContent = company;
+  document.getElementById('headerTagline').textContent = tagline;
+  document.getElementById('headerContact').innerHTML =
+    contact + '<br>' + email + ' \u00b7 ' + phone +
+    (license ? '<br>License #' + license : '');
+
+  document.getElementById('footerCompany').textContent = company + ' \u00b7 Lafayette, CO';
+  document.getElementById('footerContact').textContent = email + ' \u00b7 ' + phone;
+}
+</script>
+</body>
+</html>

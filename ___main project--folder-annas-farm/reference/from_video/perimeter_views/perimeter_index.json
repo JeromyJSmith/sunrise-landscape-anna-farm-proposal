@@ -1,0 +1,140 @@
+{
+  "source_table": "projects.annas_farm_frames",
+  "model": "openai/clip-vit-base-patch32",
+  "queries": [
+    "aerial satellite view of a residential property with a polygon outline drawn on it",
+    "Google Earth screenshot of a yard with a red boundary polygon",
+    "top-down satellite map of a house and backyard with measurement tool",
+    "wide aerial view showing the full perimeter of an empty dirt lot",
+    "map editing tool with a drawn polygon around a residential site",
+    "oblique aerial 3D view of a house and yard with a polygon highlighted"
+  ],
+  "picks": [
+    {
+      "rank": 0,
+      "filename": "perimeter_00_t14m28.00s.png",
+      "time_s": 868.0,
+      "time_stamp": "14m28.00s",
+      "pos": 868,
+      "sim": 0.3183,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 1,
+      "filename": "perimeter_01_t00m14.00s.png",
+      "time_s": 14.0,
+      "time_stamp": "00m14.00s",
+      "pos": 14,
+      "sim": 0.3172,
+      "best_query": "Google Earth screenshot of a yard with a red boundary polygon"
+    },
+    {
+      "rank": 2,
+      "filename": "perimeter_02_t17m22.00s.png",
+      "time_s": 1042.0,
+      "time_stamp": "17m22.00s",
+      "pos": 1042,
+      "sim": 0.3128,
+      "best_query": "map editing tool with a drawn polygon around a residential site"
+    },
+    {
+      "rank": 3,
+      "filename": "perimeter_03_t14m25.00s.png",
+      "time_s": 865.0,
+      "time_stamp": "14m25.00s",
+      "pos": 865,
+      "sim": 0.3101,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 4,
+      "filename": "perimeter_04_t01m37.00s.png",
+      "time_s": 97.0,
+      "time_stamp": "01m37.00s",
+      "pos": 97,
+      "sim": 0.3099,
+      "best_query": "Google Earth screenshot of a yard with a red boundary polygon"
+    },
+    {
+      "rank": 5,
+      "filename": "perimeter_05_t14m19.00s.png",
+      "time_s": 859.0,
+      "time_stamp": "14m19.00s",
+      "pos": 859,
+      "sim": 0.3091,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 6,
+      "filename": "perimeter_06_t14m22.00s.png",
+      "time_s": 862.0,
+      "time_stamp": "14m22.00s",
+      "pos": 862,
+      "sim": 0.3073,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 7,
+      "filename": "perimeter_07_t15m20.98s.png",
+      "time_s": 920.98,
+      "time_stamp": "15m20.98s",
+      "pos": 921,
+      "sim": 0.307,
+      "best_query": "top-down satellite map of a house and backyard with measurement tool"
+    },
+    {
+      "rank": 8,
+      "filename": "perimeter_08_t14m08.00s.png",
+      "time_s": 848.0,
+      "time_stamp": "14m08.00s",
+      "pos": 848,
+      "sim": 0.3069,
+      "best_query": "map editing tool with a drawn polygon around a residential site"
+    },
+    {
+      "rank": 9,
+      "filename": "perimeter_09_t03m52.00s.png",
+      "time_s": 232.0,
+      "time_stamp": "03m52.00s",
+      "pos": 232,
+      "sim": 0.3065,
+      "best_query": "Google Earth screenshot of a yard with a red boundary polygon"
+    },
+    {
+      "rank": 10,
+      "filename": "perimeter_10_t02m18.00s.png",
+      "time_s": 138.0,
+      "time_stamp": "02m18.00s",
+      "pos": 138,
+      "sim": 0.3044,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 11,
+      "filename": "perimeter_11_t01m32.00s.png",
+      "time_s": 92.0,
+      "time_stamp": "01m32.00s",
+      "pos": 92,
+      "sim": 0.3034,
+      "best_query": "Google Earth screenshot of a yard with a red boundary polygon"
+    },
+    {
+      "rank": 12,
+      "filename": "perimeter_12_t02m33.00s.png",
+      "time_s": 153.0,
+      "time_stamp": "02m33.00s",
+      "pos": 153,
+      "sim": 0.3021,
+      "best_query": "oblique aerial 3D view of a house and yard with a polygon highlighted"
+    },
+    {
+      "rank": 13,
+      "filename": "perimeter_13_t01m40.00s.png",
+      "time_s": 100.0,
+      "time_stamp": "01m40.00s",
+      "pos": 100,
+      "sim": 0.3021,
+      "best_query": "Google Earth screenshot of a yard with a red boundary polygon"
+    }
+  ]
+}

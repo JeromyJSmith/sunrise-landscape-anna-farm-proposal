@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "_note": "Camera block IDENTICAL to site2_01_before_day.json.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site2",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 1,500 square foot irregular polygon residential common-space entry area in Lafayette Colorado, Boulder County, newly installed as a low-water Front Range xeriscape hardscape. The 1500 square foot polygon footprint is fully covered in tan 3/4 to 1-1/2 inch decomposed granite over concealed black weed fabric. Four warm-ochre sandstone boulders (18 to 30 inches) are placed in a 3 plus 1 asymmetric composition — a main cluster of three center-left and a single accent boulder right. Three tons of buff Lyons sandstone flagstone form low stepping groupings. A short dry-riverbed accent line of rust-ochre 2 to 6 inch rip-rap runs along one long edge. Ten matte-black solar path lights follow a simple straight line parallel to the long axis.",
+    "time": "midday",
+    "weather": "clear blue sky, Front Range atmospheric haze",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground_cover", "type": "tan 3/4\"–1 1/2\" decomposed granite", "coverage": "full 1500 sqft polygon area", "under_layer": "black woven weed fabric, fully concealed" },
+    { "element": "accent_rock", "type": "rust-ochre 2\"–6\" rip-rap", "placement": "dry-riverbed line along long edge" },
+    { "element": "boulders", "type": "weathered Colorado moss-rock, ochre with lichen, 18–30 in", "count": 4, "placement": "3 plus 1 asymmetric composition, center-left main cluster" },
+    { "element": "flagstone", "type": "buff Lyons sandstone flagstone, irregular cleft slabs", "coverage": "3 tons across low stepping groupings" },
+    { "element": "lights", "type": "matte-black solar path lights, 2700K warm LED, 18 in stake", "count": 10, "placement": "straight line parallel to long axis, OFF (midday)" }
+  ],
+  "lighting": {
+    "source": "natural midday sun",
+    "direction": "overhead slightly camera-right",
+    "color_temperature_k": 5600,
+    "shadow_quality": "short, hard-edged",
+    "practical_lights": "solar path lights OFF"
+  },
+  "camera": {
+    "lens_mm": 24,
+    "aperture": "f/8",
+    "iso": 100,
+    "shutter": "1/500",
+    "height_ft": 5.5,
+    "framing": "eye-level wide shot — IDENTICAL framing to site2_01_before_day",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "wide establishing, matched to before",
+    "rule": "rule_of_thirds",
+    "foreground": "decomposed granite and nearest flagstone grouping",
+    "midground": "main boulder cluster and dry-riverbed accent line",
+    "background": "stucco wall and distant cottonwoods and scrub oak"
+  },
+  "style": {
+    "primary": "photorealistic architectural exterior photography",
+    "reference": "Sunset magazine landscape feature",
+    "film_stock": "neutral digital"
+  },
+  "quality": {
+    "include": ["accurate granite grain", "visible flagstone cleft", "asymmetric natural cluster composition", "realistic boulder weathering", "invisible weed fabric under rock"],
+    "avoid": ["visible weed fabric edges", "floating rocks", "grid-aligned boulders", "cartoonish saturation", "people", "vehicles", "text", "HDR halos", "grass", "tropical plants"]
+  },
+  "output_format": { "format": "png", "filename": "site2_02_after_day.png" }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "generate_image",
+  "_note": "Swap to task:edit_image once owner uploads site-2 reference photo.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site2",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 1,500 square foot irregular polygon residential common-space entry area in Lafayette Colorado suburban Front Range, Boulder County. Narrower elongated polygon footprint than Site One, sited in a residential townhome-adjacent common area. Compacted tan soil with sparse weeds, a few stray rocks, dry leaf litter, and a narrow strip of undisturbed dry grass along one edge. Low stucco boundary wall at the back.",
+    "time": "midday",
+    "weather": "clear blue sky, Front Range atmospheric haze",
+    "season": "late spring",
+    "location": "Lafayette, Colorado, Boulder County (40.0004 N, -105.110 W)"
+  },
+  "materials": [
+    { "element": "ground", "type": "compacted tan soil, sparse weeds, dry litter", "coverage": "full 1500 sqft polygon area" },
+    { "element": "boundary", "type": "low stucco wall, weathered buff", "placement": "back of frame" },
+    { "element": "context_vegetation", "type": "distant cottonwoods and scrub oak", "placement": "far background" }
+  ],
+  "lighting": {
+    "source": "natural midday sun",
+    "direction": "overhead, slightly camera-right",
+    "color_temperature_k": 5600,
+    "shadow_quality": "short, hard-edged",
+    "practical_lights": "none"
+  },
+  "camera": {
+    "lens_mm": 24,
+    "aperture": "f/8",
+    "iso": 100,
+    "shutter": "1/500",
+    "height_ft": 5.5,
+    "framing": "eye-level wide shot emphasizing the narrower elongated polygon proportion, horizontal composition, back wall on upper third",
+    "camera_model": "Sony A7R IV"
+  },
+  "composition": {
+    "shot_type": "wide establishing",
+    "rule": "rule_of_thirds",
+    "foreground": "bare soil",
+    "midground": "empty narrow space",
+    "background": "stucco wall and distant cottonwoods and scrub oak"
+  },
+  "style": {
+    "primary": "photorealistic real-estate exterior documentation photography",
+    "reference": "MLS listing photo, natural color",
+    "film_stock": "neutral digital"
+  },
+  "quality": {
+    "include": ["accurate dry soil texture", "realistic weed and debris distribution", "natural high-plains color palette"],
+    "avoid": ["cartoonish saturation", "people", "vehicles", "text or signage", "Sonoran desert", "saguaro cactus", "agave", "palm trees", "tropical vegetation", "grass lawn"]
+  },
+  "output_format": { "format": "png", "filename": "site2_01_before_day.png" }
+}

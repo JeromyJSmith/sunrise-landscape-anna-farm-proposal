@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../schemas/nano-banana.schema.json",
+  "task": "edit_image",
+  "_note": "Reference photos in reference/site-1/. Using edit_image with actual site photos.",
+  "image_config": { "aspect_ratio": "3:2", "resolution": "2K" },
+  "consistency_id": "annas-farm_site1",
+  "scene": {
+    "description": "A photorealistic wide daytime exterior of a 3500 square foot neglected residential common-space entry area at the corner of Baseline Road and Anna Thomas Parkway in Lafayette Colorado. Compacted brown soil with patchy dead grass, deteriorated landscape fabric peeling up, scattered debris and dry weeds. Stone-pillar monument sign with Anna's Farm horse logo center-right. Large bare deciduous tree center. Green utility transformer boxes left side. Crosswalk pole with yellow Caution sign at curb. Concrete sidewalk curves around the corner. Colorful townhomes visible in background. Colorado Front Range suburban neighborhood, early spring.",
+    "time": "midday",
+    "weather": "partly cloudy Colorado sky, cumulus clouds",
+    "season": "early spring, trees bare",
+    "location": "Anna Thomas Pkwy and Baseline Rd, Lafayette, Colorado"
+  },
+  "materials": [
+    { "element": "ground", "type": "compacted brown soil, patchy dead grass, deteriorated landscape fabric, debris", "coverage": "full 3500 sqft corner lot" },
+    { "element": "monument_sign", "type": "stone pillar base with oval horse logo sign", "placement": "center-right" },
+    { "element": "utilities", "type": "green transformer box, white telecom pedestal", "placement": "left near tree" },
+    { "element": "tree", "type": "large bare deciduous tree", "placement": "center of site" }
+  ],
+  "camera": { "lens_mm": 24, "aperture": "f/8", "height_ft": 5.5, "framing": "eye-level wide from sidewalk corner" },
+  "style": { "primary": "photorealistic real-estate documentation photography" },
+  "quality": {
+    "include": ["accurate brown soil", "dead grass", "stone monument sign", "Colorado spring light", "bare trees"],
+    "avoid": ["saguaro", "palm trees", "desert", "tropical", "green lawn", "HDR halos", "people", "vehicles"]
+  },
+  "output_format": { "format": "png", "filename": "site1_01_before_day.png" }
+}

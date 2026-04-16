@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sunrise Landscape Co. — Brand Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Josefin+Sans:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0e0e0e;--surface:#1a1a1a;--surface2:#242424;--border:#333;
+  --text:#e8e4df;--text-dim:#888;--accent:#C8843E;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:400}
+a{color:var(--accent);text-decoration:none}
+
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Header */
+.lab-header{padding:48px 0 24px;text-align:center;border-bottom:1px solid var(--border)}
+.lab-header h1{font-size:2.2rem;margin-bottom:8px;color:#fff}
+.lab-header p{color:var(--text-dim);font-size:0.9rem;max-width:600px;margin:0 auto}
+
+/* Live preview banner */
+.live-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:32px auto;max-width:800px;overflow:hidden;transition:all 0.4s}
+.preview-header{padding:36px 40px;display:flex;align-items:center;gap:24px;transition:background 0.4s}
+.preview-logo{max-height:80px;max-width:240px;object-fit:contain;border-radius:6px;transition:all 0.3s}
+.preview-text{flex:1}
+.preview-company{font-size:1.4rem;font-weight:600;transition:font-family 0.3s}
+.preview-tagline{font-size:0.75rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+.preview-accent{height:3px;transition:background 0.4s}
+.preview-link{display:block;text-align:center;padding:14px;font-size:0.82rem;color:var(--accent);border-top:1px solid var(--border)}
+.preview-link:hover{background:var(--surface2)}
+
+/* Section */
+.section{padding:40px 0;border-bottom:1px solid var(--border)}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+.section-head h2{font-size:1.3rem;color:#fff}
+.section-head span{font-size:0.75rem;color:var(--text-dim)}
+
+/* Logo grid */
+.logo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.logo-card{background:var(--surface);border:2px solid transparent;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.25s;position:relative}
+.logo-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.logo-card.selected{border-color:#ffd700;box-shadow:0 0 0 3px rgba(255,215,0,0.2)}
+.logo-card.selected::after{content:'SELECTED';position:absolute;top:8px;right:10px;font-size:0.6rem;font-weight:700;letter-spacing:0.12em;color:#ffd700;background:rgba(0,0,0,0.7);padding:3px 8px;border-radius:4px}
+.logo-card img{width:100%;display:block;aspect-ratio:16/9;object-fit:contain;background:#f5f0e8;padding:12px}
+.logo-card .label{padding:8px 12px;font-size:0.72rem;color:var(--text-dim)}
+
+/* Business card grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.bcard{background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border);transition:all 0.25s}
+.bcard:hover{border-color:var(--accent)}
+.bcard img{width:100%;display:block;aspect-ratio:16/9;object-fit:contain;background:#f5f0e8}
+.bcard .label{padding:8px 12px;font-size:0.72rem;color:var(--text-dim)}
+
+/* Video grid */
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.vid-card{background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.vid-card video{width:100%;display:block}
+.vid-card .label{padding:8px 12px;font-size:0.72rem;color:var(--text-dim)}
+
+/* Reference gallery */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.ref-card{border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.ref-card img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+
+/* Font picker */
+.font-picker{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.font-btn{background:var(--surface);border:2px solid var(--border);border-radius:8px;padding:14px 20px;cursor:pointer;color:var(--text);font-size:1rem;transition:all 0.2s;min-width:160px;text-align:center}
+.font-btn:hover{border-color:var(--accent)}
+.font-btn.selected{border-color:#ffd700;color:#fff}
+.font-btn .preview-text-sm{font-size:0.7rem;color:var(--text-dim);margin-top:4px;font-family:inherit !important}
+
+/* Theme picker */
+.theme-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.theme-swatch{width:52px;height:52px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;position:relative}
+.theme-swatch:hover{transform:scale(1.1)}
+.theme-swatch.selected{border-color:#fff;box-shadow:0 0 0 3px var(--accent)}
+.theme-swatch .inner{width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex}
+.theme-swatch .inner .half{flex:1}
+
+/* Random button */
+.randomize-btn{background:linear-gradient(135deg,#C8843E,#D4890B);border:none;border-radius:8px;padding:14px 28px;color:#fff;font-weight:600;font-size:0.9rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.2s}
+.randomize-btn:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(200,132,62,0.4)}
+
+@media(max-width:640px){
+  .logo-grid,.card-grid,.video-grid{grid-template-columns:1fr}
+  .preview-header{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="lab-header">
+  <h1>Sunrise Landscape Co.</h1>
+  <p>Pick a logo, choose fonts and colors. Your selection automatically updates the proposal. Hit <strong>Randomize</strong> to cycle combinations.</p>
+</div>
+
+<!-- LIVE PREVIEW -->
+<div class="live-preview" id="livePreview">
+  <div class="preview-header" id="previewHeader">
+    <img class="preview-logo" id="previewLogo" src="../SUNRISE-LANSCARPEW-IMAGES-HTML-PROPOSALS/freepik__-name-sunriselandscapeexpressivecolorlogo-type-log__71902.png" alt="Logo">
+    <div class="preview-text">
+      <div class="preview-company" id="previewCompany">Sunrise Landscape Co.</div>
+      <div class="preview-tagline">Landscape &middot; Hardscape &middot; Design — Lafayette, CO</div>
+    </div>
+  </div>
+  <div class="preview-accent" id="previewAccent" style="background:#C8843E"></div>
+  <a class="preview-link" href="proposal.html" target="_blank">Open Full Proposal &rarr;</a>
+</div>
+
+<div style="text-align:center;margin-bottom:32px">
+  <button class="randomize-btn" onclick="randomize()">Randomize Everything</button>
+</div>
+
+<!-- LOGOS -->
+<div class="section">
+  <div class="section-head">
+    <h2>Logo Options</h2>
+    <span>Click to select — updates the proposal header</span>
+  </div>
+  <div class="logo-grid" id="logoGrid"></div>
+</div>
+
+<!-- FONTS -->
+<div class="section">
+  <div class="section-head">
+    <h2>Heading Font</h2>
+    <span>Click to preview — applies to the proposal</span>
+  </div>
+  <div class="font-picker" id="fontPicker"></div>
+</div>
+
+<!-- THEMES -->
+<div class="section">
+  <div class="section-head">
+    <h2>Color Theme</h2>
+    <span>Click a swatch — colors the proposal accent + header</span>
+  </div>
+  <div class="theme-row" id="themeRow"></div>
+</div>
+
+<!-- BUSINESS CARDS -->
+<div class="section">
+  <div class="section-head">
+    <h2>Business Card Designs</h2>
+    <span>Generated variants</span>
+  </div>
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- ANIMATED REVEALS -->
+<div class="section">
+  <div class="section-head">
+    <h2>Animated Reveals</h2>
+    <span>Logo + card animations</span>
+  </div>
+  <div class="video-grid" id="videoGrid"></div>
+</div>
+
+<!-- SITE PHOTOS -->
+<div class="section">
+  <div class="section-head">
+    <h2>Site Reference — Before Photos</h2>
+    <span>Existing conditions at Anna's Farm, Lafayette CO</span>
+  </div>
+  <div class="ref-grid" id="siteGrid"></div>
+</div>
+
+<!-- FLATIRONS INSPIRATION -->
+<div class="section">
+  <div class="section-head">
+    <h2>Flatirons Inspiration</h2>
+    <span>Front Range backdrop reference</span>
+  </div>
+  <div class="ref-grid" id="flatironsGrid"></div>
+</div>
+
+<!-- CONCEPT SKETCH -->
+<div class="section">
+  <div class="section-head">
+    <h2>Concept Sketch</h2>
+    <span>Hand-drawn design layout</span>
+  </div>
+  <div style="text-align:center;padding:20px 0">
+    <img src="../files/annas-farm/reference/design/concept-sketch.jpg" style="max-width:600px;width:100%;border-radius:12px;border:1px solid var(--border)" alt="Concept sketch">
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:40px;color:#555;font-size:0.7rem">
+  Sunrise Landscape Co. &middot; Brand Lab &middot; Anna's Farm Project
+</div>
+
+<script>
+const SRC = '../SUNRISE-LANSCARPEW-IMAGES-HTML-PROPOSALS/';
+const REF = '../files/annas-farm/reference/';
+const ASSETS = '../assets/';
+
+const LOGOS = [
+  {file: 'freepik__-name-sunriselandscapeexpressivecolorlogo-type-log__71902.png', label: 'Watercolor Pencil — Serif'},
+  {file: 'freepik_name-sunriselandscapeexpr_2765805344.png', label: 'Watercolor Pencil — Serif (alt)'},
+  {file: 'freepik_name-sunriselandscapeexpr_2765808511.png', label: 'Watercolor Pencil — Serif (v3)'},
+  {file: 'freepik_name-sunriselandscapeexpr_2766239532.png', label: 'Watercolor Pencil — Serif (v4)'},
+  {file: 'freepik_brfont-style-tekton-based_2765814989.png', label: 'Tekton — Warm Brown'},
+  {file: 'freepik_brfont-style-tekton-based_2766230587.png', label: 'Tekton — Copper'},
+  {file: 'freepik_brfont-style-tekton-based_2766236450.png', label: 'Tekton — Geometric'},
+  {file: 'freepik_brfont-style-tekton-based_2766239528.png', label: 'Tekton — Bold'},
+  {file: 'freepik_font-style-tekton-based-o_2765814536.png', label: 'Tekton — Original'},
+  {file: 'freepik_font-style-tekton-based-o_2766239518.png', label: 'Tekton — Clean'},
+  {file: 'freepik_name-sunriselandscapelogo_2766237299.png', label: 'Modern Landscape'},
+  {file: 'freepik_name-sunriselandscapelogo_2766239523.png', label: 'Watercolor Wash'},
+  {file: 'freepik_name-sunriselandscapelogo_2766240778.png', label: 'Bold Sans'},
+  {file: 'freepik_creation-22_2766190030.png', label: 'Creation Variant'},
+];
+
+const CARDS = [
+  {file: 'freepik__this-is-a-business-card-for-a-landscape-architect-__8343.png', label: 'Classic Sunrise Card'},
+  {file: 'freepik_a-professional-horizontal_2766203061.png', label: 'Watercolor Wash Card'},
+  {file: 'freepik_a-professional-horizontal_2766205300.png', label: 'Horizontal Modern'},
+  {file: 'freepik_a-professional-horizontal_2766223166.png', label: 'Horizontal Elegant'},
+  {file: 'freepik_a-professional-horizontal_2766236782.png', label: 'Horizontal Warm'},
+  {file: 'freepik_a-professional-horizontal_2766236819.png', label: 'Horizontal Dark'},
+  {file: 'freepik_a-professional-horizontal_2766239973.png', label: 'Horizontal Bold'},
+  {file: 'freepik_this-is-a-business-card-f_2765910587.png', label: 'Original Card'},
+  {file: 'freepik_this-is-a-business-card-f_2766232252.png', label: 'Refined Card'},
+  {file: 'freepik_business-card-description_2766205561.png', label: 'Description Card'},
+  {file: 'freepik_business-card-analysis-su_2766239860.png', label: 'Analysis Card'},
+];
+
+const VIDEOS = [
+  {file: 'freepik_a-classy-animation-where-_2765962900.mp4', label: 'Classy Logo Reveal #1'},
+  {file: 'freepik_a-classy-animation-where-_2766233065.mp4', label: 'Classy Logo Reveal #2'},
+  {file: 'freepik_a-classy-animation-where-_2766238652.mp4', label: 'Classy Logo Reveal #3'},
+  {file: 'freepik_animated-business-card-_veo3_1_1080p_16-9_24fps_8344.mp4', label: 'Animated Card — Veo3'},
+  {file: 'freepik_animated-business-card_2765928936.mp4', label: 'Animated Card #1'},
+  {file: 'freepik_animated-business-card_2765947940.mp4', label: 'Animated Card #2'},
+  {file: 'freepik_name-sunriselandscapelogo_2766203841.mp4', label: 'Logo Animation #1'},
+  {file: 'freepik_name-sunriselandscapelogo_2766233068.mp4', label: 'Logo Animation #2'},
+  {file: 'freepik_name-sunriselandscapelogo_2766237531.mp4', label: 'Logo Animation #3'},
+  {file: 'freepik_apr-11-712-pm_2765936116.mp4', label: 'Apr 11 Session'},
+];
+
+const SITE_PHOTOS = [
+  {file: REF+'site-1/IMG_3057.jpeg', label: 'Site 1 — Corner lot (phone)'},
+  {file: REF+'site-1/IMG_3058.jpeg', label: 'Site 1 — Entry approach'},
+  {file: REF+'site-1/IMG_3059.jpeg', label: 'Site 1 — Wide angle'},
+  {file: REF+'site-1/streetview-baseline-corner-summer.jpg', label: 'Site 1 — Baseline corner'},
+  {file: REF+'site-1/streetview-baseline-monument-summer.jpg', label: 'Site 1 — Monument sign'},
+  {file: REF+'site-1/streetview-baseline-monument-close.jpg', label: 'Site 1 — Monument close'},
+  {file: REF+'site-1/streetview-baseline-wide-summer.jpg', label: 'Site 1 — Wide summer'},
+  {file: REF+'site-1/streetview-anna-thomas-pkwy.jpg', label: 'Site 1 — Anna Thomas Pkwy'},
+  {file: REF+'site-2/streetview-homestead-wide.jpg', label: 'Site 2 — Homestead wide'},
+  {file: REF+'site-2/streetview-homestead-annotated.jpg', label: 'Site 2 — Annotated'},
+  {file: REF+'site-2/streetview-baseline-summer-wide.jpg', label: 'Site 2 — Baseline wide'},
+  {file: REF+'site-2/streetview-anna-thomas-wide.jpg', label: 'Site 2 — Anna Thomas wide'},
+];
+
+const FLATIRONS = [
+  {file: ASSETS+'flatiorns/Fall-Flatirons.jpg'},
+  {file: ASSETS+'flatiorns/Late-Summer-Flatirons.jpg'},
+  {file: ASSETS+'flatiorns/The Flatirons in Summertime_0.jpg'},
+  {file: ASSETS+'flatiorns/VB_Identifying_the_Flatirons_v02_089d9257-aae2-4209-a750-c61e90c8df2a.jpg'},
+  {file: ASSETS+'flatiorns/images.jpeg'},
+  {file: ASSETS+'flatiorns/images (1).jpeg'},
+  {file: ASSETS+'flatiorns/images (2).jpeg'},
+  {file: ASSETS+'flatiorns/download.jpeg'},
+  {file: ASSETS+'flatiorns/download (1).jpeg'},
+];
+
+const FONTS = [
+  {name:'Playfair Display', css:"'Playfair Display',serif"},
+  {name:'Source Sans 3', css:"'Source Sans 3',sans-serif"},
+  {name:'Inter', css:"'Inter',sans-serif"},
+  {name:'Montserrat', css:"'Montserrat',sans-serif"},
+  {name:'Josefin Sans', css:"'Josefin Sans',sans-serif"},
+  {name:'Raleway', css:"'Raleway',sans-serif"},
+];
+
+const THEMES = [
+  {name:'Copper & Gold', accent:'#C8843E', header:'#2D2D2D', text:'#FAF6F1'},
+  {name:'Warm Earth', accent:'#8B7355', header:'#3A2E1F', text:'#F5F0E8'},
+  {name:'Sage', accent:'#6B8F5B', header:'#2A3E22', text:'#E8F0E4'},
+  {name:'Slate', accent:'#6B7B8D', header:'#1E2A36', text:'#E0E8F0'},
+  {name:'Blueprint', accent:'#4A9EFF', header:'#0C2340', text:'#C8D6E5'},
+  {name:'Sandstone', accent:'#D4890B', header:'#4A3728', text:'#FAF6F1'},
+  {name:'Charcoal', accent:'#E8E0D4', header:'#1A1A1A', text:'#FFFFFF'},
+  {name:'Rust', accent:'#9B4D28', header:'#2D1F14', text:'#F5EDE4'},
+];
+
+let state = JSON.parse(localStorage.getItem('sunriseBrand') || 'null') || {
+  logo: SRC + LOGOS[0].file,
+  font: FONTS[0].css,
+  fontName: FONTS[0].name,
+  accent: THEMES[0].accent,
+  headerBg: THEMES[0].header,
+  headerText: THEMES[0].text,
+  themeName: THEMES[0].name,
+};
+
+function save() { localStorage.setItem('sunriseBrand', JSON.stringify(state)); }
+
+function applyState() {
+  document.getElementById('previewLogo').src = state.logo;
+  document.getElementById('previewCompany').style.fontFamily = state.font;
+  document.getElementById('previewAccent').style.background = state.accent;
+  document.getElementById('previewHeader').style.background = state.headerBg;
+  document.getElementById('previewHeader').style.color = state.headerText;
+  save();
+}
+
+function selectLogo(src, el) {
+  state.logo = src;
+  document.querySelectorAll('.logo-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  applyState();
+}
+
+function selectFont(f, el) {
+  state.font = f.css;
+  state.fontName = f.name;
+  document.querySelectorAll('.font-btn').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  applyState();
+}
+
+function selectTheme(t, el) {
+  state.accent = t.accent;
+  state.headerBg = t.header;
+  state.headerText = t.text;
+  state.themeName = t.name;
+  document.querySelectorAll('.theme-swatch').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  applyState();
+}
+
+function randomize() {
+  const rl = LOGOS[Math.floor(Math.random()*LOGOS.length)];
+  const rf = FONTS[Math.floor(Math.random()*FONTS.length)];
+  const rt = THEMES[Math.floor(Math.random()*THEMES.length)];
+  state.logo = SRC + rl.file;
+  state.font = rf.css;
+  state.fontName = rf.name;
+  state.accent = rt.accent;
+  state.headerBg = rt.header;
+  state.headerText = rt.text;
+  state.themeName = rt.name;
+  document.querySelectorAll('.logo-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.font-btn').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.theme-swatch').forEach(c=>c.classList.remove('selected'));
+  applyState();
+}
+
+// Build grids
+function init() {
+  // Logos
+  const lg = document.getElementById('logoGrid');
+  LOGOS.forEach((l,i)=>{
+    const d = document.createElement('div');
+    d.className = 'logo-card' + (state.logo.includes(l.file) ? ' selected' : '');
+    d.innerHTML = `<img src="${SRC}${l.file}" alt="${l.label}"><div class="label">${l.label}</div>`;
+    d.onclick = () => selectLogo(SRC+l.file, d);
+    lg.appendChild(d);
+  });
+
+  // Business cards
+  const cg = document.getElementById('cardGrid');
+  CARDS.forEach(c=>{
+    const d = document.createElement('div');
+    d.className = 'bcard';
+    d.innerHTML = `<img src="${SRC}${c.file}" alt="${c.label}"><div class="label">${c.label}</div>`;
+    cg.appendChild(d);
+  });
+
+  // Videos
+  const vg = document.getElementById('videoGrid');
+  VIDEOS.forEach(v=>{
+    const d = document.createElement('div');
+    d.className = 'vid-card';
+    d.innerHTML = `<video src="${SRC}${v.file}" controls preload="none" poster></video><div class="label">${v.label}</div>`;
+    vg.appendChild(d);
+  });
+
+  // Site photos
+  const sg = document.getElementById('siteGrid');
+  SITE_PHOTOS.forEach(s=>{
+    const d = document.createElement('div');
+    d.className = 'ref-card';
+    d.innerHTML = `<img src="${s.file}" alt="${s.label}" loading="lazy">`;
+    sg.appendChild(d);
+  });
+
+  // Flatirons
+  const fg = document.getElementById('flatironsGrid');
+  FLATIRONS.forEach(f=>{
+    const d = document.createElement('div');
+    d.className = 'ref-card';
+    d.innerHTML = `<img src="${f.file}" alt="Flatirons" loading="lazy">`;
+    fg.appendChild(d);
+  });
+
+  // Fonts
+  const fp = document.getElementById('fontPicker');
+  FONTS.forEach(f=>{
+    const b = document.createElement('button');
+    b.className = 'font-btn' + (state.fontName === f.name ? ' selected' : '');
+    b.style.fontFamily = f.css;
+    b.innerHTML = `<div style="font-size:1.1rem;font-weight:600">Sunrise</div><div class="preview-text-sm">${f.name}</div>`;
+    b.onclick = () => selectFont(f, b);
+    fp.appendChild(b);
+  });
+
+  // Themes
+  const tr = document.getElementById('themeRow');
+  THEMES.forEach(t=>{
+    const d = document.createElement('div');
+    d.className = 'theme-swatch' + (state.themeName === t.name ? ' selected' : '');
+    d.title = t.name;
+    d.innerHTML = `<div class="inner"><div class="half" style="background:${t.header}"></div><div class="half" style="background:${t.accent}"></div></div>`;
+    d.onclick = () => selectTheme(t, d);
+    tr.appendChild(d);
+  });
+
+  applyState();
+}
+
+init();
+</script>
+</body>
+</html>

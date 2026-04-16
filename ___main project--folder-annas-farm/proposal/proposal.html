@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anna's Farm — Landscape Proposal | Sunrise Landscape Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════
+   SUNRISE LANDSCAPE CO. — ANNA'S FARM PROPOSAL
+   Aesthetic: Refined Editorial. Bodoni display + Source Serif body.
+   Warm cream stock, copper foil accents, photographic storytelling.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cream: #F7F2EA;
+  --paper: #FDFAF5;
+  --ink: #1C1A17;
+  --copper: #B87333;
+  --gold: #C9952B;
+  --warm-gray: #8A7E6F;
+  --stone: #DDD6CA;
+  --stone-light: #EDE8DF;
+  --rule: rgba(28,26,23,0.08);
+  --copper-faint: rgba(184,115,51,0.10);
+
+  --display: 'Playfair Display', 'Georgia', serif;
+  --body-serif: 'Source Serif 4', 'Georgia', serif;
+  --sans: 'DM Sans', 'Helvetica Neue', sans-serif;
+
+  --page: 860px;
+  --gutter: 2.5rem;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+}
+
+.page { max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--copper-faint); color: var(--ink); }
+
+/* ─── COVER ──────────────────────────────────────────── */
+
+.cover {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: var(--ink);
+  color: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(201,149,43,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% 90%, rgba(184,115,51,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.cover-inner {
+  position: relative;
+  z-index: 1;
+  padding: 4rem var(--gutter);
+  max-width: 640px;
+}
+
+/* Hero mountains — full cover background artwork */
+.cover-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url('hero-mountains.png') center 55% / contain no-repeat;
+  opacity: 0.35;
+  filter: blur(0.5px);
+  animation: heroBgReveal 2s ease-out 0.2s forwards;
+  pointer-events: none;
+}
+@keyframes heroBgReveal {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 0.35; transform: scale(1); }
+}
+/* Foreground mark for above-the-text placement */
+.hero-mark {
+  width: clamp(200px, 35vw, 320px);
+  margin: 0 auto 1rem;
+  filter: drop-shadow(0 0 40px rgba(212,137,11,0.35));
+  animation: heroFloat 8s ease-in-out infinite;
+}
+.hero-mark img { width: 100%; height: auto; }
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.01); }
+}
+
+.cover-rule {
+  width: 48px;
+  height: 1px;
+  background: var(--copper);
+  margin: 0 auto 2rem;
+  opacity: 0;
+  animation: reveal 0.8s ease-out 0.6s forwards;
+}
+
+.cover h1 {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--cream);
+  opacity: 0;
+  animation: reveal 1s ease-out 0.8s forwards;
+}
+
+.cover h1 em {
+  font-style: italic;
+  font-weight: 500;
+  color: rgba(247,242,234,0.55);
+  display: block;
+  font-size: 0.7em;
+  margin-top: 0.3em;
+}
+
+.cover-sub {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  margin-top: 1.5rem;
+  opacity: 0;
+  animation: reveal 0.8s ease-out 1.2s forwards;
+}
+
+.cover-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  text-align: left;
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  opacity: 0;
+  animation: reveal 0.8s ease-out 1.5s forwards;
+}
+
+.cover-meta dt {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+.cover-meta dd {
+  font-family: var(--body-serif);
+  font-size: 0.95rem;
+  color: var(--cream);
+  margin-top: 2px;
+}
+.cover-meta .accent { color: var(--gold); font-weight: 600; }
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── NAV ────────────────────────────────────────────── */
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  backdrop-filter: blur(12px);
+}
+nav .page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+}
+.nav-mark {
+  font-family: var(--display);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
+nav a {
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0 10px;
+  transition: color 0.25s;
+}
+nav a:hover { color: var(--gold); }
+.nav-accent { height: 1px; background: linear-gradient(90deg, transparent, var(--copper), transparent); }
+
+/* ─── SECTION RHYTHM ─────────────────────────────────── */
+
+.s { padding: 5rem 0; }
+.s--shaded { background: var(--paper); }
+
+.s-label {
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 0.75rem;
+}
+
+.s-title {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+
+.s-lead {
+  font-family: var(--body-serif);
+  font-size: 1.02rem;
+  line-height: 1.85;
+  color: #4A453D;
+  max-width: 640px;
+}
+
+.rule { height: 1px; background: var(--rule); }
+.rule--copper { background: linear-gradient(90deg, var(--copper), transparent 60%); height: 1px; }
+
+/* ─── FEATURE CALLOUT ────────────────────────────────── */
+
+.callout {
+  border: 1px solid var(--stone);
+  border-radius: 4px;
+  padding: 2.5rem;
+  margin: 2.5rem 0;
+  background: var(--paper);
+}
+
+.callout-title {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.feat { padding: 1rem 0; border-bottom: 1px solid var(--rule); }
+.feat:last-child { border-bottom: none; padding-bottom: 0; }
+.feat-role {
+  font-size: 0.58rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 2px;
+}
+.feat-name {
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+.feat p {
+  font-family: var(--body-serif);
+  font-size: 0.88rem;
+  color: #5A554D;
+  line-height: 1.7;
+}
+
+/* ─── PHOTO LAYOUTS ──────────────────────────────────── */
+
+.duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 2rem 0;
+}
+.duo img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.duo img.contain { object-fit: contain; background: var(--stone-light); }
+
+.grid-photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 2rem 0;
+}
+.grid-photos img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.grid-photos .span { grid-column: 1 / -1; aspect-ratio: 21/9; }
+
+.caption {
+  font-size: 0.7rem;
+  color: var(--warm-gray);
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ─── STATS ROW ──────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--stone);
+  border: 1px solid var(--stone);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.stat {
+  background: var(--paper);
+  padding: 1.25rem;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--display);
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  margin-top: 6px;
+}
+
+/* ─── GIS PANELS ─────────────────────────────────────── */
+
+.gis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 2rem 0;
+}
+.gis-card {
+  border: 1px solid var(--stone);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--paper);
+}
+.gis-card img { width: 100%; display: block; }
+.gis-card figcaption {
+  padding: 10px 14px;
+  font-size: 0.68rem;
+  color: var(--warm-gray);
+  line-height: 1.5;
+}
+.gis-card.full { grid-column: 1 / -1; }
+
+/* ─── LINE ITEMS TABLE ───────────────────────────────── */
+
+.site-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+.site-name {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+.site-coords {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  color: var(--warm-gray);
+  letter-spacing: 0.05em;
+}
+
+table.items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+table.items thead th {
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  padding: 10px 0;
+  border-bottom: 2px solid var(--ink);
+}
+table.items thead th:last-child { text-align: right; }
+table.items thead th:nth-child(2) { text-align: center; width: 80px; }
+table.items tbody td {
+  font-family: var(--body-serif);
+  font-size: 0.9rem;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+table.items tbody td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-family: var(--sans);
+  font-weight: 500;
+}
+table.items tbody td:nth-child(2) {
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+}
+.item-note {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--warm-gray);
+  margin-top: 2px;
+  font-style: normal;
+}
+table.items tfoot td {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1rem;
+  border-top: 2px solid var(--ink);
+  padding-top: 14px;
+}
+table.items tfoot td:last-child { color: var(--copper); }
+
+/* ─── TOTALS ─────────────────────────────────────────── */
+
+.totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 3rem;
+}
+.totals dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 2rem;
+  min-width: 300px;
+}
+.totals dt, .totals dd {
+  padding: 6px 0;
+  font-family: var(--body-serif);
+  font-size: 0.95rem;
+}
+.totals dd { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--sans); font-weight: 500; }
+.totals .grand dt, .totals .grand dd {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  border-top: 2px solid var(--ink);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+.totals .grand dd { color: var(--copper); }
+
+/* ─── TERMS ──────────────────────────────────────────── */
+
+.terms {
+  columns: 2;
+  column-gap: 2.5rem;
+  font-family: var(--body-serif);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: #5A554D;
+}
+.terms h4 {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin: 1.5rem 0 0.25rem;
+}
+.terms h4:first-child { margin-top: 0; }
+.terms p { margin-bottom: 0.5rem; }
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+
+footer {
+  background: var(--ink);
+  padding: 3.5rem 0;
+  text-align: center;
+}
+.footer-mark {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+.footer-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 0.25rem;
+}
+.footer-contact {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+  margin-top: 0.75rem;
+}
+.footer-link {
+  display: inline-block;
+  margin-top: 1.25rem;
+  padding: 8px 20px;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(201,149,43,0.3);
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.footer-link:hover { background: var(--gold); color: var(--ink); }
+
+/* ─── PRINT ──────────────────────────────────────────── */
+
+@media print {
+  nav, .cover::before, .footer-link { display: none; }
+  .cover { min-height: auto; padding: 3rem; break-after: page; }
+  .s { padding: 2rem 0; break-inside: avoid; }
+  .terms { columns: 1; }
+  footer { padding: 1.5rem 0; }
+}
+
+@media (max-width: 640px) {
+  :root { --gutter: 1.25rem; }
+  .stats { grid-template-columns: 1fr; }
+  .duo, .grid-photos, .gis-grid { grid-template-columns: 1fr; }
+  .cover-meta { grid-template-columns: 1fr; }
+  .terms { columns: 1; }
+  nav .page { flex-wrap: wrap; height: auto; padding: 8px 0; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ COVER ═══════════════════════ -->
+
+<div class="cover">
+  <div class="cover-inner">
+    <!-- Hero mountains as background -->
+    <div class="cover-hero-bg"></div>
+
+    <!-- Foreground: small mark + text overlay -->
+    <div class="hero-mark" style="opacity:0;animation:reveal 1.2s ease-out 0.3s forwards;">
+      <img src="mountains-mark-nobg.png" alt="" id="coverLogo">
+    </div>
+
+    <!-- Company name overlaid as crisp HTML text -->
+    <div style="opacity:0;animation:reveal 1s ease-out 0.7s forwards;position:relative;z-index:2;">
+      <div style="font-family:var(--display);font-size:clamp(2.8rem,7vw,4.2rem);font-weight:900;letter-spacing:0.14em;color:var(--cream);text-shadow:0 2px 40px rgba(0,0,0,0.5);">SUNRISE</div>
+      <div style="width:clamp(180px,30vw,280px);height:1.5px;background:linear-gradient(90deg,transparent,var(--copper),transparent);margin:8px auto;"></div>
+      <div style="font-family:var(--display);font-size:clamp(0.9rem,2.2vw,1.3rem);font-weight:500;letter-spacing:0.35em;color:rgba(255,255,255,0.55);text-shadow:0 1px 20px rgba(0,0,0,0.4);">LANDSCAPE CO.</div>
+    </div>
+
+    <div class="cover-rule" style="margin-top:2.5rem;"></div>
+    <h1 style="text-shadow:0 2px 30px rgba(0,0,0,0.4);">Anna's Farm<br><em>Common Space Entry Landscape</em></h1>
+    <div class="cover-sub">Lafayette, Colorado &nbsp;&middot;&nbsp; Boulder County</div>
+    <dl class="cover-meta">
+      <div><dt>Project</dt><dd>Two common-space entry installations</dd></div>
+      <div><dt>Location</dt><dd>Lafayette, CO 80026</dd></div>
+      <div><dt>Prepared</dt><dd>April 2026</dd></div>
+      <div><dt>Investment</dt><dd class="accent">$33,500</dd></div>
+    </dl>
+  </div>
+</div>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+
+<nav>
+  <div class="page">
+    <div class="nav-mark">SUNRISE</div>
+    <div>
+      <a href="#vision">Vision</a>
+      <a href="#context">Context</a>
+      <a href="#site1">Site 1</a>
+      <a href="#site2">Site 2</a>
+      <a href="#estimate">Estimate</a>
+      <a href="#terms">Terms</a>
+    </div>
+  </div>
+</nav>
+<div class="nav-accent"></div>
+
+<!-- ═══════════════════════ VISION ═══════════════════════ -->
+
+<section class="s" id="vision">
+  <div class="page">
+    <div class="s-label">Design Vision</div>
+    <div class="s-title">A Colorado Geological Narrative</div>
+    <p class="s-lead">This project transforms two neglected common-space entry areas at Anna's Farm into
+    distinctive community landmarks. The design tells a complete geological story drawn from the
+    Colorado landscape: Flatirons mountain formations rising as a dramatic backdrop, canyon cliff
+    walls carved by flowing water, and a dry creek bed winding through it all.</p>
+
+    <div class="callout">
+      <div class="callout-title">Three Geological Elements</div>
+
+      <div class="feat">
+        <div class="feat-role">Hero Element &mdash; Mountain Backdrop</div>
+        <div class="feat-name">Flatirons Formation</div>
+        <p>Colorado red flagstone slabs installed vertically at varied heights and tilts, composed
+        to create the iconic mountain ridge silhouette of the Boulder Flatirons. This is the
+        dominant sculptural element &mdash; the mountain range rising behind the landscape.</p>
+      </div>
+
+      <div class="feat">
+        <div class="feat-role">Secondary Vertical &mdash; Canyon Walls</div>
+        <div class="feat-name">Strip Stone Cliff Walls</div>
+        <p>Colorado red strip stone, 1&ndash;2 feet above grade, arranged in semi-arced formations
+        along the bends of the dry creek bed. Where the creek curves, canyon walls rise &mdash;
+        just as water carves through rock in Colorado&rsquo;s natural canyons.</p>
+      </div>
+
+      <div class="feat">
+        <div class="feat-role">Ground Narrative &mdash; The River</div>
+        <div class="feat-name">Dry Creek Bed</div>
+        <p>River rock and granite stones shaped as a flowing creek, winding through each site.
+        The creek passes through canyon walls at its bends and flows around the base of the
+        Flatirons formation. Contrasting decorative stone fills the surrounding ground.</p>
+      </div>
+    </div>
+
+    <div class="duo">
+      <img src="../files/annas-farm/reference/flatirons-inspiration/Late-Summer-Flatirons.jpg"
+           alt="The Flatirons, Boulder Colorado">
+      <img src="../files/annas-farm/reference/design/concept-sketch.jpg"
+           alt="Concept sketch" class="contain">
+    </div>
+    <p class="caption">The Flatirons &mdash; Boulder, CO (left) &nbsp;&middot;&nbsp; Hand-drawn concept layout (right)</p>
+
+    <p style="text-align:center; font-family:var(--display); font-size:1.1rem; font-style:italic; color:var(--copper); margin:2.5rem 0 0; letter-spacing:0.05em;">
+      Mountains &ensp;&rarr;&ensp; Canyons &ensp;&rarr;&ensp; River
+    </p>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ═══════════════════════ GIS CONTEXT ═══════════════════════ -->
+
+<section class="s s--shaded" id="context">
+  <div class="page">
+    <div class="s-label">Site Context</div>
+    <div class="s-title">Anna's Farm &mdash; Lafayette, Colorado</div>
+    <p class="s-lead">Both sites are located within the Anna's Farm community at approximately
+    5,350&nbsp;ft elevation on the Colorado Front Range. Site&nbsp;1 anchors the corner of
+    Anna Thomas Parkway and Baseline Road. Site&nbsp;2 sits ~400&nbsp;ft north along Homestead
+    Street. The Flatirons are visible to the west &mdash; the direct inspiration for the
+    vertical stone formations in this design.</p>
+
+    <div class="gis-grid">
+      <figure class="gis-card full">
+        <img src="../geo/aerial_basemap.png" alt="Esri WorldImagery aerial basemap">
+        <figcaption>Esri WorldImagery aerial &mdash; both sites marked. Baseline Rd runs east-west; residential neighborhood, open prairie to the south.</figcaption>
+      </figure>
+      <figure class="gis-card">
+        <img src="../reference/from_video/site1/site1_perimeter_hero_3500sqft_230ft_t01m37.png" alt="Site 1 polygon">
+        <figcaption>Site 1 &mdash; 3,500&nbsp;ft&sup2; &middot; 230&nbsp;ft perimeter. Google Earth Pro.</figcaption>
+      </figure>
+      <figure class="gis-card">
+        <img src="../reference/from_video/site2/site2_perimeter_hero_1577sqft_195ft_t17m22.png" alt="Site 2 polygon">
+        <figcaption>Site 2 &mdash; 1,500&nbsp;ft&sup2; target (current edit: 1,567). Google Earth Pro.</figcaption>
+      </figure>
+      <figure class="gis-card full">
+        <img src="../geo/dem_elevation.png" alt="USGS 3DEP DEM elevation">
+        <figcaption>USGS 3DEP elevation model (10m). Range: 1,613&ndash;1,634&thinsp;m. Terrain slopes southeast &mdash; relevant for drainage grading.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ═══════════════════════ SITE 1 ═══════════════════════ -->
+
+<section class="s" id="site1">
+  <div class="page">
+    <div class="s-label">Site One</div>
+    <div class="s-title">Common Space Entry A</div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3,500</div><div class="stat-label">Square Feet</div></div>
+      <div class="stat"><div class="stat-num">230</div><div class="stat-label">Ft Perimeter</div></div>
+      <div class="stat"><div class="stat-num">$21,050</div><div class="stat-label">Site Subtotal</div></div>
+    </div>
+
+    <div class="site-head">
+      <div class="site-name">Existing Conditions</div>
+      <div class="site-coords">40.0005&deg;N, 105.1100&deg;W &nbsp;&middot;&nbsp; Elev. 5,360&thinsp;ft</div>
+    </div>
+    <p class="s-lead" style="margin-bottom:1rem">Corner lot at Anna Thomas Parkway and Baseline Road. Currently bare
+    compacted soil with deteriorated landscape fabric, patchy dead grass, and scattered debris.
+    The Anna&rsquo;s Farm monument sign with horse logo on stone pillars anchors the corner.
+    A mature deciduous tree and utility infrastructure remain in place.</p>
+
+    <div class="grid-photos">
+      <img src="../files/annas-farm/reference/site-1/IMG_3057.jpeg" alt="Site 1 corner" class="span">
+      <img src="../files/annas-farm/reference/site-1/IMG_3058.jpeg" alt="Site 1 approach">
+      <img src="../files/annas-farm/reference/site-1/IMG_3059.jpeg" alt="Site 1 utilities">
+      <img src="../files/annas-farm/reference/site-1/streetview-baseline-monument-summer.jpg" alt="Monument sign" class="span">
+    </div>
+    <p class="caption">Current conditions &mdash; April 2026 (top three) &middot; Monument sign, Summer 2023 (bottom)</p>
+
+    <div class="site-head" style="margin-top:3rem">
+      <div class="site-name">Proposed Installation</div>
+    </div>
+    <p class="s-lead" style="margin-bottom:1.5rem">The larger site receives the full geological narrative. The Flatirons
+    formation &mdash; multiple vertical red flagstone slabs &mdash; creates a dramatic mountain backdrop.
+    A dry creek bed of river rock winds through the site, and where the creek bends, canyon cliff
+    walls of Colorado red strip stone rise 1&ndash;2&thinsp;ft, giving each curve geological drama.
+    Six tons of native Colorado granite boulders anchor the composition. Ten solar accent lights
+    uplight the vertical stone faces at dusk.</p>
+
+    <table class="items">
+      <thead><tr><th>Description</th><th>Qty</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Remove, grade, debris haul<span class="item-note">Clear to bare subgrade, grade for drainage</span></td><td>1 lot</td><td>$2,000</td></tr>
+        <tr><td>Weed fabric with staples<span class="item-note">Commercial-grade woven barrier, full coverage</span></td><td>3,500 sqft</td><td>$1,750</td></tr>
+        <tr><td>River rock &amp; granite stones<span class="item-note">Dry creek bed &mdash; shaped natural flow</span></td><td>&mdash;</td><td>$6,000</td></tr>
+        <tr><td>Contrasting decorative stone 2&Prime;&ndash;6&Prime;<span class="item-note">Ground surround outside creek bed</span></td><td>&mdash;</td><td>$2,000</td></tr>
+        <tr><td>Native Colorado granite &amp; river boulders<span class="item-note">Anchoring, scale contrast, geological grounding</span></td><td>6 tons</td><td>$4,800</td></tr>
+        <tr><td>Colorado red flagstone &amp; strip stone<span class="item-note">Vertical Flatirons slabs + canyon walls at creek bends</span></td><td>4 tons</td><td>$4,000</td></tr>
+        <tr><td>Solar accent lights<span class="item-note">Warm 2700K uplighting on vertical stone</span></td><td>10</td><td>$500</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="2">Site One Subtotal</td><td>$21,050</td></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<div class="rule--copper"></div>
+
+<!-- ═══════════════════════ SITE 2 ═══════════════════════ -->
+
+<section class="s s--shaded" id="site2">
+  <div class="page">
+    <div class="s-label">Site Two</div>
+    <div class="s-title">Common Space Entry B</div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num">1,500</div><div class="stat-label">Square Feet</div></div>
+      <div class="stat"><div class="stat-num">194</div><div class="stat-label">Ft Perimeter</div></div>
+      <div class="stat"><div class="stat-num">$12,450</div><div class="stat-label">Site Subtotal</div></div>
+    </div>
+
+    <div class="site-head">
+      <div class="site-name">Existing Conditions</div>
+      <div class="site-coords">40.0015&deg;N, 105.1097&deg;W &nbsp;&middot;&nbsp; Elev. 5,350&thinsp;ft</div>
+    </div>
+    <p class="s-lead" style="margin-bottom:1rem">Entry plot at Homestead Street. Currently overgrown with neglected
+    ornamental trees, dead grass, existing boulders, and an antique farm implement. Split-rail
+    fence along the back boundary with open prairie and windmill beyond.</p>
+
+    <div class="grid-photos">
+      <img src="../files/annas-farm/reference/site-2/streetview-homestead-annotated.jpg" alt="Site 2 polygon" class="span">
+      <img src="../files/annas-farm/reference/site-2/streetview-homestead-wide.jpg" alt="Site 2 wide" class="span">
+    </div>
+    <p class="caption">Current conditions &mdash; Google Street View with proposed boundary overlay (top) &middot; Wide view (bottom)</p>
+
+    <div class="site-head" style="margin-top:3rem">
+      <div class="site-name">Proposed Installation</div>
+    </div>
+    <p class="s-lead" style="margin-bottom:1.5rem">A focused version of the same geological narrative. A single Flatirons
+    formation of vertical red flagstone slabs serves as the mountain backdrop. The dry creek bed
+    follows a simpler path, with canyon cliff walls at its key bends. Four tons of native granite
+    boulders anchor the scene. The split-rail fence and open prairie beyond reinforce the
+    Colorado landscape context.</p>
+
+    <table class="items">
+      <thead><tr><th>Description</th><th>Qty</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Remove, grade, debris haul<span class="item-note">Clear to bare subgrade, grade for drainage</span></td><td>1 lot</td><td>$1,000</td></tr>
+        <tr><td>Weed fabric with staples<span class="item-note">Commercial-grade woven barrier, full coverage</span></td><td>1,500 sqft</td><td>$750</td></tr>
+        <tr><td>River rock &amp; granite stones<span class="item-note">Dry creek bed &mdash; natural flow pattern</span></td><td>&mdash;</td><td>$3,000</td></tr>
+        <tr><td>Contrasting decorative stone 2&Prime;&ndash;6&Prime;<span class="item-note">Ground surround outside creek bed</span></td><td>&mdash;</td><td>$1,000</td></tr>
+        <tr><td>Native Colorado granite &amp; river boulders<span class="item-note">Anchoring, scale contrast</span></td><td>4 tons</td><td>$3,200</td></tr>
+        <tr><td>Colorado red flagstone &amp; strip stone<span class="item-note">Vertical Flatirons slabs + canyon walls at creek bends</span></td><td>3 tons</td><td>$3,000</td></tr>
+        <tr><td>Solar accent lights<span class="item-note">Warm 2700K uplighting on vertical stone</span></td><td>10</td><td>$500</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="2">Site Two Subtotal</td><td>$12,450</td></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ═══════════════════════ ESTIMATE ═══════════════════════ -->
+
+<section class="s" id="estimate">
+  <div class="page">
+    <div class="s-label">Investment Summary</div>
+    <div class="s-title">Project Estimate</div>
+
+    <div class="totals">
+      <dl>
+        <dt>Site One &mdash; Common Space Entry A</dt><dd>$21,050</dd>
+        <dt>Site Two &mdash; Common Space Entry B</dt><dd>$12,450</dd>
+        <div class="grand"><dt>Grand Total</dt><dd>$33,500</dd></div>
+      </dl>
+    </div>
+
+    <p style="margin-top:2rem; font-size:0.78rem; color:var(--warm-gray);">
+      Tax not included. Material pricing subject to market fluctuation and availability at time of scheduling.
+    </p>
+  </div>
+</section>
+
+<div class="rule--copper"></div>
+
+<!-- ═══════════════════════ TERMS ═══════════════════════ -->
+
+<section class="s s--shaded" id="terms">
+  <div class="page">
+    <div class="s-label">Terms &amp; Conditions</div>
+    <div class="s-title">Terms</div>
+
+    <div class="terms">
+      <h4>Scope of Work</h4>
+      <p>This proposal covers materials, labor, delivery, equipment, and site cleanup for both sites
+      as described. Includes ground preparation, weed barrier, stone installation, boulder placement,
+      and lighting. Does not include irrigation, planting, metal edging, artificial turf, or patio
+      construction unless added by mutual agreement.</p>
+
+      <h4>Validity</h4>
+      <p>Valid for 30 days from the cover date. After 30 days, pricing may be revised based on
+      material availability and market conditions.</p>
+
+      <h4>Payment</h4>
+      <p>50% deposit upon acceptance. Balance due upon completion and final walkthrough.
+      Payment by check, Venmo, or Zelle.</p>
+
+      <h4>Timeline</h4>
+      <p>Estimated 2&ndash;3 weeks per site, weather permitting. Scheduling begins upon receipt
+      of deposit. Both sites may run concurrently or sequentially per client preference.</p>
+
+      <h4>Warranty</h4>
+      <p>1-year workmanship warranty on all installed elements. Stone and material warranties per
+      manufacturer. Solar fixtures warranted for manufacturer&rsquo;s stated lifespan.</p>
+
+      <h4>Compliance</h4>
+      <p>All work performed in accordance with Lafayette, CO building codes and Boulder County
+      land-use regulations. Contractor is licensed, bonded, and insured in the State of Colorado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+
+<footer>
+  <div class="page">
+    <div class="footer-mark">SUNRISE</div>
+    <div class="footer-sub">Landscape Co.</div>
+    <div class="footer-contact">
+      Lafayette, Colorado<br>
+      Landscape &nbsp;&middot;&nbsp; Hardscape &nbsp;&middot;&nbsp; Design
+    </div>
+    <a class="footer-link" href="brand-lab.html">Open Brand Lab</a>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ BRAND LAB INTEGRATION ═══════════════════════ -->
+
+<script>
+(function(){
+  try {
+    var b = JSON.parse(localStorage.getItem('sunriseBrand'));
+    if (!b) return;
+    if (b.logo) document.getElementById('coverLogo').src = b.logo;
+    if (b.accent) {
+      document.documentElement.style.setProperty('--copper', b.accent);
+      document.documentElement.style.setProperty('--gold', b.accent);
+    }
+    if (b.headerBg) document.documentElement.style.setProperty('--ink', b.headerBg);
+  } catch(e){}
+})();
+</script>
+</body>
+</html>

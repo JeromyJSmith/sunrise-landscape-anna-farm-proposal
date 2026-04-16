@@ -1,0 +1,131 @@
+# Anna Farm Project .gitignore
+# =============================
+
+# ─── OS Generated Files ───
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ─── IDE and Editor Files ───
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ─── Python (UV managed) ───
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+ENV/
+env/
+.uv/
+.python-version
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Node.js ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+
+# ─── Environment and Secrets ───
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.json
+.secrets/
+
+# ─── Build Outputs ───
+/build/
+/dist/
+*.min.js
+*.min.css
+
+# ─── Logs ───
+logs/
+*.log
+npm-debug.log*
+
+# ─── Temporary Files ───
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ─── Cache Directories ───
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# ─── Test Coverage ───
+coverage/
+.nyc_output/
+htmlcov/
+
+# ─── Large Binary Originals (tracked by LFS) ───
+# Note: These extensions are tracked by Git LFS, not ignored
+# See .gitattributes for LFS configuration
+
+# ─── Experimental/Draft Outputs (keep out of repo) ───
+outputs/experimental/
+outputs/drafts/
+*_DRAFT*
+*_EXPERIMENTAL*
+*_WIP*
+
+# ─── Backup Files ───
+*.bak
+*.backup
+*_backup*
+*_old*
+
+# ─── Archive Files (unless intentional) ───
+# *.zip
+# *.tar.gz
+# *.rar
+
+# ─── Local Development ───
+.local/
+local_only/
+DO_NOT_COMMIT/
+
+# ─── Cursor/Claude Specific ───
+.cursor/mcp-logs/
+agent-transcripts/
+terminals/
+
+# ─── macOS Quarantine ───
+*.download
+
+# ─── Database Files ───
+*.sqlite
+*.sqlite3
+*.db
+
+# ─── Jupyter Notebooks Checkpoints ───
+.ipynb_checkpoints/
