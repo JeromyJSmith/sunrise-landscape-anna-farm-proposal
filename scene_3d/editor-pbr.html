@@ -310,6 +310,11 @@
         <button id="paintClear" class="danger">Clear paint</button>
       </div>
       <button id="paintSave" style="width:100%">Save paint PNG</button>
+      <div class="grid2" style="margin-top:6px">
+        <button id="uploadBrushBtn">Upload brush…</button>
+        <button id="lineToolBtn">Line tool</button>
+      </div>
+      <input type="file" id="uploadBrush" accept=".png,.jpg,.jpeg,.webp" hidden>
     </div>
   </div>
 
@@ -482,6 +487,34 @@
         <button id="openProjectBtn">Open…</button>
       </div>
       <div id="projectList" class="list" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Camera</h2>
+    <div class="grid2">
+      <button id="saveViewBtn">Save view</button>
+      <button id="clearViewsBtn">Clear views</button>
+    </div>
+    <div id="bookmarkList" class="list" style="margin-top:6px; max-height:120px"></div>
+    <h2 style="margin-top:8px">Path animation</h2>
+    <div class="grid2">
+      <button id="drawPathBtn">Draw path</button>
+      <button id="clearPathBtn">Clear path</button>
+    </div>
+    <div class="grid2" style="margin-top:4px">
+      <button id="playPathBtn" class="primary">Play</button>
+      <button id="stopPathBtn">Stop</button>
+    </div>
+    <div class="slider">
+      <label>Speed</label>
+      <input id="pathSpeed" type="range" min="0.5" max="5" step="0.1" value="1.5">
+      <span id="pathSpeedVal" class="val">1.5</span>
+    </div>
+    <div class="slider">
+      <label>Height</label>
+      <input id="pathHeight" type="range" min="1" max="10" step="0.5" value="3">
+      <span id="pathHeightVal" class="val">3.0</span>
     </div>
   </div>
 
@@ -1149,6 +1182,17 @@ const baseObjects = new Set();
 let selected = null;
 let nightMode = false;
 
+// Camera bookmarks (F10)
+const cameraBookmarks = [];
+
+// Camera path (F10)
+let cameraPath = null; // THREE.CatmullRomCurve3
+let cameraPathLine = null; // THREE.Line for visualization
+let pathDrawMode = false;
+let pathPoints = [];
+let pathPlaying = false;
+let pathProgress = 0;
+
 // ===========================================================================
 // undo / redo command stack
 // ===========================================================================
@@ -1434,9 +1478,19 @@ loader.load("anna_scene.glb", gltf => {
 const ray = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 canvas.addEventListener("pointerdown", ev => {
-  if (paintMode) return;
   if (ev.button !== 0) return;
   if (tcontrols.dragging) return;
+  if (pathDrawMode) {
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    const r = new THREE.Raycaster();
+    r.setFromCamera(new THREE.Vector2(ndcX, ndcY), cam);
+    const hits = r.intersectObject(groundHit);
+    if (hits.length) addPathPoint(hits[0].point);
+    return;
+  }
+  if (paintMode) return;
   const rect = canvas.getBoundingClientRect();
   ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
   ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
@@ -2040,6 +2094,10 @@ addEventListener("keydown", e => {
   if (k === "]" && paintMode) { brushSize = Math.min(120, brushSize + 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
   if (k === "[" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("left"); }
   if (k === "]" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("right"); }
+  if (k >= "1" && k <= "9" && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+    const idx = parseInt(k) - 1;
+    if (cameraBookmarks[idx]) animateCameraTo(cameraBookmarks[idx].position, cameraBookmarks[idx].target);
+  }
 });
 
 // Rotation snap: hold Shift → snap to 15° increments
@@ -2177,6 +2235,9 @@ let brushHardness = 0.5;
 let brushTexture = "solid";
 let paintColor = "#8B4513";
 const paintHistory = []; // snapshot stack for undo
+const customBrushes = []; // { name, img } — F13
+let lineToolActive = false; // F13
+let lineStartPos = null; // F13
 
 // --- brush stamp generators ---
 function makeBrushStamp(size, texture, color, opacity, hardness) {
@@ -2311,6 +2372,27 @@ function makeBrushStamp(size, texture, color, opacity, hardness) {
         ctx.moveTo(px, py);
         ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
         ctx.stroke();
+      }
+      break;
+    }
+    default: {
+      if (typeof texture === "string" && texture.startsWith("custom-")) {
+        const idx = parseInt(texture.split("-")[1]);
+        const custom = customBrushes[idx];
+        if (custom) {
+          ctx.globalAlpha = opacity;
+          ctx.drawImage(custom.img, 0, 0, s, s);
+          ctx.globalCompositeOperation = "destination-in";
+          const grad = ctx.createRadialGradient(cx, cy, r * hardness, cx, cy, r);
+          grad.addColorStop(0, "white");
+          grad.addColorStop(1, "transparent");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, s, s);
+          ctx.globalCompositeOperation = "source-atop";
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.5;
+          ctx.fillRect(0, 0, s, s);
+        }
       }
       break;
     }
@@ -2511,6 +2593,33 @@ canvas.addEventListener("pointerdown", ev => {
   if (tcontrols.dragging) return;
   const wp = getPaintWorldPos(ev);
   if (!wp) return;
+  if (lineToolActive) {
+    if (!lineStartPos) {
+      lineStartPos = wp.clone();
+      toast("Click endpoint");
+    } else {
+      saveUndoSnapshot();
+      const uv1 = worldToPaintUV(lineStartPos);
+      const uv2 = worldToPaintUV(wp);
+      paintCtx.strokeStyle = paintColor;
+      paintCtx.lineWidth = brushSize * (PAINT_RES / PAINT_SIZE) * 0.3;
+      paintCtx.lineCap = "round";
+      paintCtx.globalAlpha = brushOpacity;
+      paintCtx.beginPath();
+      paintCtx.moveTo(uv1.u * PAINT_RES, uv1.v * PAINT_RES);
+      paintCtx.lineTo(uv2.u * PAINT_RES, uv2.v * PAINT_RES);
+      paintCtx.stroke();
+      paintCtx.globalAlpha = 1;
+      paintTex.needsUpdate = true;
+      const dist = lineStartPos.distanceTo(wp);
+      const ft = (dist * 3.28084).toFixed(1);
+      toast(`Line: ${dist.toFixed(2)}m (${ft}ft)`);
+      lineStartPos = null;
+    }
+    ev.stopPropagation();
+    isPainting = false;
+    return;
+  }
   ev.stopPropagation();
   isPainting = true;
   saveUndoSnapshot();
@@ -3312,10 +3421,184 @@ document.getElementById("uploadAsset").onchange = async (e) => {
   e.target.value = "";
 };
 
+// ===========================================================================
+// F10 — CAMERA BOOKMARKS
+// ===========================================================================
+document.getElementById("saveViewBtn").onclick = () => {
+  const bm = {
+    name: `View ${cameraBookmarks.length + 1}`,
+    position: cam.position.clone(),
+    target: orbit.target.clone(),
+  };
+  cameraBookmarks.push(bm);
+  refreshBookmarks();
+  toast(`Saved ${bm.name}`);
+};
+
+function refreshBookmarks() {
+  const list = document.getElementById("bookmarkList");
+  list.innerHTML = "";
+  cameraBookmarks.forEach((bm, i) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `<span class="name">${bm.name}</span><span class="pill">${i + 1}</span>`;
+    el.onclick = () => animateCameraTo(bm.position, bm.target);
+    list.appendChild(el);
+  });
+}
+
+function animateCameraTo(pos, target, duration = 800) {
+  const startPos = cam.position.clone();
+  const startTarget = orbit.target.clone();
+  const startTime = performance.now();
+  function step() {
+    const t = Math.min(1, (performance.now() - startTime) / duration);
+    const ease = t * (2 - t); // ease-out quad
+    cam.position.lerpVectors(startPos, pos, ease);
+    orbit.target.lerpVectors(startTarget, target, ease);
+    orbit.update();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  step();
+}
+
+document.getElementById("clearViewsBtn").onclick = () => {
+  cameraBookmarks.length = 0;
+  refreshBookmarks();
+  toast("Views cleared");
+};
+
+// ===========================================================================
+// F10 — CAMERA PATH ANIMATION
+// ===========================================================================
+document.getElementById("drawPathBtn").onclick = () => {
+  pathDrawMode = !pathDrawMode;
+  document.getElementById("drawPathBtn").classList.toggle("active", pathDrawMode);
+  if (pathDrawMode) {
+    pathPoints = [];
+    if (cameraPathLine) { scene.remove(cameraPathLine); cameraPathLine = null; }
+    toast("Click ground to add path points. Click Draw Path again to finish.");
+  } else {
+    finalizePath();
+  }
+};
+
+function addPathPoint(worldPos) {
+  pathPoints.push(new THREE.Vector3(worldPos.x, 0.1, worldPos.z));
+  if (cameraPathLine) scene.remove(cameraPathLine);
+  if (pathPoints.length >= 2) {
+    const geo = new THREE.BufferGeometry().setFromPoints(pathPoints);
+    cameraPathLine = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xf4a261, linewidth: 2 }));
+    scene.add(cameraPathLine);
+  }
+}
+
+function finalizePath() {
+  if (pathPoints.length < 2) { toast("Need at least 2 points"); return; }
+  cameraPath = new THREE.CatmullRomCurve3(pathPoints, false, "catmullrom", 0.5);
+  if (cameraPathLine) scene.remove(cameraPathLine);
+  const pts = cameraPath.getPoints(pathPoints.length * 10);
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  cameraPathLine = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xf4a261 }));
+  scene.add(cameraPathLine);
+  toast(`Path created with ${pathPoints.length} points`);
+}
+
+document.getElementById("playPathBtn").onclick = () => {
+  if (!cameraPath) { toast("Draw a path first"); return; }
+  pathPlaying = !pathPlaying;
+  pathProgress = pathPlaying ? 0 : pathProgress;
+  document.getElementById("playPathBtn").textContent = pathPlaying ? "Pause" : "Play";
+  if (pathPlaying) orbit.enabled = false;
+  else orbit.enabled = true;
+};
+
+document.getElementById("stopPathBtn").onclick = () => {
+  pathPlaying = false;
+  pathProgress = 0;
+  orbit.enabled = true;
+  document.getElementById("playPathBtn").textContent = "Play";
+};
+
+document.getElementById("clearPathBtn").onclick = () => {
+  pathPlaying = false;
+  pathProgress = 0;
+  cameraPath = null;
+  pathPoints = [];
+  if (cameraPathLine) { scene.remove(cameraPathLine); cameraPathLine = null; }
+  orbit.enabled = true;
+  document.getElementById("playPathBtn").textContent = "Play";
+  toast("Path cleared");
+};
+
+document.getElementById("pathSpeed").oninput = e => {
+  document.getElementById("pathSpeedVal").textContent = (+e.target.value).toFixed(1);
+};
+document.getElementById("pathHeight").oninput = e => {
+  document.getElementById("pathHeightVal").textContent = (+e.target.value).toFixed(1);
+};
+
+// ===========================================================================
+// F13 — CUSTOM BRUSH UPLOAD
+// ===========================================================================
+document.getElementById("uploadBrushBtn").onclick = () => document.getElementById("uploadBrush").click();
+document.getElementById("uploadBrush").onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const name = file.name.replace(/\.[^.]+$/, "");
+    customBrushes.push({ name, img });
+    const grid = document.getElementById("brushTextures");
+    const btn = document.createElement("button");
+    btn.dataset.brush = `custom-${customBrushes.length - 1}`;
+    btn.textContent = name.slice(0, 6);
+    btn.onclick = () => {
+      grid.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      brushTexture = btn.dataset.brush;
+      updateBrushPreview();
+    };
+    grid.appendChild(btn);
+    toast(`Added brush: ${name}`);
+  };
+  img.src = URL.createObjectURL(file);
+  e.target.value = "";
+};
+
+// ===========================================================================
+// F13 — LINE TOOL
+// ===========================================================================
+document.getElementById("lineToolBtn").onclick = () => {
+  lineToolActive = !lineToolActive;
+  document.getElementById("lineToolBtn").classList.toggle("active", lineToolActive);
+  lineStartPos = null;
+  if (lineToolActive && !paintMode) setPaintMode(true);
+  toast(lineToolActive ? "Click two points to draw a line" : "Line tool off");
+};
+
 let lastT = performance.now();
 let frames = 0, fpsAccumT = 0;
 function loop() {
   resize();
+  if (pathPlaying && cameraPath) {
+    const speed = +document.getElementById("pathSpeed").value;
+    const height = +document.getElementById("pathHeight").value;
+    pathProgress += (speed * 0.0003);
+    if (pathProgress >= 1) {
+      pathProgress = 0;
+      pathPlaying = false;
+      orbit.enabled = true;
+      document.getElementById("playPathBtn").textContent = "Play";
+      toast("Path complete");
+    } else {
+      const pt = cameraPath.getPointAt(pathProgress);
+      cam.position.set(pt.x, pt.y + height, pt.z);
+      const lookT = Math.min(1, pathProgress + 0.02);
+      const lookPt = cameraPath.getPointAt(lookT);
+      cam.lookAt(lookPt.x, lookPt.y + 1, lookPt.z);
+    }
+  }
   orbit.update();
   composer.render();
   // fps
