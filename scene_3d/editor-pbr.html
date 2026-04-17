@@ -360,6 +360,9 @@
     </div>
     <div class="grid2" style="margin-top:6px">
       <button id="dropToGround">Drop to ground</button>
+      <button id="lockBtn">Lock (L)</button>
+    </div>
+    <div class="grid2" style="margin-top:6px">
       <button id="deleteBtn" class="danger">Delete (X)</button>
     </div>
   </div>
@@ -1407,6 +1410,9 @@ function spawnAt(type, basePos = null, options = {}) {
     );
   }
   scene.add(obj);
+  // Auto drop-to-ground: ensure mesh base sits on y=0
+  const spawnBox = new THREE.Box3().setFromObject(obj);
+  if (spawnBox.min.y !== 0) obj.position.y -= spawnBox.min.y;
   registerObject(obj, type, false);
   pushUndo(AddObjectCommand(obj));
 
@@ -1518,12 +1524,19 @@ canvas.addEventListener("pointerdown", ev => {
 function selectObject(obj) {
   selected = obj;
   if (obj) {
-    tcontrols.attach(obj);
+    if (obj.userData.locked) {
+      tcontrols.detach();
+    } else {
+      tcontrols.attach(obj);
+    }
+    const lockIcon = obj.userData.locked ? " [LOCKED]" : "";
     document.getElementById("selName").innerHTML =
-      `<b>${obj.userData.id || obj.name}</b><br><span class="tip">${obj.userData.family}</span>`;
+      `<b>${obj.userData.id || obj.name}</b>${lockIcon}<br><span class="tip">${obj.userData.family}</span>`;
+    document.getElementById("lockBtn").textContent = obj.userData.locked ? "Unlock (L)" : "Lock (L)";
   } else {
     tcontrols.detach();
     document.getElementById("selName").textContent = "— nothing selected —";
+    document.getElementById("lockBtn").textContent = "Lock (L)";
   }
   syncInputs();
   refreshList();
@@ -1655,6 +1668,7 @@ function syncInputs() {
 
 function applyInputsToObject() {
   if (!selected) return;
+  if (selected.userData.locked) { syncInputs(); return; }
   const beforePos = selected.position.clone();
   const beforeRot = selected.rotation.clone();
   const beforeScl = selected.scale.clone();
@@ -1837,6 +1851,12 @@ document.getElementById("dropToGround").onclick = () => {
   selected.position.y -= box.min.y;
   syncInputs(); refreshPrompt();
 };
+document.getElementById("lockBtn").onclick = () => {
+  if (!selected) return;
+  selected.userData.locked = !selected.userData.locked;
+  selectObject(selected); // refresh display + gizmo state
+  toast(selected.userData.locked ? `Locked ${selected.userData.id}` : `Unlocked ${selected.userData.id}`);
+};
 document.getElementById("deleteBtn").onclick = deleteSelected;
 document.getElementById("undoBtn").onclick = undo;
 document.getElementById("redoBtn").onclick = redo;
@@ -1887,6 +1907,7 @@ document.getElementById("saveJson").onclick = () => {
         meshThickness: o.userData.meshThickness,
         baseDims:      o.userData.baseDims,
       } : {}),
+      ...(o.userData.locked ? { locked: true } : {}),
     })),
   };
   if (targetActive) {
@@ -1960,6 +1981,7 @@ document.getElementById("loadJson").onchange = async ev => {
         }
       }
     }
+    if (item.locked) o.userData.locked = true;
     updated++;
   }
   if (data.target) {
@@ -2087,8 +2109,9 @@ addEventListener("keydown", e => {
   }
   if (k === "b") setPaintMode(!paintMode);
   if (k === "t" && !paintMode) cycleTarget();
+  if (k === "l" && selected) { selected.userData.locked = !selected.userData.locked; selectObject(selected); toast(selected.userData.locked ? `Locked ${selected.userData.id}` : `Unlocked ${selected.userData.id}`); }
   if (k === "f") focusOn(selected);
-  if (k === "x" && !paintMode) deleteSelected();
+  if (k === "x" && !paintMode && selected && !selected.userData.locked) deleteSelected();
   if (k === "escape") { if (paintMode) setPaintMode(false); else selectObject(null); }
   if (k === "[" && paintMode) { brushSize = Math.max(2, brushSize - 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
   if (k === "]" && paintMode) { brushSize = Math.min(120, brushSize + 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
@@ -2106,6 +2129,7 @@ addEventListener("keyup",   e => { if (e.key === "Shift") tcontrols.rotationSnap
 
 function deleteSelected() {
   if (!selected) return;
+  if (selected.userData.locked) { toast("Unlock first (L)"); return; }
   const obj = selected;
   baseObjects.delete(obj);
   const cmd = DeleteObjectCommand(obj);
@@ -2839,6 +2863,7 @@ function captureProjectState(name) {
       meshWidth:     o.userData.meshWidth,
       meshThickness: o.userData.meshThickness,
       baseDims:      o.userData.baseDims,
+      locked:        o.userData.locked || false,
     })),
   };
 }
