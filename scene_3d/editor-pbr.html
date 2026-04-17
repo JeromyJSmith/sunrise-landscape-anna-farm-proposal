@@ -285,6 +285,7 @@
     <button id="frameAllBtn">Frame all</button>
     <button id="resetCam">Reset view</button>
     <button id="paintModeBtn" data-mode="paint">Paint (B)</button>
+    <button id="targetBtn">Target (T)</button>
   </div>
   <div class="paint-cursor" id="paintCursor"></div>
   <div class="hud" id="hud"><span class="fps" id="fps">--</span> fps · <span id="hudInfo">loading…</span></div>
@@ -804,6 +805,39 @@ const BUILDERS = { stone: buildStone, boulder: buildBoulder, stripStone: buildSt
                    cobble: buildCobble, tree: buildTree, sign: buildSign };
 
 // ===========================================================================
+// target placement marker
+// ===========================================================================
+const targetGroup = new THREE.Group();
+
+const ringGeo = new THREE.RingGeometry(0.35, 0.4, 32);
+const ringMat = new THREE.MeshBasicMaterial({
+  color: 0x5bc0be,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.8,
+});
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = -Math.PI / 2;
+
+const crossMat = new THREE.MeshBasicMaterial({ color: 0x5bc0be, transparent: true, opacity: 0.6 });
+const crossH = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.04), crossMat);
+crossH.rotation.x = -Math.PI / 2;
+const crossV = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.6), crossMat);
+crossV.rotation.x = -Math.PI / 2;
+
+const dotGeo = new THREE.CircleGeometry(0.06, 16);
+const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: 0xf4a261, side: THREE.DoubleSide }));
+dot.rotation.x = -Math.PI / 2;
+
+targetGroup.add(ring, crossH, crossV, dot);
+targetGroup.position.y = 0.01;
+targetGroup.visible = false;
+scene.add(targetGroup);
+
+let targetMode = false;
+let targetActive = false;
+
+// ===========================================================================
 // editor state
 // ===========================================================================
 const selectables = [];
@@ -917,10 +951,21 @@ function spawnAt(type, basePos = null) {
   if (!fn) return null;
   const obj = fn();
   obj.name = `${type}_${++counters[type] || (counters[type] = 1)}`;
-  if (basePos) obj.position.copy(basePos);
-  else obj.position.set(
-    THREE.MathUtils.randFloat(-4.5, 4.5), 0, THREE.MathUtils.randFloat(-4.5, 4.5),
-  );
+  if (basePos) {
+    obj.position.copy(basePos);
+  } else if (targetActive) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 0.3 + Math.random() * 0.5;
+    obj.position.set(
+      targetGroup.position.x + Math.cos(angle) * dist,
+      0,
+      targetGroup.position.z + Math.sin(angle) * dist,
+    );
+  } else {
+    obj.position.set(
+      THREE.MathUtils.randFloat(-4.5, 4.5), 0, THREE.MathUtils.randFloat(-4.5, 4.5),
+    );
+  }
   scene.add(obj);
   registerObject(obj, type, false);
   return obj;
@@ -983,6 +1028,19 @@ canvas.addEventListener("pointerdown", ev => {
   ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
   ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
   ray.setFromCamera(ndc, cam);
+  if (targetMode) {
+    const groundHits = ray.intersectObject(groundHit);
+    if (groundHits.length) {
+      const hit = groundHits[0].point;
+      targetGroup.position.set(hit.x, 0.01, hit.z);
+      targetGroup.visible = true;
+      targetActive = true;
+      targetMode = false;
+      document.getElementById("targetBtn").classList.remove("active");
+      hudInfo(`Target: (${targetGroup.position.x.toFixed(1)}, ${targetGroup.position.z.toFixed(1)})`);
+    }
+    return;
+  }
   const hits = ray.intersectObjects(selectables, true);
   if (!hits.length) { selectObject(null); return; }
   let obj = hits[0].object;
@@ -1218,6 +1276,9 @@ document.getElementById("saveJson").onclick = () => {
       scale:    o.scale.toArray(),
     })),
   };
+  if (targetActive) {
+    data.target = [targetGroup.position.x, targetGroup.position.z];
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1251,6 +1312,12 @@ document.getElementById("loadJson").onchange = async ev => {
     o.rotation.set(item.rotation[0], item.rotation[1], item.rotation[2]);
     o.scale.fromArray(item.scale);
     updated++;
+  }
+  if (data.target) {
+    targetGroup.position.set(data.target[0], 0.01, data.target[1]);
+    targetGroup.visible = true;
+    targetActive = true;
+    hudInfo(`Target: (${targetGroup.position.x.toFixed(1)}, ${targetGroup.position.z.toFixed(1)})`);
   }
   refreshUi(); syncInputs();
   toast(`Loaded — updated ${updated}, added ${added}`);
@@ -1301,6 +1368,7 @@ addEventListener("keydown", e => {
   if (k === "e") tcontrols.setMode("rotate");
   if (k === "r") tcontrols.setMode("scale");
   if (k === "b") setPaintMode(!paintMode);
+  if (k === "t" && !paintMode) cycleTarget();
   if (k === "f") focusOn(selected);
   if (k === "x" && !paintMode) deleteSelected();
   if (k === "escape") { if (paintMode) setPaintMode(false); else selectObject(null); }
@@ -1319,6 +1387,29 @@ function deleteSelected() {
   selectObject(null);
   refreshUi();
 }
+
+// cycleTarget: three-state cycle
+//   state 0 — no target, not aiming → enter aiming mode
+//   state 1 — target placed, not aiming → enter aiming mode (will reposition on next click)
+//   state 2 — in aiming mode → cancel + clear
+function cycleTarget() {
+  const btn = document.getElementById("targetBtn");
+  if (targetMode) {
+    // Cancel aiming. If a target was already active keep it, otherwise stay cleared.
+    targetMode = false;
+    btn.classList.remove("active");
+    if (!targetActive) {
+      hudInfo(`${selectables.length} objects`);
+    }
+  } else {
+    // Enter aiming mode
+    targetMode = true;
+    btn.classList.add("active");
+    toast("Click ground to place target");
+  }
+}
+
+document.getElementById("targetBtn").onclick = cycleTarget;
 
 function focusOn(obj) {
   if (!obj) return;
