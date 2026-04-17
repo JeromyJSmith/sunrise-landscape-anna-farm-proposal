@@ -206,6 +206,7 @@
       <button data-add="cobble">+ Cobble</button>
       <button data-add="tree">+ Tree</button>
       <button data-add="sign">+ Sign</button>
+      <button data-add="bollard">+ Bollard light</button>
     </div>
     <div class="seg" id="slabShapeSeg" style="margin-top:4px">
       <button data-slab-shape="random" class="active">Random</button>
@@ -626,6 +627,12 @@ const MATS = {
     normalMap: normalTex.pebbles.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
     roughnessMap: noiseTex.pebbles.clone(),
   }),
+  bollardPost: () => new THREE.MeshStandardMaterial({
+    color: 0x1a1a1a, roughness: 0.3, metalness: 0.8,
+  }),
+  bollardHead: () => new THREE.MeshStandardMaterial({
+    color: 0x2a2a2a, roughness: 0.35, metalness: 0.7,
+  }),
 };
 
 function repeatMap(mat, scaleX, scaleY) {
@@ -852,8 +859,48 @@ function buildSign() {
   return grp;
 }
 
+function buildBollard() {
+  const grp = new THREE.Group();
+  const h = THREE.MathUtils.randFloat(0.45, 0.6); // 18-24 inches
+
+  // Post: thin dark cylinder
+  const postGeo = new THREE.CylinderGeometry(0.025, 0.028, h, 8);
+  const post = new THREE.Mesh(postGeo, MATS.bollardPost());
+  post.position.y = h / 2;
+  post.castShadow = true;
+  post.receiveShadow = true;
+
+  // Base plate: slightly wider disc at ground level
+  const baseGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.015, 12);
+  const base = new THREE.Mesh(baseGeo, MATS.bollardPost());
+  base.position.y = 0.0075;
+  base.receiveShadow = true;
+
+  // Head: wider cap on top with downward-facing shade
+  const headGeo = new THREE.CylinderGeometry(0.06, 0.04, 0.04, 12);
+  const head = new THREE.Mesh(headGeo, MATS.bollardHead());
+  head.position.y = h + 0.02;
+  head.castShadow = true;
+
+  // Glowing ring under the head
+  const glowGeo = new THREE.TorusGeometry(0.045, 0.008, 8, 24);
+  const glowMat = new THREE.MeshBasicMaterial({ color: 0xffc87c });
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.rotation.x = Math.PI / 2;
+  glow.position.y = h - 0.005;
+
+  // PointLight at the head, casting warm light downward and outward
+  const light = new THREE.PointLight(0xffc87c, 0.8, 3.5, 2);
+  light.position.y = h;
+  light.castShadow = false; // default off for performance
+
+  grp.add(post, base, head, glow, light);
+  grp.userData.bollardHeight = h;
+  return grp;
+}
+
 const BUILDERS = { stone: buildStone, boulder: buildBoulder, stripStone: buildStripStone,
-                   cobble: buildCobble, tree: buildTree, sign: buildSign };
+                   cobble: buildCobble, tree: buildTree, sign: buildSign, bollard: buildBollard };
 
 // ===========================================================================
 // target placement marker
@@ -898,12 +945,13 @@ let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
 let activeFilter = "all";
-let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
+let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, bollard: 0, ground: 0, other: 0 };
 let currentBg = "sky";
 let slabShape = "random";
 
 function familyOf(name) {
   const n = (name || "").toLowerCase();
+  if (n.startsWith("bollard")) return "bollard";
   if (n.startsWith("slab"))    return "stone";
   if (n.startsWith("stone"))   return "stone";
   if (n.startsWith("boulder")) return "boulder";
@@ -918,6 +966,7 @@ function familyOf(name) {
 
 function familyToMatKey(fam, name) {
   const n = (name || "").toLowerCase();
+  if (fam === "bollard") return "bollardPost";
   if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
   if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
   if (fam === "stripStone") return "stripStone";
@@ -974,6 +1023,7 @@ const TYPE_ALIASES = {
   cobble:"cobble", cobbles:"cobble", pebble:"cobble", pebbles:"cobble",
   tree:"tree", trees:"tree",
   sign:"sign", monument:"sign", plaque:"sign",
+  bollard:"bollard", bollards:"bollard", "pathway light":"bollard", "path light":"bollard", "bollard light":"bollard",
 };
 
 function parsePrompt(text) {
