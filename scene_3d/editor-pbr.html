@@ -207,6 +207,12 @@
       <button data-add="tree">+ Tree</button>
       <button data-add="sign">+ Sign</button>
     </div>
+    <div class="seg" id="slabShapeSeg" style="margin-top:4px">
+      <button data-slab-shape="random" class="active">Random</button>
+      <button data-slab-shape="flat">Flat</button>
+      <button data-slab-shape="sloped">Sloped</button>
+      <button data-slab-shape="pointed">Pointed</button>
+    </div>
     <p class="tip" style="margin-top:8px">Or type a prompt:</p>
     <div class="promptline">
       <input id="addPrompt" placeholder='e.g. "add 3 boulders near tree"' />
@@ -285,6 +291,7 @@
     <button id="frameAllBtn">Frame all</button>
     <button id="resetCam">Reset view</button>
     <button id="paintModeBtn" data-mode="paint">Paint (B)</button>
+    <button id="targetBtn">Target (T)</button>
   </div>
   <div class="paint-cursor" id="paintCursor"></div>
   <div class="hud" id="hud"><span class="fps" id="fps">--</span> fps · <span id="hudInfo">loading…</span></div>
@@ -679,19 +686,63 @@ function jitterGeometry(geo, amount, seed = Math.random()) {
   geo.computeVertexNormals();
 }
 
-function buildStone() {
-  const h = THREE.MathUtils.randFloat(1.4, 2.6);
-  const w = THREE.MathUtils.randFloat(0.7, 1.2);
-  const t = THREE.MathUtils.randFloat(0.22, 0.34);
+function buildStone(shape) {
+  // Resolve shape
+  if (!shape || shape === "random") {
+    const r = Math.random();
+    if (r < 0.35) shape = "flat";
+    else if (r < 0.70) shape = "sloped";
+    else shape = "pointed";
+  }
+
+  const h = THREE.MathUtils.randFloat(0.5, 1.6);
+  const w = THREE.MathUtils.randFloat(0.3, 0.7);
+  const t = THREE.MathUtils.randFloat(0.06, 0.14);
   const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
   const pos = geo.attributes.position;
+
+  // Taper — narrow toward the top (applied to all shapes first)
   for (let i = 0; i < pos.count; i++) {
     const y = pos.getY(i);
     const norm = (y + h / 2) / h;
     const taper = 1 - 0.3 * Math.max(0, norm);
     pos.setX(i, pos.getX(i) * taper);
   }
-  jitterGeometry(geo, 0.04);
+
+  // Shape-specific top modifications (before jitter)
+  if (shape === "sloped") {
+    const slopeAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(2, 8));
+    const slopeDir = Math.random() < 0.5 ? 1 : -1;
+    for (let i = 0; i < pos.count; i++) {
+      if (pos.getY(i) > h / 2 - 0.05) {
+        pos.setY(i, pos.getY(i) + slopeDir * pos.getX(i) * Math.tan(slopeAngle));
+      }
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+  } else if (shape === "pointed") {
+    const peakHeight = THREE.MathUtils.randFloat(0.15, 0.35);
+    const halfW = w / 2;
+    for (let i = 0; i < pos.count; i++) {
+      if (pos.getY(i) > h / 2 - 0.05) {
+        // How far from center X (0..1, 0 = center, 1 = edge)
+        const edgeFraction = Math.abs(pos.getX(i)) / (halfW + 0.001);
+        // Center gets full peak, edges get none
+        const lift = peakHeight * (1 - Math.min(1, edgeFraction));
+        pos.setY(i, pos.getY(i) + lift);
+      }
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+  }
+
+  // Jitter proportional to slab size
+  jitterGeometry(geo, 0.01 + h * 0.015);
+
+  // Store resolved shape in userData
+  geo.userData = geo.userData || {};
+  geo.userData.slabShape = shape;
+
   const mat = (Math.random() < 0.5 ? MATS.stone() : MATS.stone2());
   repeatMap(mat, 1, 2);
   const mesh = new THREE.Mesh(geo, mat);
@@ -701,6 +752,7 @@ function buildStone() {
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
+  g.userData.slabShape = shape;
   return g;
 }
 
@@ -804,6 +856,39 @@ const BUILDERS = { stone: buildStone, boulder: buildBoulder, stripStone: buildSt
                    cobble: buildCobble, tree: buildTree, sign: buildSign };
 
 // ===========================================================================
+// target placement marker
+// ===========================================================================
+const targetGroup = new THREE.Group();
+
+const ringGeo = new THREE.RingGeometry(0.35, 0.4, 32);
+const ringMat = new THREE.MeshBasicMaterial({
+  color: 0x5bc0be,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.8,
+});
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = -Math.PI / 2;
+
+const crossMat = new THREE.MeshBasicMaterial({ color: 0x5bc0be, transparent: true, opacity: 0.6 });
+const crossH = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.04), crossMat);
+crossH.rotation.x = -Math.PI / 2;
+const crossV = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.6), crossMat);
+crossV.rotation.x = -Math.PI / 2;
+
+const dotGeo = new THREE.CircleGeometry(0.06, 16);
+const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: 0xf4a261, side: THREE.DoubleSide }));
+dot.rotation.x = -Math.PI / 2;
+
+targetGroup.add(ring, crossH, crossV, dot);
+targetGroup.position.y = 0.01;
+targetGroup.visible = false;
+scene.add(targetGroup);
+
+let targetMode = false;
+let targetActive = false;
+
+// ===========================================================================
 // editor state
 // ===========================================================================
 const selectables = [];
@@ -815,6 +900,7 @@ let pbrEnabled = true;
 let activeFilter = "all";
 let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
 let currentBg = "sky";
+let slabShape = "random";
 
 function familyOf(name) {
   const n = (name || "").toLowerCase();
@@ -912,15 +998,31 @@ function parsePrompt(text) {
   return { qty: Math.max(1, Math.min(50, qty)), type, anchor };
 }
 
-function spawnAt(type, basePos = null) {
-  const fn = BUILDERS[type];
-  if (!fn) return null;
-  const obj = fn();
+function spawnAt(type, basePos = null, options = {}) {
+  let obj;
+  if (type === "stone") {
+    obj = buildStone(options.slabShape !== undefined ? options.slabShape : slabShape);
+  } else {
+    const fn = BUILDERS[type];
+    if (!fn) return null;
+    obj = fn();
+  }
   obj.name = `${type}_${++counters[type] || (counters[type] = 1)}`;
-  if (basePos) obj.position.copy(basePos);
-  else obj.position.set(
-    THREE.MathUtils.randFloat(-4.5, 4.5), 0, THREE.MathUtils.randFloat(-4.5, 4.5),
-  );
+  if (basePos) {
+    obj.position.copy(basePos);
+  } else if (targetActive) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 0.3 + Math.random() * 0.5;
+    obj.position.set(
+      targetGroup.position.x + Math.cos(angle) * dist,
+      0,
+      targetGroup.position.z + Math.sin(angle) * dist,
+    );
+  } else {
+    obj.position.set(
+      THREE.MathUtils.randFloat(-4.5, 4.5), 0, THREE.MathUtils.randFloat(-4.5, 4.5),
+    );
+  }
   scene.add(obj);
   registerObject(obj, type, false);
   return obj;
@@ -1107,6 +1209,13 @@ document.querySelectorAll("[data-mode]").forEach(b => {
 document.querySelectorAll("[data-add]").forEach(b => {
   b.onclick = () => { spawnAt(b.dataset.add); refreshUi(); };
 });
+document.querySelectorAll("[data-slab-shape]").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("[data-slab-shape]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    slabShape = b.dataset.slabShape;
+  };
+});
 document.querySelectorAll("[data-bg]").forEach(b => {
   b.onclick = () => {
     document.querySelectorAll("[data-bg]").forEach(x => x.classList.remove("active"));
@@ -1216,6 +1325,7 @@ document.getElementById("saveJson").onclick = () => {
       position: o.position.toArray(),
       rotation: [o.rotation.x, o.rotation.y, o.rotation.z],
       scale:    o.scale.toArray(),
+      ...(o.userData.slabShape ? { slabShape: o.userData.slabShape } : {}),
     })),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -1242,8 +1352,8 @@ document.getElementById("loadJson").onchange = async ev => {
     // backward-compat: "post" family from older saved scenes maps to "stripStone"
     if (item.family === "post") item.family = "stripStone";
     let o = byId.get(item.id);
-    if (!o && BUILDERS[item.family]) {
-      o = spawnAt(item.family, new THREE.Vector3(...item.position));
+    if (!o && (BUILDERS[item.family] || item.family === "stone")) {
+      o = spawnAt(item.family, new THREE.Vector3(...item.position), item.slabShape ? { slabShape: item.slabShape } : {});
       o.userData.id = item.id; added++;
     }
     if (!o) continue;
