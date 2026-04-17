@@ -206,6 +206,7 @@
       <button data-add="cobble">+ Cobble</button>
       <button data-add="tree">+ Tree</button>
       <button data-add="sign">+ Sign</button>
+      <button data-add="uplight">+ Up light</button>
     </div>
     <div class="seg" id="slabShapeSeg" style="margin-top:4px">
       <button data-slab-shape="random" class="active">Random</button>
@@ -339,6 +340,31 @@
     </div>
     <div class="row-flex" style="margin-top:8px">
       <label class="row-flex tip"><input type="checkbox" id="uniformScale"> uniform</label>
+    </div>
+  </div>
+
+  <div class="section" id="lightControls" style="display:none">
+    <h2>Light properties</h2>
+    <div class="stack">
+      <div class="slider">
+        <label>Intensity</label>
+        <input id="lightIntensity" type="range" min="0" max="5" step="0.1" value="1.5">
+        <span id="lightIntensityVal" class="val">1.5</span>
+      </div>
+      <div class="slider">
+        <label>Distance</label>
+        <input id="lightDistance" type="range" min="1" max="12" step="0.5" value="5">
+        <span id="lightDistanceVal" class="val">5.0</span>
+      </div>
+      <div class="slider">
+        <label>Angle</label>
+        <input id="lightAngle" type="range" min="15" max="90" step="1" value="51">
+        <span id="lightAngleVal" class="val">51</span>
+      </div>
+      <div class="color-row">
+        <label style="font-size:11px;color:var(--muted)">Color</label>
+        <input type="color" id="lightColor" value="#ffb347">
+      </div>
     </div>
   </div>
 
@@ -626,6 +652,9 @@ const MATS = {
     normalMap: normalTex.pebbles.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
     roughnessMap: noiseTex.pebbles.clone(),
   }),
+  uplightHousing: () => new THREE.MeshStandardMaterial({
+    color: 0x2a2a2a, roughness: 0.4, metalness: 0.7,
+  }),
 };
 
 function repeatMap(mat, scaleX, scaleY) {
@@ -852,8 +881,37 @@ function buildSign() {
   return grp;
 }
 
+function buildUpLight() {
+  const grp = new THREE.Group();
+
+  // Housing: small dark disc flush with ground
+  const housingGeo = new THREE.CylinderGeometry(0.04, 0.045, 0.03, 16);
+  const housing = new THREE.Mesh(housingGeo, MATS.uplightHousing());
+  housing.position.y = 0.015;
+  housing.castShadow = false;
+  housing.receiveShadow = true;
+
+  // Lens: glowing top disc
+  const lensGeo = new THREE.CircleGeometry(0.035, 16);
+  const lensMat = new THREE.MeshBasicMaterial({ color: 0xffb347 });
+  const lens = new THREE.Mesh(lensGeo, lensMat);
+  lens.rotation.x = -Math.PI / 2;
+  lens.position.y = 0.031;
+
+  // SpotLight pointing upward
+  const light = new THREE.SpotLight(0xffb347, 1.5, 5, Math.PI / 3.5, 0.7, 1.5);
+  light.position.y = 0.03;
+  light.target.position.set(0, 4, 0);
+  light.castShadow = true;
+  light.shadow.mapSize.set(512, 512);
+  light.shadow.bias = -0.001;
+
+  grp.add(housing, lens, light, light.target);
+  return grp;
+}
+
 const BUILDERS = { stone: buildStone, boulder: buildBoulder, stripStone: buildStripStone,
-                   cobble: buildCobble, tree: buildTree, sign: buildSign };
+                   cobble: buildCobble, tree: buildTree, sign: buildSign, uplight: buildUpLight };
 
 // ===========================================================================
 // target placement marker
@@ -898,12 +956,13 @@ let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
 let activeFilter = "all";
-let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
+let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, uplight: 0, ground: 0, other: 0 };
 let currentBg = "sky";
 let slabShape = "random";
 
 function familyOf(name) {
   const n = (name || "").toLowerCase();
+  if (n.startsWith("uplight") || n.startsWith("up light")) return "uplight";
   if (n.startsWith("slab"))    return "stone";
   if (n.startsWith("stone"))   return "stone";
   if (n.startsWith("boulder")) return "boulder";
@@ -918,6 +977,7 @@ function familyOf(name) {
 
 function familyToMatKey(fam, name) {
   const n = (name || "").toLowerCase();
+  if (fam === "uplight") return "uplightHousing";
   if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
   if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
   if (fam === "stripStone") return "stripStone";
@@ -974,6 +1034,8 @@ const TYPE_ALIASES = {
   cobble:"cobble", cobbles:"cobble", pebble:"cobble", pebbles:"cobble",
   tree:"tree", trees:"tree",
   sign:"sign", monument:"sign", plaque:"sign",
+  uplight:"uplight", uplights:"uplight", "up light":"uplight", "up lights":"uplight",
+  spot:"uplight", spots:"uplight",
 };
 
 function parsePrompt(text) {
@@ -1025,6 +1087,20 @@ function spawnAt(type, basePos = null, options = {}) {
   }
   scene.add(obj);
   registerObject(obj, type, false);
+
+  // Warn when many shadow-casting uplights are in the scene
+  if (type === "uplight") {
+    let shadowCount = 0;
+    for (const o of selectables) {
+      if (o.userData.family === "uplight") {
+        o.traverse(child => { if ((child.isSpotLight || child.isPointLight) && child.castShadow) shadowCount++; });
+      }
+    }
+    if (shadowCount > 8) {
+      toast("Warning: many shadow-casting lights may impact performance");
+    }
+  }
+
   return obj;
 }
 
@@ -1159,7 +1235,12 @@ const inputs = {
 const uniformScale = document.getElementById("uniformScale");
 
 function syncInputs() {
-  if (!selected) { for (const k in inputs) inputs[k].value = ""; return; }
+  const lightControlsEl = document.getElementById("lightControls");
+  if (!selected) {
+    for (const k in inputs) inputs[k].value = "";
+    lightControlsEl.style.display = "none";
+    return;
+  }
   inputs.posX.value = selected.position.x.toFixed(3);
   inputs.posY.value = selected.position.y.toFixed(3);
   inputs.posZ.value = selected.position.z.toFixed(3);
@@ -1169,6 +1250,39 @@ function syncInputs() {
   inputs.sclX.value = selected.scale.x.toFixed(3);
   inputs.sclY.value = selected.scale.y.toFixed(3);
   inputs.sclZ.value = selected.scale.z.toFixed(3);
+
+  // Show light controls for uplights (SpotLight) and bollards (PointLight)
+  const fam = selected.userData.family;
+  if (fam === "uplight" || fam === "bollard") {
+    lightControlsEl.style.display = "";
+    // Find the light inside the group
+    let foundLight = null;
+    selected.traverse(child => {
+      if (!foundLight && (child.isSpotLight || child.isPointLight)) foundLight = child;
+    });
+    if (foundLight) {
+      const iEl = document.getElementById("lightIntensity");
+      const dEl = document.getElementById("lightDistance");
+      const aEl = document.getElementById("lightAngle");
+      const cEl = document.getElementById("lightColor");
+      iEl.value = foundLight.intensity;
+      document.getElementById("lightIntensityVal").textContent = foundLight.intensity.toFixed(1);
+      dEl.value = foundLight.distance;
+      document.getElementById("lightDistanceVal").textContent = foundLight.distance.toFixed(1);
+      if (foundLight.isSpotLight) {
+        const angleDeg = Math.round(THREE.MathUtils.radToDeg(foundLight.angle));
+        aEl.value = angleDeg;
+        document.getElementById("lightAngleVal").textContent = angleDeg;
+        aEl.parentElement.style.display = "";
+      } else {
+        aEl.parentElement.style.display = "none";
+      }
+      // Convert color to hex string
+      cEl.value = "#" + foundLight.color.getHexString();
+    }
+  } else {
+    lightControlsEl.style.display = "none";
+  }
 }
 
 function applyInputsToObject() {
@@ -1189,6 +1303,54 @@ function applyInputsToObject() {
   refreshPrompt();
 }
 for (const el of Object.values(inputs)) el.addEventListener("input", applyInputsToObject);
+
+// Light property controls
+function getSelectedLight() {
+  if (!selected) return null;
+  let found = null;
+  selected.traverse(child => {
+    if (!found && (child.isSpotLight || child.isPointLight)) found = child;
+  });
+  return found;
+}
+
+function applyLightColor(hexStr) {
+  const light = getSelectedLight();
+  if (!light) return;
+  light.color.set(hexStr);
+  // Also update lens material to match
+  selected.traverse(child => {
+    if (child.isMesh && child.material && child.material.isMeshBasicMaterial) {
+      child.material.color.set(hexStr);
+    }
+  });
+  if (selected.userData) selected.userData.lightColor = hexStr;
+}
+
+document.getElementById("lightIntensity").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("lightIntensityVal").textContent = v.toFixed(1);
+  const light = getSelectedLight();
+  if (light) { light.intensity = v; if (selected.userData) selected.userData.lightIntensity = v; }
+});
+document.getElementById("lightDistance").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("lightDistanceVal").textContent = v.toFixed(1);
+  const light = getSelectedLight();
+  if (light) { light.distance = v; if (selected.userData) selected.userData.lightDistance = v; }
+});
+document.getElementById("lightAngle").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("lightAngleVal").textContent = v;
+  const light = getSelectedLight();
+  if (light && light.isSpotLight) {
+    light.angle = THREE.MathUtils.degToRad(v);
+    if (selected.userData) selected.userData.lightAngle = v;
+  }
+});
+document.getElementById("lightColor").addEventListener("input", e => {
+  applyLightColor(e.target.value);
+});
 
 function refreshPrompt() {
   const counts = selectables.reduce((a, o) => (a[o.userData.family] = (a[o.userData.family] || 0) + 1, a), {});
@@ -1339,6 +1501,12 @@ document.getElementById("saveJson").onclick = () => {
       rotation: [o.rotation.x, o.rotation.y, o.rotation.z],
       scale:    o.scale.toArray(),
       ...(o.userData.slabShape ? { slabShape: o.userData.slabShape } : {}),
+      ...(o.userData.family === "uplight" || o.userData.family === "bollard" ? {
+        lightIntensity: o.userData.lightIntensity,
+        lightDistance:  o.userData.lightDistance,
+        lightAngle:     o.userData.lightAngle,
+        lightColor:     o.userData.lightColor,
+      } : {}),
     })),
   };
   if (targetActive) {
@@ -1376,6 +1544,23 @@ document.getElementById("loadJson").onchange = async ev => {
     o.position.fromArray(item.position);
     o.rotation.set(item.rotation[0], item.rotation[1], item.rotation[2]);
     o.scale.fromArray(item.scale);
+    // Restore light properties for uplights / bollards
+    if (item.family === "uplight" || item.family === "bollard") {
+      let light = null;
+      o.traverse(child => { if (!light && (child.isSpotLight || child.isPointLight)) light = child; });
+      if (light) {
+        if (item.lightIntensity != null) { light.intensity = item.lightIntensity; o.userData.lightIntensity = item.lightIntensity; }
+        if (item.lightDistance  != null) { light.distance  = item.lightDistance;  o.userData.lightDistance  = item.lightDistance; }
+        if (item.lightAngle     != null && light.isSpotLight) { light.angle = THREE.MathUtils.degToRad(item.lightAngle); o.userData.lightAngle = item.lightAngle; }
+        if (item.lightColor     != null) {
+          light.color.set(item.lightColor);
+          o.userData.lightColor = item.lightColor;
+          o.traverse(child => {
+            if (child.isMesh && child.material && child.material.isMeshBasicMaterial) child.material.color.set(item.lightColor);
+          });
+        }
+      }
+    }
     updated++;
   }
   if (data.target) {
