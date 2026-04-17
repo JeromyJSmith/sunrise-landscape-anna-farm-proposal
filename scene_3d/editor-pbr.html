@@ -373,6 +373,47 @@
     </div>
   </div>
 
+  <div class="section" id="materialControls" style="display:none">
+    <h2>Material</h2>
+    <div class="stack">
+      <div class="color-row">
+        <label style="font-size:11px;color:var(--muted)">Color</label>
+        <input type="color" id="matColor" value="#c05227">
+        <span class="hex" id="matColorHex">#c05227</span>
+      </div>
+      <div class="slider">
+        <label>Roughness</label>
+        <input id="matRoughness" type="range" min="0" max="1" step="0.01" value="0.85">
+        <span id="matRoughnessVal" class="val">0.85</span>
+      </div>
+      <div class="slider">
+        <label>Metalness</label>
+        <input id="matMetalness" type="range" min="0" max="1" step="0.01" value="0.0">
+        <span id="matMetalnessVal" class="val">0.00</span>
+      </div>
+      <div class="slider">
+        <label>Normal str.</label>
+        <input id="matNormalScale" type="range" min="0" max="3" step="0.05" value="0.7">
+        <span id="matNormalScaleVal" class="val">0.70</span>
+      </div>
+      <label class="field">Texture
+        <select id="matTexture">
+          <option value="default">Default</option>
+          <option value="rocky">Rocky</option>
+          <option value="smooth">Smooth</option>
+          <option value="pebbles">Pebbles</option>
+          <option value="wood">Wood</option>
+          <option value="gravel">Gravel</option>
+        </select>
+      </label>
+      <div class="grid2">
+        <label class="field">Tex scale X<input id="matTexScaleX" type="number" step="0.25" min="0.1" value="2"></label>
+        <label class="field">Tex scale Y<input id="matTexScaleY" type="number" step="0.25" min="0.1" value="2"></label>
+      </div>
+      <button id="matResetBtn">Reset material</button>
+    </div>
+  </div>
+
   <div class="section" id="lightControls" style="display:none">
     <h2>Light properties</h2>
     <div class="stack">
@@ -399,7 +440,22 @@
   </div>
 
   <div class="section">
-    <h2>Save / Load</h2>
+    <h2>Project</h2>
+    <div class="stack">
+      <div class="row-flex">
+        <input id="projectName" placeholder="Untitled" style="flex:1">
+        <button id="saveProjectBtn" class="primary" style="white-space:nowrap">Save</button>
+      </div>
+      <div class="grid2">
+        <button id="newProjectBtn">New</button>
+        <button id="openProjectBtn">Open…</button>
+      </div>
+      <div id="projectList" class="list" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Export / Import</h2>
     <div class="grid2" style="margin-bottom:6px">
       <button id="undoBtn">Undo (Ctrl+Z)</button>
       <button id="redoBtn">Redo (Ctrl+Shift+Z)</button>
@@ -746,6 +802,7 @@ tcontrols.addEventListener("mouseUp", () => {
   if (!selected || !_tcBeforePos) return;
   pushUndo(TransformCommand(selected, _tcBeforePos, _tcBeforeRot, _tcBeforeScl));
   _tcBeforePos = null; _tcBeforeRot = null; _tcBeforeScl = null;
+  if (typeof scheduleAutoSave === "function") scheduleAutoSave();
 });
 
 // ===========================================================================
@@ -1276,6 +1333,8 @@ function spawnAt(type, basePos = null, options = {}) {
   registerObject(obj, type, false);
   pushUndo(AddObjectCommand(obj));
 
+  if (typeof scheduleAutoSave === "function") scheduleAutoSave();
+
   // Warn when many shadow-casting uplights are in the scene
   if (type === "uplight") {
     let shadowCount = 0;
@@ -1471,6 +1530,9 @@ function syncInputs() {
   } else {
     lightControlsEl.style.display = "none";
   }
+
+  // Material controls (show for non-light objects)
+  if (typeof syncMaterialControls === "function") syncMaterialControls();
 }
 
 function applyInputsToObject() {
@@ -1893,6 +1955,7 @@ function deleteSelected() {
   cmd.execute();
   pushUndo(cmd);
   refreshUi();
+  if (typeof scheduleAutoSave === "function") scheduleAutoSave();
 }
 
 // cycleTarget: three-state cycle
@@ -2366,6 +2429,7 @@ canvas.addEventListener("pointerup", ev => {
   if (isPainting) {
     isPainting = false;
     lastPaintPos = null;
+    if (typeof scheduleAutoSave === "function") scheduleAutoSave();
   }
 });
 
@@ -2500,6 +2564,505 @@ canvas.addEventListener("pointerleave", () => {
   initDragHandle("left");
   initDragHandle("right");
 })();
+
+// ===========================================================================
+// F11 — IndexedDB PROJECT MANAGEMENT
+// ===========================================================================
+const DB_NAME = "annas-farm-editor";
+const DB_VERSION = 1;
+const DB_STORE = "projects";
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(DB_STORE)) {
+        db.createObjectStore(DB_STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function captureProjectState(name) {
+  return {
+    id: Date.now(),
+    name: name || "Untitled",
+    savedAt: new Date().toISOString(),
+    sunTime:      +document.getElementById("sunTime").value,
+    sunStrength:  +document.getElementById("sunStrength").value,
+    envIntensity: +document.getElementById("envIntensity").value,
+    exposure:     +document.getElementById("exposure").value,
+    fogNear:      +document.getElementById("fogNear").value,
+    fogFar:       +document.getElementById("fogFar").value,
+    groundFog:    +document.getElementById("groundFog").value,
+    nightMode,
+    target: targetActive ? [targetGroup.position.x, targetGroup.position.z] : null,
+    paintDataURL: paintCanvas.toDataURL("image/png"),
+    objects: selectables.map(o => ({
+      id: o.userData.id,
+      family: o.userData.family,
+      isBase: !!o.userData.isBase,
+      position: o.position.toArray(),
+      rotation: [o.rotation.x, o.rotation.y, o.rotation.z],
+      scale: o.scale.toArray(),
+      slabShape: o.userData.slabShape || null,
+      lightIntensity: o.userData.lightIntensity,
+      lightDistance:  o.userData.lightDistance,
+      lightAngle:     o.userData.lightAngle,
+      lightColor:     o.userData.lightColor,
+      matColor:       o.userData.matColor,
+      matRoughness:   o.userData.matRoughness,
+      matMetalness:   o.userData.matMetalness,
+      matNormalScale: o.userData.matNormalScale,
+      matTexture:     o.userData.matTexture,
+      matTexScaleX:   o.userData.matTexScaleX,
+      matTexScaleY:   o.userData.matTexScaleY,
+    })),
+  };
+}
+
+async function saveProject(name) {
+  const db = await openDB();
+  const data = captureProjectState(name);
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readwrite");
+    tx.objectStore(DB_STORE).put(data);
+    tx.oncomplete = () => resolve(data);
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function listProjects() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readonly");
+    const req = tx.objectStore(DB_STORE).getAll();
+    req.onsuccess = e => resolve(e.target.result.sort((a, b) => b.id - a.id));
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function loadProject(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readonly");
+    const req = tx.objectStore(DB_STORE).get(id);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function deleteProject(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readwrite");
+    tx.objectStore(DB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function applyProject(id) {
+  const data = await loadProject(id);
+  if (!data) { toast("Project not found"); return; }
+
+  // Clear non-base objects
+  for (const o of [...selectables]) {
+    if (!o.userData.isBase) {
+      scene.remove(o);
+      const i = selectables.indexOf(o);
+      if (i >= 0) selectables.splice(i, 1);
+    }
+  }
+  selectObject(null);
+
+  // Reset base transforms
+  for (const o of selectables) {
+    if (o.userData.isBase) {
+      o.position.copy(o.userData.home.position);
+      o.rotation.copy(o.userData.home.rotation);
+      o.scale.copy(o.userData.home.scale);
+    }
+  }
+
+  // Restore atmosphere
+  const setSlider = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+    const out = document.getElementById(id + "Val");
+    if (out) out.textContent = formatSlider(id, val);
+  };
+  setSlider("sunTime",      data.sunTime      ?? 16.5);
+  setSlider("sunStrength",  data.sunStrength  ?? 2.4);
+  setSlider("envIntensity", data.envIntensity ?? 1.0);
+  setSlider("exposure",     data.exposure     ?? 1.0);
+  setSlider("fogNear",      data.fogNear      ?? 50);
+  setSlider("fogFar",       data.fogFar       ?? 120);
+  setSlider("groundFog",    data.groundFog    ?? 0);
+
+  setSunFromTime(data.sunTime ?? 16.5);
+  sun.intensity = data.sunStrength ?? 2.4;
+  scene.environmentIntensity = data.envIntensity ?? 1.0;
+  renderer.toneMappingExposure = data.exposure ?? 1.0;
+  scene.fog.near = data.fogNear ?? 50;
+  scene.fog.far  = data.fogFar  ?? 120;
+  groundFogMat.opacity = data.groundFog ?? 0;
+
+  if (data.nightMode) {
+    document.getElementById("nightModeBtn").click();
+  } else if (nightMode) {
+    exitNightMode();
+  }
+
+  // Restore target
+  if (data.target) {
+    targetGroup.position.set(data.target[0], 0.01, data.target[1]);
+    targetGroup.visible = true;
+    targetActive = true;
+  } else {
+    targetGroup.visible = false;
+    targetActive = false;
+  }
+
+  // Restore objects
+  const byId = new Map(selectables.map(o => [o.userData.id, o]));
+  for (const item of data.objects) {
+    if (item.family === "post") item.family = "stripStone";
+    let o = byId.get(item.id);
+    if (!o && (BUILDERS[item.family] || item.family === "stone")) {
+      o = spawnAt(item.family, new THREE.Vector3(...item.position),
+                  item.slabShape ? { slabShape: item.slabShape } : {});
+      o.userData.id = item.id;
+    }
+    if (!o) continue;
+    o.position.fromArray(item.position);
+    o.rotation.set(item.rotation[0], item.rotation[1], item.rotation[2]);
+    o.scale.fromArray(item.scale);
+
+    // Restore light props
+    if (item.family === "uplight" || item.family === "bollard") {
+      let light = null;
+      o.traverse(c => { if (!light && (c.isSpotLight || c.isPointLight)) light = c; });
+      if (light) {
+        if (item.lightIntensity != null) { light.intensity = item.lightIntensity; o.userData.lightIntensity = item.lightIntensity; }
+        if (item.lightDistance  != null) { light.distance  = item.lightDistance;  o.userData.lightDistance  = item.lightDistance; }
+        if (item.lightAngle     != null && light.isSpotLight) { light.angle = THREE.MathUtils.degToRad(item.lightAngle); o.userData.lightAngle = item.lightAngle; }
+        if (item.lightColor     != null) {
+          light.color.set(item.lightColor); o.userData.lightColor = item.lightColor;
+          o.traverse(c => { if (c.isMesh && c.material && c.material.isMeshBasicMaterial) c.material.color.set(item.lightColor); });
+        }
+      }
+    }
+
+    // Restore material overrides
+    const matFields = ["matColor","matRoughness","matMetalness","matNormalScale","matTexture","matTexScaleX","matTexScaleY"];
+    let hasMat = false;
+    for (const f of matFields) if (item[f] != null) { o.userData[f] = item[f]; hasMat = true; }
+    if (hasMat) applyMaterialOverridesFromUserData(o);
+  }
+
+  // Restore paint
+  if (data.paintDataURL && data.paintDataURL !== "data:,") {
+    const img = new Image();
+    img.onload = () => {
+      paintCtx.clearRect(0, 0, PAINT_RES, PAINT_RES);
+      paintCtx.drawImage(img, 0, 0, PAINT_RES, PAINT_RES);
+      paintTex.needsUpdate = true;
+    };
+    img.src = data.paintDataURL;
+  } else {
+    paintCtx.clearRect(0, 0, PAINT_RES, PAINT_RES);
+    paintTex.needsUpdate = true;
+  }
+
+  document.getElementById("projectName").value = data.name;
+  refreshUi(); syncInputs();
+  toast(`Loaded "${data.name}"`);
+}
+
+// Project name state
+let _projectName = "Untitled";
+
+// Auto-save with 3s debounce — skip if name is "Untitled"
+let _autoSaveTimer = null;
+function scheduleAutoSave() {
+  const name = document.getElementById("projectName").value.trim();
+  if (!name || name === "Untitled") return;
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(async () => {
+    await saveProject(name);
+    toast(`Auto-saved "${name}"`);
+  }, 3000);
+}
+
+// Project panel handlers
+document.getElementById("saveProjectBtn").onclick = async () => {
+  const name = document.getElementById("projectName").value.trim() || "Untitled";
+  await saveProject(name);
+  toast(`Saved project "${name}"`);
+};
+
+document.getElementById("newProjectBtn").onclick = () => {
+  if (!confirm("Start a new project? Unsaved changes will be lost.")) return;
+  // Clear non-base objects
+  for (const o of [...selectables]) {
+    if (!o.userData.isBase) {
+      scene.remove(o);
+      const i = selectables.indexOf(o);
+      if (i >= 0) selectables.splice(i, 1);
+    }
+  }
+  selectObject(null);
+  // Reset base transforms
+  for (const o of selectables) {
+    if (o.userData.isBase) {
+      o.position.copy(o.userData.home.position);
+      o.rotation.copy(o.userData.home.rotation);
+      o.scale.copy(o.userData.home.scale);
+    }
+  }
+  // Clear paint
+  paintCtx.clearRect(0, 0, PAINT_RES, PAINT_RES);
+  paintTex.needsUpdate = true;
+  // Clear target
+  targetGroup.visible = false;
+  targetActive = false;
+  // Reset name
+  document.getElementById("projectName").value = "Untitled";
+  document.getElementById("projectList").style.display = "none";
+  refreshUi(); syncInputs();
+  toast("New project");
+};
+
+document.getElementById("openProjectBtn").onclick = async () => {
+  const listEl = document.getElementById("projectList");
+  if (listEl.style.display !== "none") { listEl.style.display = "none"; return; }
+  const projects = await listProjects();
+  listEl.innerHTML = "";
+  if (!projects.length) {
+    listEl.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:4px">No saved projects</div>';
+  }
+  for (const p of projects) {
+    const row = document.createElement("div");
+    row.className = "item";
+    const dt = new Date(p.savedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    row.innerHTML = `<span class="name">${p.name}</span><span class="pill">${dt}</span>`;
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "×";
+    delBtn.title = "Delete project";
+    delBtn.style.cssText = "padding:2px 6px;font-size:11px;color:var(--danger);flex-shrink:0";
+    delBtn.onclick = async e => {
+      e.stopPropagation();
+      if (!confirm(`Delete "${p.name}"?`)) return;
+      await deleteProject(p.id);
+      row.remove();
+      toast(`Deleted "${p.name}"`);
+    };
+    row.appendChild(delBtn);
+    row.onclick = async () => {
+      listEl.style.display = "none";
+      await applyProject(p.id);
+    };
+    listEl.appendChild(row);
+  }
+  listEl.style.display = "";
+};
+
+// ===========================================================================
+// F7 — PER-OBJECT MATERIAL EDITOR
+// ===========================================================================
+function getSelectedMaterial() {
+  if (!selected) return null;
+  let found = null;
+  selected.traverse(o => {
+    if (!found && o.isMesh && o.material && o.material.isMeshStandardMaterial) found = o.material;
+  });
+  return found;
+}
+
+function applyMaterialToSelected(fn) {
+  if (!selected) return;
+  selected.traverse(o => {
+    if (o.isMesh && o.material && o.material.isMeshStandardMaterial) fn(o.material);
+  });
+}
+
+function applyMaterialOverridesFromUserData(obj) {
+  if (!obj) return;
+  const ud = obj.userData;
+  obj.traverse(o => {
+    if (!o.isMesh || !o.material || !o.material.isMeshStandardMaterial) return;
+    const m = o.material;
+    if (ud.matColor     != null) m.color.set(ud.matColor);
+    if (ud.matRoughness != null) m.roughness = ud.matRoughness;
+    if (ud.matMetalness != null) m.metalness = ud.matMetalness;
+    if (ud.matNormalScale != null && m.normalMap) m.normalScale.set(ud.matNormalScale, ud.matNormalScale);
+    if (ud.matTexture != null && ud.matTexture !== "default") {
+      const sx = ud.matTexScaleX ?? 2;
+      const sy = ud.matTexScaleY ?? 2;
+      if (normalTex[ud.matTexture]) {
+        m.normalMap = normalTex[ud.matTexture].clone();
+        m.normalMap.wrapS = m.normalMap.wrapT = THREE.RepeatWrapping;
+        m.normalMap.repeat.set(sx, sy);
+        m.normalMap.needsUpdate = true;
+      }
+      if (noiseTex[ud.matTexture]) {
+        m.roughnessMap = noiseTex[ud.matTexture].clone();
+        m.roughnessMap.wrapS = m.roughnessMap.wrapT = THREE.RepeatWrapping;
+        m.roughnessMap.repeat.set(sx, sy);
+        m.roughnessMap.needsUpdate = true;
+      }
+    } else if (ud.matTexScaleX != null || ud.matTexScaleY != null) {
+      const sx = ud.matTexScaleX ?? 2;
+      const sy = ud.matTexScaleY ?? 2;
+      repeatMap(m, sx, sy);
+    }
+    m.needsUpdate = true;
+  });
+}
+
+function syncMaterialControls() {
+  const matEl = document.getElementById("materialControls");
+  if (!selected || selected.userData.family === "uplight" || selected.userData.family === "bollard") {
+    matEl.style.display = "none";
+    return;
+  }
+  const mat = getSelectedMaterial();
+  if (!mat) { matEl.style.display = "none"; return; }
+  matEl.style.display = "";
+
+  const hex = "#" + mat.color.getHexString();
+  document.getElementById("matColor").value = hex;
+  document.getElementById("matColorHex").textContent = hex;
+  document.getElementById("matRoughness").value = mat.roughness;
+  document.getElementById("matRoughnessVal").textContent = mat.roughness.toFixed(2);
+  document.getElementById("matMetalness").value = mat.metalness;
+  document.getElementById("matMetalnessVal").textContent = mat.metalness.toFixed(2);
+  const ns = mat.normalScale ? mat.normalScale.x : 0.7;
+  document.getElementById("matNormalScale").value = ns;
+  document.getElementById("matNormalScaleVal").textContent = ns.toFixed(2);
+  document.getElementById("matTexture").value = selected.userData.matTexture || "default";
+  document.getElementById("matTexScaleX").value = selected.userData.matTexScaleX ?? 2;
+  document.getElementById("matTexScaleY").value = selected.userData.matTexScaleY ?? 2;
+}
+
+// Wire material controls
+document.getElementById("matColor").addEventListener("input", e => {
+  const v = e.target.value;
+  document.getElementById("matColorHex").textContent = v;
+  applyMaterialToSelected(m => m.color.set(v));
+  if (selected) selected.userData.matColor = v;
+  scheduleAutoSave();
+});
+
+document.getElementById("matRoughness").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("matRoughnessVal").textContent = v.toFixed(2);
+  applyMaterialToSelected(m => { m.roughness = v; });
+  if (selected) selected.userData.matRoughness = v;
+  scheduleAutoSave();
+});
+
+document.getElementById("matMetalness").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("matMetalnessVal").textContent = v.toFixed(2);
+  applyMaterialToSelected(m => { m.metalness = v; });
+  if (selected) selected.userData.matMetalness = v;
+  scheduleAutoSave();
+});
+
+document.getElementById("matNormalScale").addEventListener("input", e => {
+  const v = +e.target.value;
+  document.getElementById("matNormalScaleVal").textContent = v.toFixed(2);
+  applyMaterialToSelected(m => { if (m.normalMap) m.normalScale.set(v, v); });
+  if (selected) selected.userData.matNormalScale = v;
+  scheduleAutoSave();
+});
+
+document.getElementById("matTexture").addEventListener("change", e => {
+  const texKey = e.target.value;
+  if (selected) selected.userData.matTexture = texKey;
+  const sx = +(document.getElementById("matTexScaleX").value) || 2;
+  const sy = +(document.getElementById("matTexScaleY").value) || 2;
+  if (texKey === "default") {
+    // Re-build from MATS to restore original textures
+    const fam = selected ? selected.userData.family : null;
+    const matKey = familyToMatKey(fam, selected ? (selected.userData.id || "") : "");
+    if (matKey && MATS[matKey]) {
+      const freshMat = MATS[matKey]();
+      selected.traverse(o => {
+        if (o.isMesh && o.material && o.material.isMeshStandardMaterial) {
+          const old = o.material;
+          const newM = freshMat.clone ? freshMat.clone() : MATS[matKey]();
+          newM.color.copy(old.color);
+          newM.roughness = old.roughness;
+          newM.metalness = old.metalness;
+          o.material = newM;
+          o.material.needsUpdate = true;
+        }
+      });
+    }
+  } else if (normalTex[texKey] || noiseTex[texKey]) {
+    applyMaterialToSelected(m => {
+      if (normalTex[texKey]) {
+        m.normalMap = normalTex[texKey].clone();
+        m.normalMap.wrapS = m.normalMap.wrapT = THREE.RepeatWrapping;
+        m.normalMap.repeat.set(sx, sy);
+        m.normalMap.needsUpdate = true;
+      }
+      if (noiseTex[texKey]) {
+        m.roughnessMap = noiseTex[texKey].clone();
+        m.roughnessMap.wrapS = m.roughnessMap.wrapT = THREE.RepeatWrapping;
+        m.roughnessMap.repeat.set(sx, sy);
+        m.roughnessMap.needsUpdate = true;
+      }
+      m.needsUpdate = true;
+    });
+  }
+  scheduleAutoSave();
+});
+
+function applyTexScale() {
+  const sx = +(document.getElementById("matTexScaleX").value) || 2;
+  const sy = +(document.getElementById("matTexScaleY").value) || 2;
+  applyMaterialToSelected(m => repeatMap(m, sx, sy));
+  if (selected) { selected.userData.matTexScaleX = sx; selected.userData.matTexScaleY = sy; }
+  scheduleAutoSave();
+}
+document.getElementById("matTexScaleX").addEventListener("input", applyTexScale);
+document.getElementById("matTexScaleY").addEventListener("input", applyTexScale);
+
+document.getElementById("matResetBtn").onclick = () => {
+  if (!selected) return;
+  const fam = selected.userData.family;
+  const matKey = familyToMatKey(fam, selected.userData.id || "");
+  if (!matKey || !MATS[matKey]) { toast("No default material for this object"); return; }
+  selected.traverse(o => {
+    if (o.isMesh && o.material && o.material.isMeshStandardMaterial) {
+      o.material = MATS[matKey]();
+      if (fam === "ground")      repeatMap(o.material, 12, 12);
+      else if (fam === "path")   repeatMap(o.material, 6, 1.5);
+      else if (fam === "stone")  repeatMap(o.material, 1, 2);
+      else if (fam === "boulder") repeatMap(o.material, 1.5, 1.5);
+      else if (fam === "stripStone") repeatMap(o.material, 1, 2);
+      o.material.needsUpdate = true;
+    }
+  });
+  // Clear overrides
+  delete selected.userData.matColor;
+  delete selected.userData.matRoughness;
+  delete selected.userData.matMetalness;
+  delete selected.userData.matNormalScale;
+  delete selected.userData.matTexture;
+  delete selected.userData.matTexScaleX;
+  delete selected.userData.matTexScaleY;
+  syncMaterialControls();
+  toast("Material reset to default");
+  scheduleAutoSave();
+};
 
 let lastT = performance.now();
 let frames = 0, fpsAccumT = 0;
