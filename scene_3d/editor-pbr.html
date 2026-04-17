@@ -74,6 +74,7 @@
     z-index: 5; border: 1px solid var(--line);
   }
   .toolbar button.active { outline: 2px solid var(--accent); }
+  button.active { border-color: var(--accent); background: #133333; }
   .hud {
     position: absolute; top: 12px; right: 12px; padding: 6px 10px; border-radius: 6px;
     background: rgba(13,16,21,0.85); font-size: 11px; color: var(--muted); z-index: 5;
@@ -172,6 +173,34 @@
         <input id="exposure" type="range" min="0.2" max="2" step="0.05" value="1.0">
         <span id="exposureVal" class="val">1.0</span>
       </div>
+      <h2 style="margin-top:6px">Fog</h2>
+      <div class="slider">
+        <label>Fog near</label>
+        <input id="fogNear" type="range" min="5" max="200" step="1" value="50">
+        <span id="fogNearVal" class="val">50</span>
+      </div>
+      <div class="slider">
+        <label>Fog far</label>
+        <input id="fogFar" type="range" min="20" max="400" step="5" value="120">
+        <span id="fogFarVal" class="val">120</span>
+      </div>
+      <div class="slider">
+        <label>Ground fog</label>
+        <input id="groundFog" type="range" min="0" max="0.6" step="0.02" value="0">
+        <span id="groundFogVal" class="val">0.00</span>
+      </div>
+      <h2 style="margin-top:6px">Time presets</h2>
+      <div class="grid3">
+        <button data-time="6.5">Dawn</button>
+        <button data-time="9">Morning</button>
+        <button data-time="12">Noon</button>
+      </div>
+      <div class="grid3" style="margin-top:4px">
+        <button data-time="16.5">Golden hr</button>
+        <button data-time="18.5">Sunset</button>
+        <button data-time="20">Dusk</button>
+      </div>
+      <button data-time="night" style="margin-top:4px;width:100%" id="nightModeBtn">Night mode</button>
       <h2 style="margin-top:6px">Background</h2>
       <div class="seg">
         <button data-bg="sky" class="active">Sky</button>
@@ -466,6 +495,18 @@ scene.add(sun);
 
 const hemi = new THREE.HemisphereLight(0xc8e4ff, 0x70573b, 0.45);
 scene.add(hemi);
+
+const groundFogMat = new THREE.MeshBasicMaterial({
+  color: 0xc8d8ec, transparent: true, opacity: 0,
+  side: THREE.DoubleSide, depthWrite: false,
+});
+const groundFogPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(60, 60), groundFogMat
+);
+groundFogPlane.rotation.x = -Math.PI / 2;
+groundFogPlane.position.y = 0.3;
+groundFogPlane.renderOrder = 2;
+scene.add(groundFogPlane);
 
 // Env map: PMREM-process the Sky shader so PBR materials reflect a real sky
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -1018,6 +1059,7 @@ let targetActive = false;
 const selectables = [];
 const baseObjects = new Set();
 let selected = null;
+let nightMode = false;
 
 // ===========================================================================
 // undo / redo command stack
@@ -1751,10 +1793,70 @@ function formatSlider(id, v) {
   }
   return v.toFixed(2);
 }
-bindSlider("sunTime",     v => setSunFromTime(v));
+bindSlider("sunTime",     v => { if (nightMode) exitNightMode(); setSunFromTime(v); });
 bindSlider("sunStrength", v => sun.intensity = v);
 bindSlider("envIntensity",v => { scene.environmentIntensity = v; });
 bindSlider("exposure",    v => renderer.toneMappingExposure = v);
+bindSlider("fogNear",     v => { if (scene.fog.isFog) scene.fog.near = v; });
+bindSlider("fogFar",      v => { if (scene.fog.isFog) scene.fog.far = v; });
+bindSlider("groundFog",   v => { groundFogMat.opacity = v; });
+
+// time preset buttons
+document.querySelectorAll("[data-time]").forEach(b => {
+  if (b.dataset.time === "night") return; // handled separately
+  b.onclick = () => {
+    if (nightMode) exitNightMode();
+    const t = +b.dataset.time;
+    document.getElementById("sunTime").value = t;
+    document.getElementById("sunTimeVal").textContent = formatSlider("sunTime", t);
+    setSunFromTime(t);
+    sun.intensity = +document.getElementById("sunStrength").value;
+  };
+});
+
+document.getElementById("nightModeBtn").onclick = () => {
+  if (nightMode) { exitNightMode(); return; }
+  nightMode = true;
+  document.getElementById("nightModeBtn").classList.add("active");
+  // Set sun to dusk
+  document.getElementById("sunTime").value = 20;
+  document.getElementById("sunTimeVal").textContent = "20:00";
+  setSunFromTime(20);
+  // Moonlight
+  sun.intensity = 0.05;
+  sun.color.setHSL(0.6, 0.3, 0.6);
+  // Dim cool hemisphere
+  hemi.color.set(0x4466aa);
+  hemi.groundColor.set(0x111122);
+  hemi.intensity = 0.15;
+  // Dark fog
+  scene.fog.color.set(0x0a0e1a);
+  groundFogMat.color.set(0x0a0e1a);
+  // Darken env
+  scene.environmentIntensity = 0.2;
+  renderer.toneMappingExposure = 0.5;
+  // Auto ground fog for mood
+  if (groundFogMat.opacity < 0.1) {
+    groundFogMat.opacity = 0.15;
+    document.getElementById("groundFog").value = 0.15;
+    document.getElementById("groundFogVal").textContent = "0.15";
+  }
+};
+
+function exitNightMode() {
+  nightMode = false;
+  document.getElementById("nightModeBtn").classList.remove("active");
+  // Restore from sliders
+  const t = +document.getElementById("sunTime").value;
+  setSunFromTime(t);
+  sun.intensity = +document.getElementById("sunStrength").value;
+  hemi.color.set(0xc8e4ff);
+  hemi.groundColor.set(0x70573b);
+  hemi.intensity = 0.45;
+  scene.environmentIntensity = +document.getElementById("envIntensity").value;
+  renderer.toneMappingExposure = +document.getElementById("exposure").value;
+  groundFogMat.color.set(scene.fog.color);
+}
 
 // initial sun position
 setSunFromTime(+document.getElementById("sunTime").value);
