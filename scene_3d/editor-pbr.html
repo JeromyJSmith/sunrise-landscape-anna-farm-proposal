@@ -1085,6 +1085,19 @@ canvas.addEventListener("pointerdown", ev => {
   ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
   ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
   ray.setFromCamera(ndc, cam);
+  if (targetMode) {
+    const groundHits = ray.intersectObject(groundHit);
+    if (groundHits.length) {
+      const hit = groundHits[0].point;
+      targetGroup.position.set(hit.x, 0.01, hit.z);
+      targetGroup.visible = true;
+      targetActive = true;
+      targetMode = false;
+      document.getElementById("targetBtn").classList.remove("active");
+      hudInfo(`Target: (${targetGroup.position.x.toFixed(1)}, ${targetGroup.position.z.toFixed(1)})`);
+    }
+    return;
+  }
   const hits = ray.intersectObjects(selectables, true);
   if (!hits.length) { selectObject(null); return; }
   let obj = hits[0].object;
@@ -1328,6 +1341,9 @@ document.getElementById("saveJson").onclick = () => {
       ...(o.userData.slabShape ? { slabShape: o.userData.slabShape } : {}),
     })),
   };
+  if (targetActive) {
+    data.target = [targetGroup.position.x, targetGroup.position.z];
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1361,6 +1377,12 @@ document.getElementById("loadJson").onchange = async ev => {
     o.rotation.set(item.rotation[0], item.rotation[1], item.rotation[2]);
     o.scale.fromArray(item.scale);
     updated++;
+  }
+  if (data.target) {
+    targetGroup.position.set(data.target[0], 0.01, data.target[1]);
+    targetGroup.visible = true;
+    targetActive = true;
+    hudInfo(`Target: (${targetGroup.position.x.toFixed(1)}, ${targetGroup.position.z.toFixed(1)})`);
   }
   refreshUi(); syncInputs();
   toast(`Loaded — updated ${updated}, added ${added}`);
@@ -1411,6 +1433,7 @@ addEventListener("keydown", e => {
   if (k === "e") tcontrols.setMode("rotate");
   if (k === "r") tcontrols.setMode("scale");
   if (k === "b") setPaintMode(!paintMode);
+  if (k === "t" && !paintMode) cycleTarget();
   if (k === "f") focusOn(selected);
   if (k === "x" && !paintMode) deleteSelected();
   if (k === "escape") { if (paintMode) setPaintMode(false); else selectObject(null); }
@@ -1429,6 +1452,29 @@ function deleteSelected() {
   selectObject(null);
   refreshUi();
 }
+
+// cycleTarget: three-state cycle
+//   state 0 — no target, not aiming → enter aiming mode
+//   state 1 — target placed, not aiming → enter aiming mode (will reposition on next click)
+//   state 2 — in aiming mode → cancel + clear
+function cycleTarget() {
+  const btn = document.getElementById("targetBtn");
+  if (targetMode) {
+    // Cancel aiming. If a target was already active keep it, otherwise stay cleared.
+    targetMode = false;
+    btn.classList.remove("active");
+    if (!targetActive) {
+      hudInfo(`${selectables.length} objects`);
+    }
+  } else {
+    // Enter aiming mode
+    targetMode = true;
+    btn.classList.add("active");
+    toast("Click ground to place target");
+  }
+}
+
+document.getElementById("targetBtn").onclick = cycleTarget;
 
 function focusOn(obj) {
   if (!obj) return;
