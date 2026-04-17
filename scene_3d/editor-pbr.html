@@ -202,7 +202,7 @@
     <div class="grid2">
       <button data-add="stone">+ Stone slab</button>
       <button data-add="boulder">+ Boulder</button>
-      <button data-add="post">+ Post</button>
+      <button data-add="stripStone">+ Strip stone</button>
       <button data-add="cobble">+ Cobble</button>
       <button data-add="tree">+ Tree</button>
       <button data-add="sign">+ Sign</button>
@@ -582,9 +582,10 @@ const MATS = {
     normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
     roughnessMap: noiseTex.smooth.clone(),
   }),
-  post: () => new THREE.MeshStandardMaterial({
+  stripStone: () => new THREE.MeshStandardMaterial({
     color: 0x7a5232, roughness: 0.88, metalness: 0.0,
-    normalMap: normalTex.wood.clone(), normalScale: new THREE.Vector2(0.4, 1.2),
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
+    roughnessMap: noiseTex.rocky.clone(),
   }),
   cobble: () => new THREE.MeshStandardMaterial({
     color: 0xbcb39e, roughness: 0.85, metalness: 0.0,
@@ -722,13 +723,18 @@ function buildBoulder() {
   return g;
 }
 
-function buildPost() {
-  const h = THREE.MathUtils.randFloat(0.55, 0.95);
-  const geo = new THREE.CylinderGeometry(0.05, 0.06, h, 10);
-  const mesh = new THREE.Mesh(geo, MATS.post());
+function buildStripStone() {
+  const h = THREE.MathUtils.randFloat(0.63, 0.79);   // 0.71 ± 0.08 m (≈28 in)
+  const w = THREE.MathUtils.randFloat(0.20, 0.35);   // 8–14 in
+  const t = THREE.MathUtils.randFloat(0.125, 0.175); // 6 in ± 0.025 m
+  const geo = new THREE.BoxGeometry(w, h, t, 3, 6, 2);
+  jitterGeometry(geo, 0.02);
+  const mat = MATS.stripStone();
+  repeatMap(mat, 1, 2);
+  const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.position.y = h / 2;
-  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
@@ -794,7 +800,7 @@ function buildSign() {
   return grp;
 }
 
-const BUILDERS = { stone: buildStone, boulder: buildBoulder, post: buildPost,
+const BUILDERS = { stone: buildStone, boulder: buildBoulder, stripStone: buildStripStone,
                    cobble: buildCobble, tree: buildTree, sign: buildSign };
 
 // ===========================================================================
@@ -807,7 +813,7 @@ let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
 let activeFilter = "all";
-let counters = { stone: 0, boulder: 0, post: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
+let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
 let currentBg = "sky";
 
 function familyOf(name) {
@@ -816,7 +822,7 @@ function familyOf(name) {
   if (n.startsWith("stone"))   return "stone";
   if (n.startsWith("boulder")) return "boulder";
   if (n.startsWith("cobble"))  return "cobble";
-  if (n.startsWith("post"))    return "post";
+  if (n.startsWith("strip"))   return "stripStone";
   if (n.startsWith("tree"))    return "tree";
   if (n.startsWith("sign"))    return "sign";
   if (n.includes("path"))      return "path";
@@ -828,7 +834,7 @@ function familyToMatKey(fam, name) {
   const n = (name || "").toLowerCase();
   if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
   if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
-  if (fam === "post")    return "post";
+  if (fam === "stripStone") return "stripStone";
   if (fam === "cobble")  return "cobble";
   if (fam === "tree")    return n.includes("canopy") ? "leaves" : "trunk";
   if (fam === "sign")    return n.includes("plaque") ? "signPlt" : "signSt";
@@ -850,7 +856,7 @@ function applyPbrToImported(obj) {
       else if (fam === "path") repeatMap(newMat, 6, 1.5);
       else if (fam === "stone") repeatMap(newMat, 1, 2);
       else if (fam === "boulder") repeatMap(newMat, 1.5, 1.5);
-      else if (fam === "post") repeatMap(newMat, 0.5, 2);
+      else if (fam === "stripStone") repeatMap(newMat, 1, 2);
       else if (fam === "cobble") repeatMap(newMat, 1, 1);
       o.material = newMat;
     }
@@ -877,7 +883,8 @@ const NUMBER_WORDS = { a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,
 const TYPE_ALIASES = {
   stone:"stone", stones:"stone", slab:"stone", slabs:"stone", flagstone:"stone", flagstones:"stone",
   boulder:"boulder", boulders:"boulder", rock:"boulder", rocks:"boulder",
-  post:"post", posts:"post", marker:"post", markers:"post",
+  strip:"stripStone", strips:"stripStone", stripstone:"stripStone", stripstones:"stripStone",
+  "strip stone":"stripStone", post:"stripStone", posts:"stripStone", marker:"stripStone", markers:"stripStone",
   cobble:"cobble", cobbles:"cobble", pebble:"cobble", pebbles:"cobble",
   tree:"tree", trees:"tree",
   sign:"sign", monument:"sign", plaque:"sign",
@@ -1080,7 +1087,7 @@ function refreshPrompt() {
 Counts: ${Object.entries(counts).map(([k,v]) => `${k}=${v}`).join(", ")}.
 
 Each object remains independently movable, pivot at its base.
-Collections: stones, boulders, posts, tree, sign, path, ground.
+Collections: stones, boulders, stripStones, tree, sign, path, ground.
 Units: meters. Sun: ${document.getElementById("sunTime").value} hours.
 
 Sample objects (first 24):
@@ -1232,6 +1239,8 @@ document.getElementById("loadJson").onchange = async ev => {
   const byId = new Map(selectables.map(o => [o.userData.id, o]));
   let updated = 0, added = 0;
   for (const item of data.objects) {
+    // backward-compat: "post" family from older saved scenes maps to "stripStone"
+    if (item.family === "post") item.family = "stripStone";
     let o = byId.get(item.id);
     if (!o && BUILDERS[item.family]) {
       o = spawnAt(item.family, new THREE.Vector3(...item.position));
