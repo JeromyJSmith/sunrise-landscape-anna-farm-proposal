@@ -3,7 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main"]
-    paths: ["site/**"]
+    paths:
+      - "site/**"
+      - "scene_3d/**"
   workflow_dispatch:
 
 permissions:
@@ -24,6 +26,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build site structure
+        run: |
+          mkdir -p _site
+          # Copy existing site content
+          if [ -d site ]; then cp -r site/* _site/ 2>/dev/null || true; fi
+          # Copy 3D editor
+          cp -r scene_3d _site/editor
+          # Create root index that links to both
+          cat > _site/index.html << 'INDEXEOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Anna's Farm</title>
+            <style>
+              body { font-family: -apple-system, system-ui, sans-serif; background: #0d1015; color: #eef2f7; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+              a { color: #5bc0be; text-decoration: none; font-size: 1.2em; padding: 12px 24px; border: 1px solid #2c3242; border-radius: 8px; display: block; margin: 8px; transition: border-color 0.2s; }
+              a:hover { border-color: #5bc0be; }
+              h1 { font-size: 1.4em; margin-bottom: 24px; letter-spacing: 0.05em; }
+            </style>
+          </head>
+          <body>
+            <h1>ANNA'S FARM</h1>
+            <a href="editor/editor-pbr.html">3D Scene Editor</a>
+          </body>
+          </html>
+          INDEXEOF
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -31,7 +64,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
