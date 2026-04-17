@@ -774,6 +774,11 @@ const MATS = {
     normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.7, 0.7),
     roughnessMap: noiseTex.rocky.clone(),
   }),
+  stone3: () => new THREE.MeshStandardMaterial({
+    color: 0xb87856, roughness: 0.88, metalness: 0.0,
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.8, 0.8),
+    roughnessMap: noiseTex.rocky.clone(),
+  }),
   boulder: () => new THREE.MeshStandardMaterial({
     color: 0x8a8a87, roughness: 0.95, metalness: 0.0,
     normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
@@ -785,7 +790,7 @@ const MATS = {
     roughnessMap: noiseTex.smooth.clone(),
   }),
   stripStone: () => new THREE.MeshStandardMaterial({
-    color: 0x7a5232, roughness: 0.88, metalness: 0.0,
+    color: 0xad5a38, roughness: 0.88, metalness: 0.0,
     normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
     roughnessMap: noiseTex.rocky.clone(),
   }),
@@ -909,65 +914,75 @@ function buildStone(shape) {
   // Resolve shape
   if (!shape || shape === "random") {
     const r = Math.random();
-    if (r < 0.35) shape = "flat";
-    else if (r < 0.70) shape = "sloped";
+    if (r < 0.30) shape = "flat";
+    else if (r < 0.60) shape = "sloped";
     else shape = "pointed";
   }
 
-  const h = THREE.MathUtils.randFloat(0.5, 1.6);
-  const w = THREE.MathUtils.randFloat(0.3, 0.7);
-  const t = THREE.MathUtils.randFloat(0.06, 0.14);
-  const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
+  const h = THREE.MathUtils.randFloat(0.6, 1.8);       // tall upright slab
+  const wTop = THREE.MathUtils.randFloat(0.25, 0.55);   // narrower at top
+  const wBase = wTop * THREE.MathUtils.randFloat(1.25, 1.6); // wider base (flatiron shape)
+  const t = THREE.MathUtils.randFloat(0.06, 0.14);      // thin like real flagstone
+  const geo = new THREE.BoxGeometry(wBase, h, t, 5, 10, 2);
   const pos = geo.attributes.position;
 
-  // Taper — narrow toward the top (applied to all shapes first)
+  // Taper — WIDER at base, NARROWER at top (Flatiron silhouette)
   for (let i = 0; i < pos.count; i++) {
     const y = pos.getY(i);
-    const norm = (y + h / 2) / h;
-    const taper = 1 - 0.3 * Math.max(0, norm);
+    const norm = (y + h / 2) / h; // 0 at bottom, 1 at top
+    const taper = THREE.MathUtils.lerp(1.0, wTop / wBase, norm);
     pos.setX(i, pos.getX(i) * taper);
+    // Slight thickness taper too — thinner at top
+    pos.setZ(i, pos.getZ(i) * THREE.MathUtils.lerp(1.0, 0.7, norm));
   }
 
   // Shape-specific top modifications (before jitter)
   if (shape === "sloped") {
-    const slopeAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(2, 8));
+    const slopeAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(3, 10));
     const slopeDir = Math.random() < 0.5 ? 1 : -1;
     for (let i = 0; i < pos.count; i++) {
-      if (pos.getY(i) > h / 2 - 0.05) {
+      if (pos.getY(i) > h / 2 - 0.08) {
         pos.setY(i, pos.getY(i) + slopeDir * pos.getX(i) * Math.tan(slopeAngle));
       }
     }
-    pos.needsUpdate = true;
-    geo.computeVertexNormals();
   } else if (shape === "pointed") {
-    const peakHeight = THREE.MathUtils.randFloat(0.15, 0.35);
-    const halfW = w / 2;
+    // Pentagonal peak — 5th edge at the top
+    const peakHeight = THREE.MathUtils.randFloat(0.12, 0.30);
+    const topW = wTop * 0.5; // width at the very top after taper
     for (let i = 0; i < pos.count; i++) {
-      if (pos.getY(i) > h / 2 - 0.05) {
-        // How far from center X (0..1, 0 = center, 1 = edge)
-        const edgeFraction = Math.abs(pos.getX(i)) / (halfW + 0.001);
-        // Center gets full peak, edges get none
-        const lift = peakHeight * (1 - Math.min(1, edgeFraction));
+      if (pos.getY(i) > h / 2 - 0.08) {
+        const edgeFrac = Math.abs(pos.getX(i)) / (topW + 0.001);
+        const lift = peakHeight * Math.max(0, 1 - edgeFrac);
         pos.setY(i, pos.getY(i) + lift);
       }
     }
-    pos.needsUpdate = true;
-    geo.computeVertexNormals();
   }
 
-  // Jitter proportional to slab size
-  jitterGeometry(geo, 0.01 + h * 0.015);
+  // Irregular edge offsets — real flagstone has rough natural edges
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    const norm = (y + h / 2) / h;
+    // Random edge wobble that's stronger on the sides
+    const isEdge = Math.abs(pos.getX(i)) > (wBase * 0.3 * (1 - norm * 0.4));
+    if (isEdge) {
+      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * 0.03);
+      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * 0.02);
+    }
+  }
 
-  // Store resolved shape in userData
-  geo.userData = geo.userData || {};
-  geo.userData.slabShape = shape;
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
 
-  const mat = (Math.random() < 0.5 ? MATS.stone() : MATS.stone2());
+  // Finer jitter proportional to slab size
+  jitterGeometry(geo, 0.008 + h * 0.01);
+
+  const r = Math.random();
+  const mat = r < 0.35 ? MATS.stone() : r < 0.7 ? MATS.stone2() : MATS.stone3();
   repeatMap(mat, 1, 2);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.position.y = h / 2;
-  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
@@ -995,17 +1010,39 @@ function buildBoulder() {
 }
 
 function buildStripStone() {
-  const h = THREE.MathUtils.randFloat(0.63, 0.79);   // 0.71 ± 0.08 m (≈28 in)
-  const w = THREE.MathUtils.randFloat(0.20, 0.35);   // 8–14 in
-  const t = THREE.MathUtils.randFloat(0.125, 0.175); // 6 in ± 0.025 m
-  const geo = new THREE.BoxGeometry(w, h, t, 3, 6, 2);
-  jitterGeometry(geo, 0.02);
+  const h = THREE.MathUtils.randFloat(0.55, 0.80);   // ~22-32 inches
+  const w = THREE.MathUtils.randFloat(0.18, 0.35);   // 7-14 inches wide
+  const t = THREE.MathUtils.randFloat(0.04, 0.10);   // 1.5-4 inches THIN like flagstone
+  const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
+  const pos = geo.attributes.position;
+
+  // Slight taper — wider at base like a small flatiron
+  const baseScale = THREE.MathUtils.randFloat(1.1, 1.3);
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    const norm = (y + h / 2) / h; // 0=bottom, 1=top
+    const taper = THREE.MathUtils.lerp(baseScale, 1.0, norm);
+    pos.setX(i, pos.getX(i) * taper);
+  }
+
+  // Rough irregular edges
+  for (let i = 0; i < pos.count; i++) {
+    const isEdge = Math.abs(pos.getX(i)) > w * 0.35 || pos.getY(i) > h * 0.4;
+    if (isEdge) {
+      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * 0.015);
+      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * 0.01);
+    }
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+
+  jitterGeometry(geo, 0.012);
   const mat = MATS.stripStone();
   repeatMap(mat, 1, 2);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.position.y = h / 2;
-  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
@@ -1056,19 +1093,68 @@ function buildSign() {
   const grp = new THREE.Group();
   const pierH = 1.5, pierW = 0.55, pierD = 0.55;
   const plaqueW = 2.6, plaqueH = 0.9, plaqueT = 0.12;
-  const stoneMat = MATS.signSt();
-  const plateMat = MATS.signPlt();
-  const left  = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
-  const right = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
-  const plate = new THREE.Mesh(new THREE.BoxGeometry(plaqueW, plaqueH, plaqueT), plateMat);
-  const cap   = new THREE.Mesh(new THREE.BoxGeometry(plaqueW + 0.1, 0.12, pierD + 0.1), stoneMat);
-  left.position.set(-plaqueW/2 + pierW/2, pierH/2, 0);
-  right.position.set(plaqueW/2 - pierW/2, pierH/2, 0);
-  plate.position.set(0, pierH - plaqueH/2 + 0.05, 0);
-  cap.position.set(0, pierH + 0.15, 0);
-  [left, right, plate, cap].forEach(m => { m.castShadow = true; m.receiveShadow = true; });
-  grp.add(left, right, plate, cap);
+
+  // Merge stone parts into a single geometry for unified selection
+  const leftGeo  = new THREE.BoxGeometry(pierW, pierH, pierD);
+  const rightGeo = new THREE.BoxGeometry(pierW, pierH, pierD);
+  const capGeo   = new THREE.BoxGeometry(plaqueW + 0.1, 0.12, pierD + 0.1);
+
+  // Position geometries before merging (translate in geometry space)
+  leftGeo.translate(-plaqueW/2 + pierW/2, pierH/2, 0);
+  rightGeo.translate(plaqueW/2 - pierW/2, pierH/2, 0);
+  capGeo.translate(0, pierH + 0.15, 0);
+
+  // Merge all stone parts
+  const mergedGeo = mergeGeometries([leftGeo, rightGeo, capGeo]);
+  const stoneMesh = new THREE.Mesh(mergedGeo, MATS.signSt());
+  stoneMesh.castShadow = true; stoneMesh.receiveShadow = true;
+
+  // Plaque as separate mesh (different material) but same group
+  const plateGeo = new THREE.BoxGeometry(plaqueW, plaqueH, plaqueT);
+  plateGeo.translate(0, pierH - plaqueH/2 + 0.05, 0);
+  const plateMesh = new THREE.Mesh(plateGeo, MATS.signPlt());
+  plateMesh.castShadow = true; plateMesh.receiveShadow = true;
+
+  grp.add(stoneMesh, plateMesh);
   return grp;
+}
+
+// Simple geometry merge helper (BufferGeometry concat)
+function mergeGeometries(geos) {
+  let totalVerts = 0, totalIdx = 0;
+  for (const g of geos) {
+    totalVerts += g.attributes.position.count;
+    totalIdx += g.index ? g.index.count : g.attributes.position.count;
+  }
+  const positions = new Float32Array(totalVerts * 3);
+  const normals   = new Float32Array(totalVerts * 3);
+  const indices   = [];
+  let vertOffset = 0, idxOffset = 0;
+  for (const g of geos) {
+    const pos = g.attributes.position;
+    const nor = g.attributes.normal;
+    for (let i = 0; i < pos.count; i++) {
+      positions[(vertOffset + i) * 3]     = pos.getX(i);
+      positions[(vertOffset + i) * 3 + 1] = pos.getY(i);
+      positions[(vertOffset + i) * 3 + 2] = pos.getZ(i);
+      if (nor) {
+        normals[(vertOffset + i) * 3]     = nor.getX(i);
+        normals[(vertOffset + i) * 3 + 1] = nor.getY(i);
+        normals[(vertOffset + i) * 3 + 2] = nor.getZ(i);
+      }
+    }
+    if (g.index) {
+      for (let i = 0; i < g.index.count; i++) indices.push(g.index.array[i] + vertOffset);
+    } else {
+      for (let i = 0; i < pos.count; i++) indices.push(i + vertOffset);
+    }
+    vertOffset += pos.count;
+  }
+  const merged = new THREE.BufferGeometry();
+  merged.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  merged.setAttribute("normal",   new THREE.BufferAttribute(normals, 3));
+  merged.setIndex(indices);
+  return merged;
 }
 
 function buildUpLight() {
@@ -1300,7 +1386,7 @@ function familyToMatKey(fam, name) {
   const n = (name || "").toLowerCase();
   if (fam === "uplight") return "uplightHousing";
   if (fam === "bollard") return "bollardPost";
-  if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
+  if (fam === "stone")   return n.includes("3") ? "stone3" : n.includes("2") ? "stone2" : "stone";
   if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
   if (fam === "stripStone") return "stripStone";
   if (fam === "cobble")  return "cobble";
