@@ -257,6 +257,15 @@
   </div>
 
   <div class="section">
+    <h2>Custom assets</h2>
+    <div class="stack">
+      <button id="uploadAssetBtn">Upload GLB/GLTF…</button>
+      <input type="file" id="uploadAsset" accept=".glb,.gltf" hidden>
+      <div id="customAssetList" class="list"></div>
+    </div>
+  </div>
+
+  <div class="section">
     <h2>Ground paint</h2>
     <div class="grid2" style="margin-bottom:8px">
       <button id="paintToggle" class="primary">Enable paint (B)</button>
@@ -323,6 +332,7 @@
     <button id="resetCam">Reset view</button>
     <button id="paintModeBtn" data-mode="paint">Paint (B)</button>
     <button id="targetBtn">Target (T)</button>
+    <button id="snapBtn">Snap (G)</button>
   </div>
   <div class="paint-cursor" id="paintCursor"></div>
   <div class="hud" id="hud"><span class="fps" id="fps">--</span> fps · <span id="hudInfo">loading…</span></div>
@@ -411,6 +421,27 @@
         <label class="field">Tex scale Y<input id="matTexScaleY" type="number" step="0.25" min="0.1" value="2"></label>
       </div>
       <button id="matResetBtn">Reset material</button>
+    </div>
+  </div>
+
+  <div class="section" id="meshControls" style="display:none">
+    <h2>Dimensions</h2>
+    <div class="stack">
+      <div class="slider">
+        <label>Height</label>
+        <input id="meshHeight" type="range" min="0.3" max="2.0" step="0.01" value="1.0">
+        <span id="meshHeightVal" class="val">1.00</span>
+      </div>
+      <div class="slider">
+        <label>Width</label>
+        <input id="meshWidth" type="range" min="0.15" max="1.0" step="0.01" value="0.5">
+        <span id="meshWidthVal" class="val">0.50</span>
+      </div>
+      <div class="slider">
+        <label>Thickness</label>
+        <input id="meshThickness" type="range" min="0.03" max="0.2" step="0.005" value="0.1">
+        <span id="meshThicknessVal" class="val">0.100</span>
+      </div>
     </div>
   </div>
 
@@ -1197,9 +1228,10 @@ let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
 let activeFilter = "all";
-let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, uplight: 0, bollard: 0, ground: 0, other: 0 };
+let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, uplight: 0, bollard: 0, ground: 0, other: 0, custom: 0 };
 let currentBg = "sky";
 let slabShape = "random";
+let gridSnap = false;
 
 function familyOf(name) {
   const n = (name || "").toLowerCase();
@@ -1280,6 +1312,7 @@ const TYPE_ALIASES = {
   uplight:"uplight", uplights:"uplight", "up light":"uplight", "up lights":"uplight",
   spot:"uplight", spots:"uplight",
   bollard:"bollard", bollards:"bollard", "pathway light":"bollard", "path light":"bollard", "bollard light":"bollard",
+  custom:"custom",
 };
 
 function parsePrompt(text) {
@@ -1533,6 +1566,37 @@ function syncInputs() {
 
   // Material controls (show for non-light objects)
   if (typeof syncMaterialControls === "function") syncMaterialControls();
+
+  // Mesh dimension controls (stone slab and strip stone only)
+  const meshCtrlEl = document.getElementById("meshControls");
+  if (selected && (fam === "stone" || fam === "stripStone")) {
+    meshCtrlEl.style.display = "";
+    // Populate sliders from userData or estimate from current mesh bounds
+    let mesh = null;
+    selected.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+    if (mesh) {
+      if (!selected.userData.baseDims) {
+        const box = new THREE.Box3().setFromObject(mesh);
+        const size = box.getSize(new THREE.Vector3());
+        selected.userData.baseDims = { w: size.x, h: size.y, t: size.z };
+      }
+      const base = selected.userData.baseDims;
+      const curH = selected.userData.meshHeight ?? (mesh.scale.y * base.h);
+      const curW = selected.userData.meshWidth  ?? (mesh.scale.x * base.w);
+      const curT = selected.userData.meshThickness ?? (mesh.scale.z * base.t);
+      const hEl = document.getElementById("meshHeight");
+      const wEl = document.getElementById("meshWidth");
+      const tEl = document.getElementById("meshThickness");
+      hEl.value = curH.toFixed(2);
+      document.getElementById("meshHeightVal").textContent = (+hEl.value).toFixed(2);
+      wEl.value = curW.toFixed(2);
+      document.getElementById("meshWidthVal").textContent = (+wEl.value).toFixed(2);
+      tEl.value = curT.toFixed(3);
+      document.getElementById("meshThicknessVal").textContent = (+tEl.value).toFixed(3);
+    }
+  } else {
+    meshCtrlEl.style.display = "none";
+  }
 }
 
 function applyInputsToObject() {
@@ -1763,6 +1827,12 @@ document.getElementById("saveJson").onclick = () => {
         lightAngle:     o.userData.lightAngle,
         lightColor:     o.userData.lightColor,
       } : {}),
+      ...(o.userData.meshHeight != null ? {
+        meshHeight:    o.userData.meshHeight,
+        meshWidth:     o.userData.meshWidth,
+        meshThickness: o.userData.meshThickness,
+        baseDims:      o.userData.baseDims,
+      } : {}),
     })),
   };
   if (targetActive) {
@@ -1814,6 +1884,25 @@ document.getElementById("loadJson").onchange = async ev => {
           o.traverse(child => {
             if (child.isMesh && child.material && child.material.isMeshBasicMaterial) child.material.color.set(item.lightColor);
           });
+        }
+      }
+    }
+    // Restore mesh dimension overrides (JSON export)
+    if (item.baseDims)      o.userData.baseDims = item.baseDims;
+    if (item.meshHeight != null || item.meshWidth != null || item.meshThickness != null) {
+      o.userData.meshHeight    = item.meshHeight;
+      o.userData.meshWidth     = item.meshWidth;
+      o.userData.meshThickness = item.meshThickness;
+      if (item.baseDims) {
+        let mesh = null;
+        o.traverse(c => { if (!mesh && c.isMesh) mesh = c; });
+        if (mesh) {
+          const base = item.baseDims;
+          const h = item.meshHeight ?? (mesh.scale.y * base.h);
+          const w = item.meshWidth  ?? (mesh.scale.x * base.w);
+          const t = item.meshThickness ?? (mesh.scale.z * base.t);
+          mesh.scale.set(w / base.w, h / base.h, t / base.t);
+          mesh.position.y = h / 2;
         }
       }
     }
@@ -1936,6 +2025,12 @@ addEventListener("keydown", e => {
   if (k === "w") tcontrols.setMode("translate");
   if (k === "e") tcontrols.setMode("rotate");
   if (k === "r") tcontrols.setMode("scale");
+  if (k === "g") {
+    gridSnap = !gridSnap;
+    tcontrols.translationSnap = gridSnap ? 0.25 : null;
+    document.getElementById("snapBtn").classList.toggle("active", gridSnap);
+    toast(`Grid snap ${gridSnap ? "on (0.25 m)" : "off"}`);
+  }
   if (k === "b") setPaintMode(!paintMode);
   if (k === "t" && !paintMode) cycleTarget();
   if (k === "f") focusOn(selected);
@@ -1946,6 +2041,10 @@ addEventListener("keydown", e => {
   if (k === "[" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("left"); }
   if (k === "]" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("right"); }
 });
+
+// Rotation snap: hold Shift → snap to 15° increments
+addEventListener("keydown", e => { if (e.key === "Shift") tcontrols.rotationSnap = THREE.MathUtils.degToRad(15); });
+addEventListener("keyup",   e => { if (e.key === "Shift") tcontrols.rotationSnap = null; });
 
 function deleteSelected() {
   if (!selected) return;
@@ -1980,6 +2079,13 @@ function cycleTarget() {
 }
 
 document.getElementById("targetBtn").onclick = cycleTarget;
+
+document.getElementById("snapBtn").onclick = () => {
+  gridSnap = !gridSnap;
+  tcontrols.translationSnap = gridSnap ? 0.25 : null;
+  document.getElementById("snapBtn").classList.toggle("active", gridSnap);
+  toast(`Grid snap ${gridSnap ? "on (0.25 m)" : "off"}`);
+};
 
 function focusOn(obj) {
   if (!obj) return;
@@ -2620,6 +2726,10 @@ function captureProjectState(name) {
       matTexture:     o.userData.matTexture,
       matTexScaleX:   o.userData.matTexScaleX,
       matTexScaleY:   o.userData.matTexScaleY,
+      meshHeight:    o.userData.meshHeight,
+      meshWidth:     o.userData.meshWidth,
+      meshThickness: o.userData.meshThickness,
+      baseDims:      o.userData.baseDims,
     })),
   };
 }
@@ -2762,6 +2872,26 @@ async function applyProject(id) {
     let hasMat = false;
     for (const f of matFields) if (item[f] != null) { o.userData[f] = item[f]; hasMat = true; }
     if (hasMat) applyMaterialOverridesFromUserData(o);
+
+    // Restore mesh dimension overrides
+    if (item.baseDims)      o.userData.baseDims = item.baseDims;
+    if (item.meshHeight != null || item.meshWidth != null || item.meshThickness != null) {
+      o.userData.meshHeight    = item.meshHeight;
+      o.userData.meshWidth     = item.meshWidth;
+      o.userData.meshThickness = item.meshThickness;
+      if (item.baseDims) {
+        let mesh = null;
+        o.traverse(c => { if (!mesh && c.isMesh) mesh = c; });
+        if (mesh) {
+          const base = item.baseDims;
+          const h = item.meshHeight ?? (mesh.scale.y * base.h);
+          const w = item.meshWidth  ?? (mesh.scale.x * base.w);
+          const t = item.meshThickness ?? (mesh.scale.z * base.t);
+          mesh.scale.set(w / base.w, h / base.h, t / base.t);
+          mesh.position.y = h / 2;
+        }
+      }
+    }
   }
 
   // Restore paint
@@ -3062,6 +3192,124 @@ document.getElementById("matResetBtn").onclick = () => {
   syncMaterialControls();
   toast("Material reset to default");
   scheduleAutoSave();
+};
+
+// ===========================================================================
+// F17 — PER-OBJECT MESH DIMENSIONS
+// ===========================================================================
+function applyMeshDimensions() {
+  if (!selected) return;
+  const h = +document.getElementById("meshHeight").value;
+  const w = +document.getElementById("meshWidth").value;
+  const t = +document.getElementById("meshThickness").value;
+
+  let mesh = null;
+  selected.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) return;
+
+  if (!selected.userData.baseDims) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const size = box.getSize(new THREE.Vector3());
+    selected.userData.baseDims = { w: size.x, h: size.y, t: size.z };
+  }
+  const base = selected.userData.baseDims;
+
+  mesh.scale.set(w / base.w, h / base.h, t / base.t);
+  mesh.position.y = h / 2;
+
+  selected.userData.meshHeight    = h;
+  selected.userData.meshWidth     = w;
+  selected.userData.meshThickness = t;
+
+  syncInputs();
+  if (typeof scheduleAutoSave === "function") scheduleAutoSave();
+}
+
+document.getElementById("meshHeight").addEventListener("input", e => {
+  document.getElementById("meshHeightVal").textContent = (+e.target.value).toFixed(2);
+  applyMeshDimensions();
+});
+document.getElementById("meshWidth").addEventListener("input", e => {
+  document.getElementById("meshWidthVal").textContent = (+e.target.value).toFixed(2);
+  applyMeshDimensions();
+});
+document.getElementById("meshThickness").addEventListener("input", e => {
+  document.getElementById("meshThicknessVal").textContent = (+e.target.value).toFixed(3);
+  applyMeshDimensions();
+});
+
+// ===========================================================================
+// F12 — CUSTOM ASSET UPLOAD
+// ===========================================================================
+const customAssets = []; // { name, dataUrl }
+
+function refreshCustomAssets() {
+  const list = document.getElementById("customAssetList");
+  list.innerHTML = "";
+  for (const asset of customAssets) {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `<span class="name">${asset.name}</span><span class="pill">custom</span>`;
+    el.onclick = () => spawnCustomAsset(asset);
+    list.appendChild(el);
+  }
+}
+
+function spawnCustomAsset(asset) {
+  const binary = atob(asset.dataUrl.split(",")[1]);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.parse(bytes.buffer, "", (gltf) => {
+    const obj = gltf.scene;
+    obj.name = `${asset.name}_${Date.now()}`;
+    obj.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+
+    if (targetActive) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 0.3 + Math.random() * 0.5;
+      obj.position.set(
+        targetGroup.position.x + Math.cos(angle) * dist,
+        0,
+        targetGroup.position.z + Math.sin(angle) * dist,
+      );
+    } else {
+      obj.position.set(
+        THREE.MathUtils.randFloat(-4.5, 4.5),
+        0,
+        THREE.MathUtils.randFloat(-4.5, 4.5),
+      );
+    }
+
+    scene.add(obj);
+    registerObject(obj, "custom", false);
+    selectObject(obj);
+    refreshUi();
+    toast(`Placed ${asset.name}`);
+  }, (err) => {
+    console.error("GLTFLoader parse error:", err);
+    toast(`Failed to load ${asset.name}`);
+  });
+}
+
+document.getElementById("uploadAssetBtn").onclick = () => document.getElementById("uploadAsset").click();
+document.getElementById("uploadAsset").onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const name = file.name.replace(/\.(glb|gltf)$/i, "");
+  const arrayBuffer = await file.arrayBuffer();
+  const blob = new Blob([arrayBuffer]);
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    customAssets.push({ name, dataUrl });
+    refreshCustomAssets();
+    toast(`Added custom asset: ${name}`);
+  };
+  reader.readAsDataURL(blob);
+  // Reset so the same file can be re-uploaded if needed
+  e.target.value = "";
 };
 
 let lastT = performance.now();
