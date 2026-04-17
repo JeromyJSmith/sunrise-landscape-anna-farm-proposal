@@ -371,6 +371,10 @@
 
   <div class="section">
     <h2>Save / Load</h2>
+    <div class="grid2" style="margin-bottom:6px">
+      <button id="undoBtn">Undo (Ctrl+Z)</button>
+      <button id="redoBtn">Redo (Ctrl+Shift+Z)</button>
+    </div>
     <div class="grid2">
       <button id="saveJson">Download JSON</button>
       <button id="loadJsonBtn">Load JSON…</button>
@@ -689,6 +693,20 @@ tcontrols.addEventListener("dragging-changed", e => orbit.enabled = !e.value);
 tcontrols.addEventListener("objectChange", () => { syncInputs(); refreshPrompt(); });
 scene.add(tcontrols);
 
+// Capture before-state on drag start, push TransformCommand on drag end
+let _tcBeforePos = null, _tcBeforeRot = null, _tcBeforeScl = null;
+tcontrols.addEventListener("mouseDown", () => {
+  if (!selected) return;
+  _tcBeforePos = selected.position.clone();
+  _tcBeforeRot = selected.rotation.clone();
+  _tcBeforeScl = selected.scale.clone();
+});
+tcontrols.addEventListener("mouseUp", () => {
+  if (!selected || !_tcBeforePos) return;
+  pushUndo(TransformCommand(selected, _tcBeforePos, _tcBeforeRot, _tcBeforeScl));
+  _tcBeforePos = null; _tcBeforeRot = null; _tcBeforeScl = null;
+});
+
 // ===========================================================================
 // post-processing (SSAO + FXAA)
 // ===========================================================================
@@ -1000,6 +1018,82 @@ let targetActive = false;
 const selectables = [];
 const baseObjects = new Set();
 let selected = null;
+
+// ===========================================================================
+// undo / redo command stack
+// ===========================================================================
+const undoStack = [];
+const redoStack = [];
+const MAX_UNDO = 50;
+
+function pushUndo(cmd) {
+  undoStack.push(cmd);
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack.length = 0;
+}
+
+function undo() {
+  if (!undoStack.length) { toast("Nothing to undo"); return; }
+  const cmd = undoStack.pop();
+  cmd.undo();
+  redoStack.push(cmd);
+  syncInputs();
+  refreshUi();
+  toast(`Undo: ${cmd.description}`);
+}
+
+function redo() {
+  if (!redoStack.length) { toast("Nothing to redo"); return; }
+  const cmd = redoStack.pop();
+  cmd.execute();
+  undoStack.push(cmd);
+  syncInputs();
+  refreshUi();
+  toast(`Redo: ${cmd.description}`);
+}
+
+function AddObjectCommand(obj) {
+  return {
+    description: `Add ${obj.userData.family}`,
+    execute() { scene.add(obj); selectables.push(obj); selectObject(obj); },
+    undo() {
+      scene.remove(obj);
+      const i = selectables.indexOf(obj);
+      if (i >= 0) selectables.splice(i, 1);
+      if (selected === obj) selectObject(null);
+    },
+  };
+}
+
+function DeleteObjectCommand(obj) {
+  const idx = selectables.indexOf(obj);
+  return {
+    description: `Delete ${obj.userData.id || obj.userData.family}`,
+    execute() {
+      scene.remove(obj);
+      const i = selectables.indexOf(obj);
+      if (i >= 0) selectables.splice(i, 1);
+      if (selected === obj) selectObject(null);
+    },
+    undo() {
+      scene.add(obj);
+      if (idx >= 0) selectables.splice(idx, 0, obj);
+      else selectables.push(obj);
+      selectObject(obj);
+    },
+  };
+}
+
+function TransformCommand(obj, beforePos, beforeRot, beforeScl) {
+  const afterPos = obj.position.clone();
+  const afterRot = obj.rotation.clone();
+  const afterScl = obj.scale.clone();
+  return {
+    description: `Move ${obj.userData.id || obj.userData.family}`,
+    execute() { obj.position.copy(afterPos); obj.rotation.copy(afterRot); obj.scale.copy(afterScl); },
+    undo() { obj.position.copy(beforePos); obj.rotation.copy(beforeRot); obj.scale.copy(beforeScl); },
+  };
+}
 let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
@@ -1138,6 +1232,7 @@ function spawnAt(type, basePos = null, options = {}) {
   }
   scene.add(obj);
   registerObject(obj, type, false);
+  pushUndo(AddObjectCommand(obj));
 
   // Warn when many shadow-casting uplights are in the scene
   if (type === "uplight") {
@@ -1338,6 +1433,9 @@ function syncInputs() {
 
 function applyInputsToObject() {
   if (!selected) return;
+  const beforePos = selected.position.clone();
+  const beforeRot = selected.rotation.clone();
+  const beforeScl = selected.scale.clone();
   selected.position.set(+inputs.posX.value, +inputs.posY.value, +inputs.posZ.value);
   selected.rotation.set(
     THREE.MathUtils.degToRad(+inputs.rotX.value),
@@ -1351,6 +1449,7 @@ function applyInputsToObject() {
   } else {
     selected.scale.set(+inputs.sclX.value, +inputs.sclY.value, +inputs.sclZ.value);
   }
+  pushUndo(TransformCommand(selected, beforePos, beforeRot, beforeScl));
   refreshPrompt();
 }
 for (const el of Object.values(inputs)) el.addEventListener("input", applyInputsToObject);
@@ -1517,6 +1616,8 @@ document.getElementById("dropToGround").onclick = () => {
   syncInputs(); refreshPrompt();
 };
 document.getElementById("deleteBtn").onclick = deleteSelected;
+document.getElementById("undoBtn").onclick = undo;
+document.getElementById("redoBtn").onclick = redo;
 
 document.getElementById("resetAllBtn").onclick = () => {
   for (const o of selectables) {
@@ -1663,8 +1764,11 @@ renderer.toneMappingExposure = +document.getElementById("exposure").value;
 
 // keyboard
 addEventListener("keydown", e => {
-  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   const k = e.key.toLowerCase();
+  // Undo/redo — handled before any input-field guard
+  if ((e.ctrlKey || e.metaKey) && k === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === "z" && e.shiftKey)  { e.preventDefault(); redo(); return; }
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   if (k === "w") tcontrols.setMode("translate");
   if (k === "e") tcontrols.setMode("rotate");
   if (k === "r") tcontrols.setMode("scale");
@@ -1681,11 +1785,11 @@ addEventListener("keydown", e => {
 
 function deleteSelected() {
   if (!selected) return;
-  scene.remove(selected);
-  const i = selectables.indexOf(selected);
-  if (i >= 0) selectables.splice(i, 1);
-  baseObjects.delete(selected);
-  selectObject(null);
+  const obj = selected;
+  baseObjects.delete(obj);
+  const cmd = DeleteObjectCommand(obj);
+  cmd.execute();
+  pushUndo(cmd);
   refreshUi();
 }
 
