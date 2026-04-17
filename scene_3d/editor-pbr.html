@@ -1,0 +1,1752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Anna's Farm — 3D Scene Editor (v2)</title>
+<style>
+  :root {
+    --bg: #0d1015; --panel: #161a22; --panel-2: #1f2532; --line: #2c3242;
+    --text: #eef2f7; --muted: #98a3b4; --accent: #5bc0be; --warn: #f4a261; --danger: #e76f51;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; }
+  body { display: grid; grid-template-columns: 320px 1fr 320px; height: 100vh; }
+  .col { overflow: auto; background: var(--panel); }
+  .col.left  { border-right: 1px solid var(--line); }
+  .col.right { border-left:  1px solid var(--line); }
+  .main { position: relative; min-width: 0; background: #0a0c10; }
+  #viewport { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .section { padding: 14px 14px; border-bottom: 1px solid var(--line); }
+  h1 { font-size: 14px; margin: 0 0 6px; letter-spacing: 0.04em; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 8px; }
+  p { margin: 4px 0; color: var(--muted); }
+  .tip { font-size: 12px; color: var(--muted); }
+  button, select, input, textarea {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 8px; font: inherit;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: #1b3d3d; border-color: var(--accent); }
+  button.danger  { background: #3a2222; border-color: #7a3a3a; color: #ffd6c8; }
+  button.danger:hover { border-color: var(--danger); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .stack { display: grid; gap: 6px; }
+  label.field { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--muted); }
+  label.field input { width: 100%; }
+  .slider { display: grid; grid-template-columns: 80px 1fr 50px; gap: 6px; align-items: center; font-size: 12px; }
+  .slider input[type=range] { width: 100%; }
+  .slider .val { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .toolbar {
+    position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap;
+    background: rgba(13,16,21,0.85); padding: 6px; border-radius: 8px; backdrop-filter: blur(6px);
+    z-index: 5; border: 1px solid var(--line);
+  }
+  .toolbar button.active { outline: 2px solid var(--accent); }
+  .hud {
+    position: absolute; top: 12px; right: 12px; padding: 6px 10px; border-radius: 6px;
+    background: rgba(13,16,21,0.85); font-size: 11px; color: var(--muted); z-index: 5;
+    backdrop-filter: blur(6px); border: 1px solid var(--line); font-variant-numeric: tabular-nums;
+  }
+  .hud .fps { color: var(--accent); font-weight: 700; }
+  .refs { display: grid; gap: 8px; }
+  .refs img { width: 100%; border-radius: 6px; border: 1px solid var(--line); display: block; }
+  .ref-cap { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .list { display: grid; gap: 4px; max-height: 240px; overflow: auto; padding-right: 2px; }
+  .item {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 6px 8px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; cursor: pointer; user-select: none;
+  }
+  .item:hover { border-color: var(--accent); }
+  .item.active { border-color: var(--accent); background: #133333; }
+  .item .name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .pill { font-size: 10px; color: var(--muted); padding: 1px 5px; border: 1px solid var(--line); border-radius: 99px; }
+  .filterbar { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+  .filterbar button { padding: 3px 8px; font-size: 11px; }
+  .filterbar button.active { border-color: var(--accent); background: #133333; }
+  .promptline { display: flex; gap: 6px; }
+  .promptline input { flex: 1; }
+  textarea { width: 100%; min-height: 110px; resize: vertical; font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+  details { margin-top: 6px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  .pillbtn { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); border-radius: 99px; font-size: 11px; color: var(--muted); }
+  .row-flex { display: flex; gap: 6px; align-items: center; }
+  .toast {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--panel); border: 1px solid var(--accent); padding: 8px 14px; border-radius: 8px;
+    font-size: 12px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 10;
+  }
+  .toast.show { opacity: 1; }
+  .loadbar {
+    position: absolute; bottom: 0; left: 0; height: 2px; width: 0%;
+    background: var(--accent); transition: width 0.15s ease; z-index: 10;
+  }
+  select { width: 100%; }
+  .seg { display: flex; gap: 0; }
+  .seg button { flex: 1; border-radius: 0; border-right-width: 0; }
+  .seg button:first-child { border-radius: 6px 0 0 6px; }
+  .seg button:last-child  { border-radius: 0 6px 6px 0; border-right-width: 1px; }
+  .seg button.active { background: #133333; border-color: var(--accent); color: var(--text); }
+  .paint-controls { display: none; }
+  .paint-controls.visible { display: grid; gap: 8px; }
+  .color-row { display: flex; gap: 6px; align-items: center; }
+  .color-row input[type=color] { width: 36px; height: 28px; border: 1px solid var(--line); border-radius: 4px; padding: 0; cursor: pointer; background: var(--panel-2); }
+  .color-row .hex { font-size: 11px; color: var(--muted); font-family: ui-monospace, monospace; }
+  .brush-preview { width: 100%; height: 60px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .brush-preview canvas { image-rendering: auto; }
+  .texture-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .texture-grid button { padding: 6px 4px; font-size: 10px; text-align: center; }
+  .texture-grid button.active { border-color: var(--accent); background: #133333; }
+  .paint-cursor {
+    position: absolute; pointer-events: none; z-index: 6;
+    border: 2px solid var(--accent); border-radius: 50%;
+    transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.15s;
+  }
+  .paint-cursor.visible { opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL ------------------------------------------------------------ -->
+<aside class="col left">
+  <div class="section">
+    <h1>ANNA'S FARM — EDITOR v2</h1>
+    <p class="tip">PBR-lit edition. Click an object → drag the gizmo or type values on the right. <b>W</b>/<b>E</b>/<b>R</b> = move/rotate/scale. <b>F</b> = focus. <b>X</b> = delete.</p>
+  </div>
+
+  <div class="section">
+    <h2>Lighting & atmosphere</h2>
+    <div class="stack">
+      <div class="slider">
+        <label>Time of day</label>
+        <input id="sunTime" type="range" min="6" max="20" step="0.1" value="16.5">
+        <span id="sunTimeVal" class="val">16:30</span>
+      </div>
+      <div class="slider">
+        <label>Sun strength</label>
+        <input id="sunStrength" type="range" min="0" max="6" step="0.05" value="2.4">
+        <span id="sunStrengthVal" class="val">2.4</span>
+      </div>
+      <div class="slider">
+        <label>Env intensity</label>
+        <input id="envIntensity" type="range" min="0" max="3" step="0.05" value="1.0">
+        <span id="envIntensityVal" class="val">1.0</span>
+      </div>
+      <div class="slider">
+        <label>Exposure</label>
+        <input id="exposure" type="range" min="0.2" max="2" step="0.05" value="1.0">
+        <span id="exposureVal" class="val">1.0</span>
+      </div>
+      <h2 style="margin-top:6px">Background</h2>
+      <div class="seg">
+        <button data-bg="sky" class="active">Sky</button>
+        <button data-bg="hdri">HDRI</button>
+        <button data-bg="solid">Solid</button>
+      </div>
+      <h2 style="margin-top:6px">Display</h2>
+      <div class="grid2">
+        <button id="toggleHelpers">Helpers</button>
+        <button id="toggleWireframe">Wireframe</button>
+        <button id="toggleAO">SSAO</button>
+        <button id="togglePbr">PBR maps</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>References</h2>
+    <div class="refs">
+      <div><img src="refs/iso1.webp" alt="concept iso 1" loading="lazy"><div class="ref-cap">Concept render — primary layout</div></div>
+      <div><img src="refs/iso2.webp" alt="concept iso 2" loading="lazy"><div class="ref-cap">Concept render — alt angle</div></div>
+      <div><img src="refs/site.jpg"  alt="site photo"   loading="lazy"><div class="ref-cap">Real site photo</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Add object</h2>
+    <div class="grid2">
+      <button data-add="stone">+ Stone slab</button>
+      <button data-add="boulder">+ Boulder</button>
+      <button data-add="post">+ Post</button>
+      <button data-add="cobble">+ Cobble</button>
+      <button data-add="tree">+ Tree</button>
+      <button data-add="sign">+ Sign</button>
+    </div>
+    <p class="tip" style="margin-top:8px">Or type a prompt:</p>
+    <div class="promptline">
+      <input id="addPrompt" placeholder='e.g. "add 3 boulders near tree"' />
+      <button id="addPromptBtn" class="primary">Go</button>
+    </div>
+    <p class="tip" style="margin-top:6px">
+      <span class="pillbtn">add 5 stones</span>
+      <span class="pillbtn">2 posts near sign</span>
+      <span class="pillbtn">a boulder by tree</span>
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Ground paint</h2>
+    <div class="grid2" style="margin-bottom:8px">
+      <button id="paintToggle" class="primary">Enable paint (B)</button>
+      <button id="paintErase">Eraser</button>
+    </div>
+    <div class="paint-controls" id="paintControls">
+      <div class="color-row">
+        <label style="font-size:11px;color:var(--muted)">Color</label>
+        <input type="color" id="paintColor" value="#8B4513">
+        <span class="hex" id="paintColorHex">#8B4513</span>
+      </div>
+      <div class="slider">
+        <label>Brush size</label>
+        <input id="brushSize" type="range" min="2" max="120" step="1" value="24">
+        <span id="brushSizeVal" class="val">24</span>
+      </div>
+      <div class="slider">
+        <label>Opacity</label>
+        <input id="brushOpacity" type="range" min="0.05" max="1" step="0.05" value="0.6">
+        <span id="brushOpacityVal" class="val">0.60</span>
+      </div>
+      <div class="slider">
+        <label>Hardness</label>
+        <input id="brushHardness" type="range" min="0" max="1" step="0.05" value="0.5">
+        <span id="brushHardnessVal" class="val">0.50</span>
+      </div>
+      <h2>Brush texture</h2>
+      <div class="texture-grid" id="brushTextures">
+        <button data-brush="solid" class="active">Solid</button>
+        <button data-brush="spray">Spray</button>
+        <button data-brush="grass">Grass</button>
+        <button data-brush="gravel">Gravel</button>
+        <button data-brush="noise">Noise</button>
+        <button data-brush="scatter">Scatter</button>
+        <button data-brush="stipple">Stipple</button>
+        <button data-brush="chalk">Chalk</button>
+      </div>
+      <h2>Brush preview</h2>
+      <div class="brush-preview"><canvas id="brushPreview" width="56" height="56"></canvas></div>
+      <div class="grid2">
+        <button id="paintUndo">Undo stroke</button>
+        <button id="paintClear" class="danger">Clear paint</button>
+      </div>
+      <button id="paintSave" style="width:100%">Save paint PNG</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Scene objects (<span id="objCount">0</span>)</h2>
+    <div class="filterbar" id="filterbar"></div>
+    <div id="objectList" class="list"></div>
+  </div>
+</aside>
+
+<!-- VIEWPORT --------------------------------------------------------------- -->
+<main class="main">
+  <div class="toolbar">
+    <button data-mode="translate" class="active">Move (W)</button>
+    <button data-mode="rotate">Rotate (E)</button>
+    <button data-mode="scale">Scale (R)</button>
+    <button id="focusBtn">Focus (F)</button>
+    <button id="frameAllBtn">Frame all</button>
+    <button id="resetCam">Reset view</button>
+    <button id="paintModeBtn" data-mode="paint">Paint (B)</button>
+  </div>
+  <div class="paint-cursor" id="paintCursor"></div>
+  <div class="hud" id="hud"><span class="fps" id="fps">--</span> fps · <span id="hudInfo">loading…</span></div>
+  <canvas id="viewport"></canvas>
+  <div class="loadbar" id="loadbar"></div>
+  <div class="toast" id="toast"></div>
+</main>
+
+<!-- RIGHT PANEL ----------------------------------------------------------- -->
+<aside class="col right">
+  <div class="section">
+    <h2>Selected</h2>
+    <div id="selName" class="tip">— nothing selected —</div>
+    <div class="grid2" style="margin-top:8px">
+      <button id="duplicateBtn">Duplicate</button>
+      <button id="resetTransformBtn">Reset transform</button>
+    </div>
+    <div class="grid2" style="margin-top:6px">
+      <button id="dropToGround">Drop to ground</button>
+      <button id="deleteBtn" class="danger">Delete (X)</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Position (m)</h2>
+    <div class="grid3">
+      <label class="field">X<input id="posX" type="number" step="0.05"></label>
+      <label class="field">Y<input id="posY" type="number" step="0.05"></label>
+      <label class="field">Z<input id="posZ" type="number" step="0.05"></label>
+    </div>
+    <h2 style="margin-top:10px">Rotation (°)</h2>
+    <div class="grid3">
+      <label class="field">X<input id="rotX" type="number" step="1"></label>
+      <label class="field">Y<input id="rotY" type="number" step="1"></label>
+      <label class="field">Z<input id="rotZ" type="number" step="1"></label>
+    </div>
+    <h2 style="margin-top:10px">Scale</h2>
+    <div class="grid3">
+      <label class="field">X<input id="sclX" type="number" step="0.05" min="0.05"></label>
+      <label class="field">Y<input id="sclY" type="number" step="0.05" min="0.05"></label>
+      <label class="field">Z<input id="sclZ" type="number" step="0.05" min="0.05"></label>
+    </div>
+    <div class="row-flex" style="margin-top:8px">
+      <label class="row-flex tip"><input type="checkbox" id="uniformScale"> uniform</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Save / Load</h2>
+    <div class="grid2">
+      <button id="saveJson">Download JSON</button>
+      <button id="loadJsonBtn">Load JSON…</button>
+    </div>
+    <input type="file" id="loadJson" accept=".json" hidden>
+    <div class="grid2" style="margin-top:6px">
+      <button id="resetAllBtn" class="danger">Reset all transforms</button>
+      <button id="clearAddedBtn" class="danger">Remove added</button>
+    </div>
+    <div class="grid2" style="margin-top:6px">
+      <button id="screenshotBtn">Screenshot PNG</button>
+      <button id="copyPrompt">Copy AI prompt</button>
+    </div>
+    <details>
+      <summary>Export prompt for downstream AI tools</summary>
+      <textarea id="promptOut" readonly></textarea>
+    </details>
+  </div>
+</aside>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader }       from "three/addons/loaders/GLTFLoader.js";
+import { RGBELoader }       from "three/addons/loaders/RGBELoader.js";
+import { OrbitControls }    from "three/addons/controls/OrbitControls.js";
+import { TransformControls }from "three/addons/controls/TransformControls.js";
+import { Sky }              from "three/addons/objects/Sky.js";
+import { EffectComposer }   from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass }       from "three/addons/postprocessing/RenderPass.js";
+import { SSAOPass }         from "three/addons/postprocessing/SSAOPass.js";
+import { OutputPass }       from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass }       from "three/addons/postprocessing/ShaderPass.js";
+import { FXAAShader }       from "three/addons/shaders/FXAAShader.js";
+
+// ===========================================================================
+// renderer / scene / camera
+// ===========================================================================
+const canvas   = document.getElementById("viewport");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping      = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog   = new THREE.Fog(0xc8d8ec, 50, 120);
+
+const cam = new THREE.PerspectiveCamera(38, 2, 0.1, 800);
+cam.position.set(15, 12, 15);
+
+const orbit = new OrbitControls(cam, canvas);
+orbit.target.set(0, 1, 0);
+orbit.enableDamping = true;
+
+// ===========================================================================
+// sky + sun + env
+// ===========================================================================
+const sky = new Sky();
+sky.scale.setScalar(1000);
+const skyU = sky.material.uniforms;
+skyU.turbidity.value = 7;
+skyU.rayleigh.value = 1.2;
+skyU.mieCoefficient.value = 0.005;
+skyU.mieDirectionalG.value = 0.85;
+scene.add(sky);
+
+const sunDir = new THREE.Vector3();
+const sun = new THREE.DirectionalLight(0xfff1d6, 2.4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+const sd = sun.shadow.camera;
+sd.left = -16; sd.right = 16; sd.top = 16; sd.bottom = -16;
+sd.near = 0.5; sd.far = 80;
+sun.shadow.bias = -0.0002;
+sun.shadow.normalBias = 0.04;
+scene.add(sun);
+
+const hemi = new THREE.HemisphereLight(0xc8e4ff, 0x70573b, 0.45);
+scene.add(hemi);
+
+// Env map: PMREM-process the Sky shader so PBR materials reflect a real sky
+const pmrem = new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+let envTex = null;
+
+function rebuildEnv() {
+  if (envTex) envTex.dispose();
+  // Render the sky into a PMREM cubemap
+  const tmpScene = new THREE.Scene();
+  tmpScene.add(sky.clone());
+  envTex = pmrem.fromScene(tmpScene, 0.04).texture;
+  scene.environment = envTex;
+  scene.environmentIntensity = +document.getElementById("envIntensity").value;
+  if (currentBg === "hdri") scene.background = envTex;
+  if (currentBg === "sky")  scene.background = null; // sky mesh is in-scene
+}
+
+// Time-of-day → sun direction (golden-hour at 16:30)
+function setSunFromTime(hour) {
+  const t = THREE.MathUtils.mapLinear(hour, 6, 20, -Math.PI * 0.5, Math.PI * 0.5);
+  // elevation: sun rises east (-x), sets west (+x); zenith at noon
+  const elev = Math.sin(((hour - 6) / 14) * Math.PI) * THREE.MathUtils.degToRad(78);
+  const azim = THREE.MathUtils.degToRad(45) + t * 0.3;
+  sunDir.setFromSphericalCoords(1, Math.PI / 2 - elev, azim);
+  skyU.sunPosition.value.copy(sunDir);
+  sun.position.copy(sunDir).multiplyScalar(40);
+  sun.target.position.set(0, 0, 0);
+  sun.target.updateMatrixWorld();
+  // warm light at low sun, cool at high
+  const warmth = THREE.MathUtils.smoothstep(elev, 0, 0.5);
+  sun.color.setHSL(THREE.MathUtils.lerp(0.08, 0.13, warmth), 0.55, 0.65);
+  hemi.intensity = THREE.MathUtils.lerp(0.2, 0.55, warmth);
+  scene.fog.color.setHSL(0.58, 0.25, THREE.MathUtils.lerp(0.55, 0.75, warmth));
+  rebuildEnv();
+}
+
+// ===========================================================================
+// procedural PBR helpers — generate normal/roughness textures via canvas
+// (so we don't depend on third-party CDNs at runtime)
+// ===========================================================================
+function makeNoiseDataTexture(size, octaves, seed) {
+  const data = new Uint8Array(size * size);
+  const rng = mulberry32(seed * 1e6 | 0);
+  // value-noise
+  const grid = 8;
+  const points = [];
+  for (let i = 0; i < grid * grid; i++) points.push(rng());
+  function val(x, y) {
+    const fx = (x / size) * grid;
+    const fy = (y / size) * grid;
+    const x0 = Math.floor(fx) % grid, y0 = Math.floor(fy) % grid;
+    const x1 = (x0 + 1) % grid, y1 = (y0 + 1) % grid;
+    const tx = fx - Math.floor(fx), ty = fy - Math.floor(fy);
+    const a = points[y0 * grid + x0], b = points[y0 * grid + x1];
+    const c = points[y1 * grid + x0], d = points[y1 * grid + x1];
+    const sx = tx * tx * (3 - 2 * tx);
+    const sy = ty * ty * (3 - 2 * ty);
+    return THREE.MathUtils.lerp(THREE.MathUtils.lerp(a, b, sx), THREE.MathUtils.lerp(c, d, sx), sy);
+  }
+  let amp = 1, freq = 1, sum = 0, total = 0;
+  for (let i = 0; i < size * size; i++) {
+    const x = i % size, y = (i / size) | 0;
+    let v = 0; let aamp = amp; let ttotal = 0;
+    for (let o = 0; o < octaves; o++) {
+      v += val(x * (1 << o), y * (1 << o)) * aamp;
+      ttotal += aamp;
+      aamp *= 0.5;
+    }
+    data[i] = Math.min(255, Math.max(0, (v / ttotal) * 255));
+  }
+  const tex = new THREE.DataTexture(data, size, size, THREE.RedFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function makeNormalFromHeight(heightTex, strength = 1) {
+  const size = heightTex.image.width;
+  const src = heightTex.image.data;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = y * size + x;
+      const xl = src[y * size + ((x - 1 + size) % size)];
+      const xr = src[y * size + ((x + 1) % size)];
+      const yu = src[((y - 1 + size) % size) * size + x];
+      const yd = src[((y + 1) % size) * size + x];
+      const dx = (xr - xl) / 255 * strength;
+      const dy = (yd - yu) / 255 * strength;
+      const nx = -dx, ny = -dy, nz = 1.0;
+      const len = Math.hypot(nx, ny, nz);
+      data[i * 4 + 0] = ((nx / len) * 0.5 + 0.5) * 255;
+      data[i * 4 + 1] = ((ny / len) * 0.5 + 0.5) * 255;
+      data[i * 4 + 2] = ((nz / len) * 0.5 + 0.5) * 255;
+      data[i * 4 + 3] = 255;
+    }
+  }
+  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const noiseTex = {
+  rocky:    makeNoiseDataTexture(256, 5, 0.31),
+  smooth:   makeNoiseDataTexture(256, 4, 0.62),
+  pebbles:  makeNoiseDataTexture(256, 6, 0.17),
+  wood:     makeNoiseDataTexture(256, 4, 0.83),
+  gravel:   makeNoiseDataTexture(256, 6, 0.44),
+};
+const normalTex = {
+  rocky:    makeNormalFromHeight(noiseTex.rocky,   2.5),
+  smooth:   makeNormalFromHeight(noiseTex.smooth,  1.2),
+  pebbles:  makeNormalFromHeight(noiseTex.pebbles, 3.0),
+  wood:     makeNormalFromHeight(noiseTex.wood,    1.6),
+  gravel:   makeNormalFromHeight(noiseTex.gravel,  2.8),
+};
+for (const k of Object.keys(normalTex)) {
+  normalTex[k].repeat.set(2, 2);
+  noiseTex[k].repeat.set(2, 2);
+}
+
+function mulberry32(a) {
+  return function() {
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// material library — keyed by family. Each variant repeats noise texture differently.
+const MATS = {
+  stone: () => new THREE.MeshStandardMaterial({
+    color: 0xc05227, roughness: 0.85, metalness: 0.0,
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.7, 0.7),
+    roughnessMap: noiseTex.rocky.clone(),
+  }),
+  stone2: () => new THREE.MeshStandardMaterial({
+    color: 0x9e4324, roughness: 0.9, metalness: 0.0,
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.7, 0.7),
+    roughnessMap: noiseTex.rocky.clone(),
+  }),
+  boulder: () => new THREE.MeshStandardMaterial({
+    color: 0x8a8a87, roughness: 0.95, metalness: 0.0,
+    normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
+    roughnessMap: noiseTex.smooth.clone(),
+  }),
+  boulderW: () => new THREE.MeshStandardMaterial({
+    color: 0xd9d6cf, roughness: 0.92, metalness: 0.0,
+    normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
+    roughnessMap: noiseTex.smooth.clone(),
+  }),
+  post: () => new THREE.MeshStandardMaterial({
+    color: 0x7a5232, roughness: 0.88, metalness: 0.0,
+    normalMap: normalTex.wood.clone(), normalScale: new THREE.Vector2(0.4, 1.2),
+  }),
+  cobble: () => new THREE.MeshStandardMaterial({
+    color: 0xbcb39e, roughness: 0.85, metalness: 0.0,
+    normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.4, 0.4),
+  }),
+  trunk: () => new THREE.MeshStandardMaterial({
+    color: 0x4d382a, roughness: 0.95, metalness: 0.0,
+    normalMap: normalTex.wood.clone(), normalScale: new THREE.Vector2(0.6, 1.5),
+  }),
+  leaves: () => new THREE.MeshStandardMaterial({
+    color: 0x5c8c40, roughness: 0.9, metalness: 0.0,
+  }),
+  signSt: () => new THREE.MeshStandardMaterial({
+    color: 0x73544a, roughness: 0.85, metalness: 0.0,
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
+  }),
+  signPlt: () => new THREE.MeshStandardMaterial({
+    color: 0x33231a, roughness: 0.45, metalness: 0.5,
+  }),
+  ground: () => new THREE.MeshStandardMaterial({
+    color: 0x9e8e6b, roughness: 0.95, metalness: 0.0,
+    normalMap: normalTex.gravel.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
+    roughnessMap: noiseTex.gravel.clone(),
+  }),
+  deck: () => new THREE.MeshStandardMaterial({
+    color: 0x8e6334, roughness: 0.85, metalness: 0.0,
+    normalMap: normalTex.wood.clone(), normalScale: new THREE.Vector2(0.3, 1.0),
+  }),
+  path: () => new THREE.MeshStandardMaterial({
+    color: 0x4c5c70, roughness: 0.78, metalness: 0.0,
+    normalMap: normalTex.pebbles.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
+    roughnessMap: noiseTex.pebbles.clone(),
+  }),
+};
+
+function repeatMap(mat, scaleX, scaleY) {
+  for (const k of ["map", "normalMap", "roughnessMap", "aoMap"]) {
+    if (mat[k]) {
+      mat[k].wrapS = mat[k].wrapT = THREE.RepeatWrapping;
+      mat[k].repeat.set(scaleX, scaleY);
+      mat[k].needsUpdate = true;
+    }
+  }
+}
+
+// ===========================================================================
+// helpers, gizmo, picking
+// ===========================================================================
+const grid = new THREE.GridHelper(40, 40, 0x3e5566, 0x202b35);
+grid.position.y = 0.001;
+scene.add(grid);
+const axes = new THREE.AxesHelper(3);
+scene.add(axes);
+
+const tcontrols = new TransformControls(cam, canvas);
+tcontrols.size = 0.8;
+tcontrols.addEventListener("dragging-changed", e => orbit.enabled = !e.value);
+tcontrols.addEventListener("objectChange", () => { syncInputs(); refreshPrompt(); });
+scene.add(tcontrols);
+
+// ===========================================================================
+// post-processing (SSAO + FXAA)
+// ===========================================================================
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const renderPass = new RenderPass(scene, cam);
+composer.addPass(renderPass);
+const ssaoPass = new SSAOPass(scene, cam);
+ssaoPass.kernelRadius = 0.45;
+ssaoPass.minDistance = 0.0008;
+ssaoPass.maxDistance = 0.05;
+ssaoPass.output = SSAOPass.OUTPUT.Default;
+composer.addPass(ssaoPass);
+const fxaaPass = new ShaderPass(FXAAShader);
+composer.addPass(fxaaPass);
+composer.addPass(new OutputPass());
+let ssaoEnabled = true;
+
+// ===========================================================================
+// procedural builders (matched to the Blender script)
+// ===========================================================================
+function jitterGeometry(geo, amount, seed = Math.random()) {
+  const pos = geo.attributes.position;
+  const rnd = mulberry32(Math.floor(seed * 1e9));
+  for (let i = 0; i < pos.count; i++) {
+    pos.setX(i, pos.getX(i) + (rnd() - 0.5) * amount);
+    pos.setY(i, pos.getY(i) + (rnd() - 0.5) * amount);
+    pos.setZ(i, pos.getZ(i) + (rnd() - 0.5) * amount);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+
+function buildStone() {
+  const h = THREE.MathUtils.randFloat(1.4, 2.6);
+  const w = THREE.MathUtils.randFloat(0.7, 1.2);
+  const t = THREE.MathUtils.randFloat(0.22, 0.34);
+  const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    const norm = (y + h / 2) / h;
+    const taper = 1 - 0.3 * Math.max(0, norm);
+    pos.setX(i, pos.getX(i) * taper);
+  }
+  jitterGeometry(geo, 0.04);
+  const mat = (Math.random() < 0.5 ? MATS.stone() : MATS.stone2());
+  repeatMap(mat, 1, 2);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.position.y = h / 2;
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
+  const g = new THREE.Group();
+  g.add(mesh);
+  g.rotation.y = Math.random() * Math.PI;
+  return g;
+}
+
+function buildBoulder() {
+  const r = THREE.MathUtils.randFloat(0.4, 0.7);
+  const geo = new THREE.IcosahedronGeometry(r, 2);
+  jitterGeometry(geo, r * 0.18);
+  const mat = (Math.random() < 0.5 ? MATS.boulder() : MATS.boulderW());
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.scale.set(
+    THREE.MathUtils.randFloat(0.95, 1.25),
+    THREE.MathUtils.randFloat(0.55, 0.85),
+    THREE.MathUtils.randFloat(0.95, 1.25),
+  );
+  mesh.position.y = r * 0.5;
+  const g = new THREE.Group();
+  g.add(mesh);
+  g.rotation.y = Math.random() * Math.PI;
+  return g;
+}
+
+function buildPost() {
+  const h = THREE.MathUtils.randFloat(0.55, 0.95);
+  const geo = new THREE.CylinderGeometry(0.05, 0.06, h, 10);
+  const mesh = new THREE.Mesh(geo, MATS.post());
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.position.y = h / 2;
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
+  const g = new THREE.Group();
+  g.add(mesh);
+  g.rotation.y = Math.random() * Math.PI;
+  return g;
+}
+
+function buildCobble() {
+  const r = THREE.MathUtils.randFloat(0.10, 0.22);
+  const geo = new THREE.IcosahedronGeometry(r, 1);
+  jitterGeometry(geo, r * 0.12);
+  const mesh = new THREE.Mesh(geo, MATS.cobble());
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.scale.y = 0.55;
+  mesh.position.y = r * 0.3;
+  const g = new THREE.Group();
+  g.add(mesh);
+  return g;
+}
+
+function buildTree() {
+  const trunkH = THREE.MathUtils.randFloat(2.0, 2.6);
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.18, 0.25, trunkH, 12),
+    MATS.trunk(),
+  );
+  trunk.castShadow = true; trunk.receiveShadow = true;
+  trunk.position.y = 0.5 + trunkH / 2;
+  const leafGroup = new THREE.Group();
+  leafGroup.position.y = 0.5 + trunkH + 1.4;
+  const blobs = [
+    [0,0,0,1.55],[-0.9,0.2,0.3,1.10],[1.0,0.1,-0.2,1.20],
+    [0.1,-0.1,0.9,1.05],[0,0.4,-0.8,1.0],
+  ];
+  for (const [x,y,z,r] of blobs) {
+    const g = new THREE.IcosahedronGeometry(r, 2);
+    jitterGeometry(g, 0.1);
+    const m = new THREE.Mesh(g, MATS.leaves());
+    m.castShadow = true; m.receiveShadow = true;
+    m.position.set(x, y, z);
+    leafGroup.add(m);
+  }
+  const grp = new THREE.Group();
+  grp.add(trunk, leafGroup);
+  return grp;
+}
+
+function buildSign() {
+  const grp = new THREE.Group();
+  const pierH = 1.5, pierW = 0.55, pierD = 0.55;
+  const plaqueW = 2.6, plaqueH = 0.9, plaqueT = 0.12;
+  const stoneMat = MATS.signSt();
+  const plateMat = MATS.signPlt();
+  const left  = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
+  const right = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(plaqueW, plaqueH, plaqueT), plateMat);
+  const cap   = new THREE.Mesh(new THREE.BoxGeometry(plaqueW + 0.1, 0.12, pierD + 0.1), stoneMat);
+  left.position.set(-plaqueW/2 + pierW/2, pierH/2, 0);
+  right.position.set(plaqueW/2 - pierW/2, pierH/2, 0);
+  plate.position.set(0, pierH - plaqueH/2 + 0.05, 0);
+  cap.position.set(0, pierH + 0.15, 0);
+  [left, right, plate, cap].forEach(m => { m.castShadow = true; m.receiveShadow = true; });
+  grp.add(left, right, plate, cap);
+  return grp;
+}
+
+const BUILDERS = { stone: buildStone, boulder: buildBoulder, post: buildPost,
+                   cobble: buildCobble, tree: buildTree, sign: buildSign };
+
+// ===========================================================================
+// editor state
+// ===========================================================================
+const selectables = [];
+const baseObjects = new Set();
+let selected = null;
+let helpersVisible = true;
+let wireframe = false;
+let pbrEnabled = true;
+let activeFilter = "all";
+let counters = { stone: 0, boulder: 0, post: 0, cobble: 0, tree: 0, sign: 0, ground: 0, other: 0 };
+let currentBg = "sky";
+
+function familyOf(name) {
+  const n = (name || "").toLowerCase();
+  if (n.startsWith("slab"))    return "stone";
+  if (n.startsWith("stone"))   return "stone";
+  if (n.startsWith("boulder")) return "boulder";
+  if (n.startsWith("cobble"))  return "cobble";
+  if (n.startsWith("post"))    return "post";
+  if (n.startsWith("tree"))    return "tree";
+  if (n.startsWith("sign"))    return "sign";
+  if (n.includes("path"))      return "path";
+  if (n.includes("deck") || n.includes("gravel")) return "ground";
+  return "other";
+}
+
+function familyToMatKey(fam, name) {
+  const n = (name || "").toLowerCase();
+  if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
+  if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
+  if (fam === "post")    return "post";
+  if (fam === "cobble")  return "cobble";
+  if (fam === "tree")    return n.includes("canopy") ? "leaves" : "trunk";
+  if (fam === "sign")    return n.includes("plaque") ? "signPlt" : "signSt";
+  if (n.includes("deck"))   return "deck";
+  if (n.includes("gravel")) return "ground";
+  if (fam === "path")    return "path";
+  return null;
+}
+
+function applyPbrToImported(obj) {
+  if (!pbrEnabled) return;
+  const fam = familyOf(obj.name);
+  obj.traverse(o => {
+    if (!o.isMesh) return;
+    const matKey = familyToMatKey(fam, o.name) || familyToMatKey(fam, obj.name);
+    if (matKey && MATS[matKey]) {
+      const newMat = MATS[matKey]();
+      if (fam === "ground")  repeatMap(newMat, 12, 12);
+      else if (fam === "path") repeatMap(newMat, 6, 1.5);
+      else if (fam === "stone") repeatMap(newMat, 1, 2);
+      else if (fam === "boulder") repeatMap(newMat, 1.5, 1.5);
+      else if (fam === "post") repeatMap(newMat, 0.5, 2);
+      else if (fam === "cobble") repeatMap(newMat, 1, 1);
+      o.material = newMat;
+    }
+    o.castShadow = true;
+    o.receiveShadow = true;
+  });
+}
+
+function registerObject(obj, family, isBase = false) {
+  obj.userData.family = family;
+  obj.userData.id     = obj.name || `${family}-${(++counters[family] || (counters[family] = 1))}`;
+  obj.userData.home   = {
+    position: obj.position.clone(),
+    rotation: obj.rotation.clone(),
+    scale:    obj.scale.clone(),
+  };
+  obj.userData.isBase = isBase;
+  selectables.push(obj);
+  if (isBase) baseObjects.add(obj);
+}
+
+// ---- prompt parser -------------------------------------------------------
+const NUMBER_WORDS = { a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10 };
+const TYPE_ALIASES = {
+  stone:"stone", stones:"stone", slab:"stone", slabs:"stone", flagstone:"stone", flagstones:"stone",
+  boulder:"boulder", boulders:"boulder", rock:"boulder", rocks:"boulder",
+  post:"post", posts:"post", marker:"post", markers:"post",
+  cobble:"cobble", cobbles:"cobble", pebble:"cobble", pebbles:"cobble",
+  tree:"tree", trees:"tree",
+  sign:"sign", monument:"sign", plaque:"sign",
+};
+
+function parsePrompt(text) {
+  const t = text.toLowerCase();
+  let qty = 1;
+  const numMatch = t.match(/\b(\d+)\b/);
+  if (numMatch) qty = parseInt(numMatch[1], 10);
+  else for (const [w,v] of Object.entries(NUMBER_WORDS)) {
+    if (new RegExp(`\\b${w}\\b`).test(t)) { qty = v; break; }
+  }
+  let type = null;
+  for (const [w,v] of Object.entries(TYPE_ALIASES)) {
+    if (new RegExp(`\\b${w}\\b`).test(t)) { type = v; break; }
+  }
+  let anchor = null;
+  const anchorMatch = t.match(/\b(?:near|by|next to|around|at)\s+(?:the\s+)?(\w+)/);
+  if (anchorMatch) {
+    const target = TYPE_ALIASES[anchorMatch[1]] || anchorMatch[1];
+    anchor = selectables.find(o => o.userData.family === target)
+          || selectables.find(o => (o.name || "").toLowerCase().includes(anchorMatch[1]));
+  }
+  return { qty: Math.max(1, Math.min(50, qty)), type, anchor };
+}
+
+function spawnAt(type, basePos = null) {
+  const fn = BUILDERS[type];
+  if (!fn) return null;
+  const obj = fn();
+  obj.name = `${type}_${++counters[type] || (counters[type] = 1)}`;
+  if (basePos) obj.position.copy(basePos);
+  else obj.position.set(
+    THREE.MathUtils.randFloat(-4.5, 4.5), 0, THREE.MathUtils.randFloat(-4.5, 4.5),
+  );
+  scene.add(obj);
+  registerObject(obj, type, false);
+  return obj;
+}
+
+function runPrompt(text) {
+  const { qty, type, anchor } = parsePrompt(text);
+  if (!type) { toast(`Couldn't find an object type in "${text}"`); return; }
+  const created = [];
+  for (let i = 0; i < qty; i++) {
+    let pos = null;
+    if (anchor) {
+      const a = anchor.position;
+      const angle = (i / qty) * Math.PI * 2 + Math.random() * 0.4;
+      const dist  = 1.5 + Math.random() * 1.8;
+      pos = new THREE.Vector3(a.x + Math.cos(angle) * dist, 0, a.z + Math.sin(angle) * dist);
+    }
+    created.push(spawnAt(type, pos));
+  }
+  if (created.length) selectObject(created[created.length - 1]);
+  refreshUi();
+  toast(`Added ${qty} ${type}${qty > 1 ? "s" : ""}${anchor ? " near " + anchor.userData.id : ""}`);
+}
+
+// ===========================================================================
+// load the base scene from GLB
+// ===========================================================================
+const manager = new THREE.LoadingManager();
+const loadbar = document.getElementById("loadbar");
+manager.onProgress = (url, loaded, total) => {
+  loadbar.style.width = `${(loaded / total) * 100}%`;
+};
+manager.onLoad = () => { loadbar.style.width = "0%"; };
+const loader = new GLTFLoader(manager);
+loader.load("anna_scene.glb", gltf => {
+  for (const child of [...gltf.scene.children]) {
+    scene.add(child);
+    const fam = familyOf(child.name);
+    applyPbrToImported(child);
+    registerObject(child, fam, true);
+  }
+  refreshUi();
+  frameAll();
+  hudInfo(`${selectables.length} objects`);
+}, undefined, err => {
+  console.error(err);
+  hudInfo("could not load anna_scene.glb");
+});
+
+// ===========================================================================
+// picking + selection
+// ===========================================================================
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+canvas.addEventListener("pointerdown", ev => {
+  if (paintMode) return;
+  if (ev.button !== 0) return;
+  if (tcontrols.dragging) return;
+  const rect = canvas.getBoundingClientRect();
+  ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  ray.setFromCamera(ndc, cam);
+  const hits = ray.intersectObjects(selectables, true);
+  if (!hits.length) { selectObject(null); return; }
+  let obj = hits[0].object;
+  while (obj.parent && !selectables.includes(obj)) obj = obj.parent;
+  if (selectables.includes(obj)) selectObject(obj);
+});
+
+function selectObject(obj) {
+  selected = obj;
+  if (obj) {
+    tcontrols.attach(obj);
+    document.getElementById("selName").innerHTML =
+      `<b>${obj.userData.id || obj.name}</b><br><span class="tip">${obj.userData.family}</span>`;
+  } else {
+    tcontrols.detach();
+    document.getElementById("selName").textContent = "— nothing selected —";
+  }
+  syncInputs();
+  refreshList();
+}
+
+// ===========================================================================
+// UI
+// ===========================================================================
+const objectList = document.getElementById("objectList");
+const filterbar  = document.getElementById("filterbar");
+
+function refreshList() {
+  const families = ["all", ...new Set(selectables.map(o => o.userData.family))];
+  filterbar.innerHTML = "";
+  for (const f of families) {
+    const b = document.createElement("button");
+    b.textContent = f;
+    if (f === activeFilter) b.classList.add("active");
+    b.onclick = () => { activeFilter = f; refreshList(); };
+    filterbar.appendChild(b);
+  }
+  objectList.innerHTML = "";
+  let visible = 0;
+  for (const o of selectables) {
+    if (activeFilter !== "all" && o.userData.family !== activeFilter) continue;
+    const el = document.createElement("div");
+    el.className = "item" + (o === selected ? " active" : "");
+    el.innerHTML = `<span class="name">${o.userData.id || o.name}</span><span class="pill">${o.userData.family}</span>`;
+    el.onclick = () => selectObject(o);
+    objectList.appendChild(el);
+    visible++;
+  }
+  document.getElementById("objCount").textContent = visible;
+}
+
+function refreshUi() { refreshList(); refreshPrompt(); }
+
+const inputs = {
+  posX: document.getElementById("posX"), posY: document.getElementById("posY"), posZ: document.getElementById("posZ"),
+  rotX: document.getElementById("rotX"), rotY: document.getElementById("rotY"), rotZ: document.getElementById("rotZ"),
+  sclX: document.getElementById("sclX"), sclY: document.getElementById("sclY"), sclZ: document.getElementById("sclZ"),
+};
+const uniformScale = document.getElementById("uniformScale");
+
+function syncInputs() {
+  if (!selected) { for (const k in inputs) inputs[k].value = ""; return; }
+  inputs.posX.value = selected.position.x.toFixed(3);
+  inputs.posY.value = selected.position.y.toFixed(3);
+  inputs.posZ.value = selected.position.z.toFixed(3);
+  inputs.rotX.value = THREE.MathUtils.radToDeg(selected.rotation.x).toFixed(1);
+  inputs.rotY.value = THREE.MathUtils.radToDeg(selected.rotation.y).toFixed(1);
+  inputs.rotZ.value = THREE.MathUtils.radToDeg(selected.rotation.z).toFixed(1);
+  inputs.sclX.value = selected.scale.x.toFixed(3);
+  inputs.sclY.value = selected.scale.y.toFixed(3);
+  inputs.sclZ.value = selected.scale.z.toFixed(3);
+}
+
+function applyInputsToObject() {
+  if (!selected) return;
+  selected.position.set(+inputs.posX.value, +inputs.posY.value, +inputs.posZ.value);
+  selected.rotation.set(
+    THREE.MathUtils.degToRad(+inputs.rotX.value),
+    THREE.MathUtils.degToRad(+inputs.rotY.value),
+    THREE.MathUtils.degToRad(+inputs.rotZ.value),
+  );
+  if (uniformScale.checked) {
+    const s = +inputs.sclX.value;
+    selected.scale.set(s, s, s);
+    inputs.sclY.value = s; inputs.sclZ.value = s;
+  } else {
+    selected.scale.set(+inputs.sclX.value, +inputs.sclY.value, +inputs.sclZ.value);
+  }
+  refreshPrompt();
+}
+for (const el of Object.values(inputs)) el.addEventListener("input", applyInputsToObject);
+
+function refreshPrompt() {
+  const counts = selectables.reduce((a, o) => (a[o.userData.family] = (a[o.userData.family] || 0) + 1, a), {});
+  const lines = selectables.slice(0, 24).map(o => {
+    const p = o.position, r = o.rotation, s = o.scale;
+    return `${o.userData.id}: type=${o.userData.family}, pos=(${p.x.toFixed(2)}, ${p.y.toFixed(2)}, ${p.z.toFixed(2)}), rotDeg=(${THREE.MathUtils.radToDeg(r.x).toFixed(1)}, ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}, ${THREE.MathUtils.radToDeg(r.z).toFixed(1)}), scale=(${s.x.toFixed(2)}, ${s.y.toFixed(2)}, ${s.z.toFixed(2)})`;
+  }).join("\n");
+  document.getElementById("promptOut").value =
+`Build an editable 3D scene matching this layout.
+
+Counts: ${Object.entries(counts).map(([k,v]) => `${k}=${v}`).join(", ")}.
+
+Each object remains independently movable, pivot at its base.
+Collections: stones, boulders, posts, tree, sign, path, ground.
+Units: meters. Sun: ${document.getElementById("sunTime").value} hours.
+
+Sample objects (first 24):
+${lines}`;
+}
+
+// ===========================================================================
+// buttons / controls
+// ===========================================================================
+document.querySelectorAll("[data-mode]").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("[data-mode]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    tcontrols.setMode(b.dataset.mode);
+  };
+});
+document.querySelectorAll("[data-add]").forEach(b => {
+  b.onclick = () => { spawnAt(b.dataset.add); refreshUi(); };
+});
+document.querySelectorAll("[data-bg]").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("[data-bg]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    currentBg = b.dataset.bg;
+    if (currentBg === "sky")   { sky.visible = true;  scene.background = null; }
+    if (currentBg === "hdri")  { sky.visible = false; scene.background = envTex; }
+    if (currentBg === "solid") { sky.visible = false; scene.background = new THREE.Color(0x0e1117); }
+  };
+});
+
+document.getElementById("addPromptBtn").onclick = () => {
+  const v = document.getElementById("addPrompt").value.trim();
+  if (v) runPrompt(v);
+};
+document.getElementById("addPrompt").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("addPromptBtn").click();
+});
+
+document.getElementById("focusBtn").onclick    = () => focusOn(selected);
+document.getElementById("frameAllBtn").onclick = frameAll;
+document.getElementById("toggleHelpers").onclick = () => {
+  helpersVisible = !helpersVisible;
+  grid.visible = axes.visible = helpersVisible;
+};
+document.getElementById("toggleWireframe").onclick = () => {
+  wireframe = !wireframe;
+  for (const o of selectables) o.traverse(c => { if (c.isMesh && c.material) c.material.wireframe = wireframe; });
+};
+document.getElementById("toggleAO").onclick = () => {
+  ssaoEnabled = !ssaoEnabled;
+  ssaoPass.enabled = ssaoEnabled;
+  toast(`SSAO ${ssaoEnabled ? "on" : "off"}`);
+};
+document.getElementById("togglePbr").onclick = () => {
+  pbrEnabled = !pbrEnabled;
+  if (pbrEnabled) {
+    for (const o of selectables) if (o.userData.isBase) applyPbrToImported(o);
+    toast("PBR on");
+  } else {
+    for (const o of selectables) if (o.userData.isBase) {
+      o.traverse(m => { if (m.isMesh) m.material = new THREE.MeshStandardMaterial({ color: m.material.color, roughness: 0.9 }); });
+    }
+    toast("PBR off");
+  }
+};
+document.getElementById("resetCam").onclick = () => {
+  cam.position.set(15, 12, 15); orbit.target.set(0, 1, 0); orbit.update();
+};
+
+document.getElementById("duplicateBtn").onclick = () => {
+  if (!selected) return;
+  const fam = selected.userData.family;
+  if (!BUILDERS[fam]) { toast(`Can't duplicate ${fam}`); return; }
+  const dup = spawnAt(fam, selected.position.clone());
+  dup.rotation.copy(selected.rotation);
+  dup.scale.copy(selected.scale);
+  dup.position.x += 0.6;
+  selectObject(dup);
+  refreshUi();
+};
+document.getElementById("resetTransformBtn").onclick = () => {
+  if (!selected) return;
+  selected.position.copy(selected.userData.home.position);
+  selected.rotation.copy(selected.userData.home.rotation);
+  selected.scale.copy(selected.userData.home.scale);
+  syncInputs(); refreshPrompt();
+};
+document.getElementById("dropToGround").onclick = () => {
+  if (!selected) return;
+  const box = new THREE.Box3().setFromObject(selected);
+  selected.position.y -= box.min.y;
+  syncInputs(); refreshPrompt();
+};
+document.getElementById("deleteBtn").onclick = deleteSelected;
+
+document.getElementById("resetAllBtn").onclick = () => {
+  for (const o of selectables) {
+    o.position.copy(o.userData.home.position);
+    o.rotation.copy(o.userData.home.rotation);
+    o.scale.copy(o.userData.home.scale);
+  }
+  syncInputs(); refreshPrompt();
+  toast("Reset all transforms");
+};
+document.getElementById("clearAddedBtn").onclick = () => {
+  const removed = [];
+  for (const o of [...selectables]) {
+    if (!o.userData.isBase) {
+      removed.push(o);
+      scene.remove(o);
+      const i = selectables.indexOf(o);
+      if (i >= 0) selectables.splice(i, 1);
+    }
+  }
+  if (selected && removed.includes(selected)) selectObject(null);
+  refreshUi();
+  toast(`Removed ${removed.length} added objects`);
+};
+
+document.getElementById("saveJson").onclick = () => {
+  const data = {
+    version: 2, units: "meters",
+    sunTime: +document.getElementById("sunTime").value,
+    objects: selectables.map(o => ({
+      id: o.userData.id, family: o.userData.family, isBase: !!o.userData.isBase,
+      position: o.position.toArray(),
+      rotation: [o.rotation.x, o.rotation.y, o.rotation.z],
+      scale:    o.scale.toArray(),
+    })),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "anna_scene_layout.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Saved layout JSON");
+};
+document.getElementById("loadJsonBtn").onclick = () => document.getElementById("loadJson").click();
+document.getElementById("loadJson").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  const text = await f.text();
+  let data; try { data = JSON.parse(text); } catch { toast("Invalid JSON"); return; }
+  if (!data.objects) { toast("Missing 'objects' array"); return; }
+  if (data.sunTime != null) {
+    document.getElementById("sunTime").value = data.sunTime;
+    setSunFromTime(data.sunTime);
+  }
+  const byId = new Map(selectables.map(o => [o.userData.id, o]));
+  let updated = 0, added = 0;
+  for (const item of data.objects) {
+    let o = byId.get(item.id);
+    if (!o && BUILDERS[item.family]) {
+      o = spawnAt(item.family, new THREE.Vector3(...item.position));
+      o.userData.id = item.id; added++;
+    }
+    if (!o) continue;
+    o.position.fromArray(item.position);
+    o.rotation.set(item.rotation[0], item.rotation[1], item.rotation[2]);
+    o.scale.fromArray(item.scale);
+    updated++;
+  }
+  refreshUi(); syncInputs();
+  toast(`Loaded — updated ${updated}, added ${added}`);
+};
+
+document.getElementById("screenshotBtn").onclick = () => {
+  composer.render();
+  const dataUrl = renderer.domElement.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = dataUrl; a.download = "anna_scene.png"; a.click();
+  toast("Saved screenshot");
+};
+
+document.getElementById("copyPrompt").onclick = async () => {
+  await navigator.clipboard.writeText(document.getElementById("promptOut").value);
+  toast("Copied prompt to clipboard");
+};
+
+// sliders
+function bindSlider(id, fn) {
+  const el = document.getElementById(id);
+  const out = document.getElementById(id + "Val");
+  el.oninput = () => { fn(+el.value); out.textContent = formatSlider(id, +el.value); };
+}
+function formatSlider(id, v) {
+  if (id === "sunTime") {
+    const h = Math.floor(v); const m = Math.round((v - h) * 60);
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+  return v.toFixed(2);
+}
+bindSlider("sunTime",     v => setSunFromTime(v));
+bindSlider("sunStrength", v => sun.intensity = v);
+bindSlider("envIntensity",v => { scene.environmentIntensity = v; });
+bindSlider("exposure",    v => renderer.toneMappingExposure = v);
+
+// initial sun position
+setSunFromTime(+document.getElementById("sunTime").value);
+sun.intensity = +document.getElementById("sunStrength").value;
+scene.environmentIntensity = +document.getElementById("envIntensity").value;
+renderer.toneMappingExposure = +document.getElementById("exposure").value;
+
+// keyboard
+addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  const k = e.key.toLowerCase();
+  if (k === "w") tcontrols.setMode("translate");
+  if (k === "e") tcontrols.setMode("rotate");
+  if (k === "r") tcontrols.setMode("scale");
+  if (k === "b") setPaintMode(!paintMode);
+  if (k === "f") focusOn(selected);
+  if (k === "x" && !paintMode) deleteSelected();
+  if (k === "escape") { if (paintMode) setPaintMode(false); else selectObject(null); }
+  if (k === "[" && paintMode) { brushSize = Math.max(2, brushSize - 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
+  if (k === "]" && paintMode) { brushSize = Math.min(120, brushSize + 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
+});
+
+function deleteSelected() {
+  if (!selected) return;
+  scene.remove(selected);
+  const i = selectables.indexOf(selected);
+  if (i >= 0) selectables.splice(i, 1);
+  baseObjects.delete(selected);
+  selectObject(null);
+  refreshUi();
+}
+
+function focusOn(obj) {
+  if (!obj) return;
+  const box = new THREE.Box3().setFromObject(obj);
+  const center = box.getCenter(new THREE.Vector3());
+  const size   = Math.max(box.getSize(new THREE.Vector3()).length(), 0.5);
+  orbit.target.copy(center);
+  cam.position.copy(center).add(new THREE.Vector3(size * 1.6, size * 1.2, size * 1.6));
+  orbit.update();
+}
+function frameAll() {
+  if (!selectables.length) return;
+  const box = new THREE.Box3();
+  for (const o of selectables) box.expandByObject(o);
+  const center = box.getCenter(new THREE.Vector3());
+  const size   = box.getSize(new THREE.Vector3()).length();
+  orbit.target.copy(center);
+  cam.position.copy(center).add(new THREE.Vector3(size * 0.55, size * 0.42, size * 0.55));
+  orbit.update();
+}
+
+// ===========================================================================
+// hud / toast / loop
+// ===========================================================================
+const toastEl = document.getElementById("toast");
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+function hudInfo(msg) { document.getElementById("hudInfo").textContent = msg; }
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== w * devicePixelRatio || canvas.height !== h * devicePixelRatio) {
+    renderer.setSize(w, h, false);
+    composer.setSize(w, h);
+    cam.aspect = w / h;
+    cam.updateProjectionMatrix();
+    fxaaPass.material.uniforms["resolution"].value.set(1 / w, 1 / h);
+  }
+}
+
+// ===========================================================================
+// GROUND PAINT SYSTEM
+// ===========================================================================
+const PAINT_RES = 2048;
+const paintCanvas = document.createElement("canvas");
+paintCanvas.width = paintCanvas.height = PAINT_RES;
+const paintCtx = paintCanvas.getContext("2d");
+paintCtx.clearRect(0, 0, PAINT_RES, PAINT_RES);
+
+const paintTex = new THREE.CanvasTexture(paintCanvas);
+paintTex.wrapS = paintTex.wrapT = THREE.ClampToEdgeWrapping;
+paintTex.minFilter = THREE.LinearFilter;
+paintTex.magFilter = THREE.LinearFilter;
+
+// Paint plane — sits just above ground, covers the scene area
+const PAINT_SIZE = 40;
+const paintPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(PAINT_SIZE, PAINT_SIZE),
+  new THREE.MeshBasicMaterial({
+    map: paintTex, transparent: true, depthWrite: false,
+    side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1,
+  }),
+);
+paintPlane.rotation.x = -Math.PI / 2;
+paintPlane.position.y = 0.005;
+paintPlane.renderOrder = 1;
+scene.add(paintPlane);
+
+// Invisible raycast target on the ground
+const groundHit = new THREE.Mesh(
+  new THREE.PlaneGeometry(PAINT_SIZE, PAINT_SIZE),
+  new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide }),
+);
+groundHit.rotation.x = -Math.PI / 2;
+groundHit.position.y = 0.001;
+scene.add(groundHit);
+
+let paintMode = false;
+let isPainting = false;
+let isErasing = false;
+let brushSize = 24;
+let brushOpacity = 0.6;
+let brushHardness = 0.5;
+let brushTexture = "solid";
+let paintColor = "#8B4513";
+const paintHistory = []; // snapshot stack for undo
+
+// --- brush stamp generators ---
+function makeBrushStamp(size, texture, color, opacity, hardness) {
+  const s = Math.max(4, Math.ceil(size));
+  const c = document.createElement("canvas");
+  c.width = c.height = s;
+  const ctx = c.getContext("2d");
+  const cx = s / 2, cy = s / 2, r = s / 2;
+  const rng = mulberry32(Date.now() & 0xffffff);
+
+  function parseColor(hex) {
+    const n = parseInt(hex.replace("#",""), 16);
+    return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+  }
+  const [cr, cg, cb] = parseColor(color);
+
+  switch (texture) {
+    case "solid": {
+      const grad = ctx.createRadialGradient(cx, cy, r * hardness, cx, cy, r);
+      grad.addColorStop(0, `rgba(${cr},${cg},${cb},${opacity})`);
+      grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, s, s);
+      break;
+    }
+    case "spray": {
+      const count = Math.floor(s * s * 0.12);
+      for (let i = 0; i < count; i++) {
+        const angle = rng() * Math.PI * 2;
+        const dist = Math.pow(rng(), 0.6) * r;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist;
+        const pr = 0.5 + rng() * 1.5;
+        const a = opacity * (1 - dist / r) * (0.3 + rng() * 0.7);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case "grass": {
+      const blades = Math.floor(s * 0.6);
+      for (let i = 0; i < blades; i++) {
+        const bx = cx + (rng() - 0.5) * r * 1.6;
+        const by = cy + (rng() - 0.5) * r * 1.6;
+        const dist = Math.hypot(bx - cx, by - cy);
+        if (dist > r) continue;
+        const a = opacity * (1 - dist / r);
+        const h = 3 + rng() * (s * 0.25);
+        const lean = (rng() - 0.5) * 4;
+        ctx.strokeStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.lineWidth = 0.8 + rng() * 1.2;
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.quadraticCurveTo(bx + lean, by - h * 0.6, bx + lean * 1.5, by - h);
+        ctx.stroke();
+      }
+      break;
+    }
+    case "gravel": {
+      const pebbles = Math.floor(s * 0.35);
+      for (let i = 0; i < pebbles; i++) {
+        const px = cx + (rng() - 0.5) * r * 1.8;
+        const py = cy + (rng() - 0.5) * r * 1.8;
+        const dist = Math.hypot(px - cx, py - cy);
+        if (dist > r) continue;
+        const a = opacity * (1 - dist / r) * (0.4 + rng() * 0.6);
+        const pr = 1 + rng() * 3;
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.beginPath();
+        ctx.ellipse(px, py, pr, pr * (0.5 + rng() * 0.5), rng() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case "noise": {
+      const img = ctx.createImageData(s, s);
+      for (let i = 0; i < s * s; i++) {
+        const x = i % s, y = (i / s) | 0;
+        const dist = Math.hypot(x - cx, y - cy);
+        if (dist > r) continue;
+        const a = opacity * (1 - dist / r) * rng() * 255;
+        const idx = i * 4;
+        img.data[idx] = cr; img.data[idx+1] = cg; img.data[idx+2] = cb; img.data[idx+3] = a;
+      }
+      ctx.putImageData(img, 0, 0);
+      break;
+    }
+    case "scatter": {
+      const dots = Math.floor(s * 0.2);
+      for (let i = 0; i < dots; i++) {
+        const angle = rng() * Math.PI * 2;
+        const dist = rng() * r;
+        if (dist > r) continue;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist;
+        const pr = 1.5 + rng() * (s * 0.06);
+        const a = opacity * (1 - dist / r);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case "stipple": {
+      const count = Math.floor(s * s * 0.04);
+      for (let i = 0; i < count; i++) {
+        const px = rng() * s, py = rng() * s;
+        const dist = Math.hypot(px - cx, py - cy);
+        if (dist > r) continue;
+        const a = opacity * (1 - dist / r) * (0.5 + rng() * 0.5);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.fillRect(px, py, 1, 1);
+      }
+      break;
+    }
+    case "chalk": {
+      const strokes = Math.floor(s * 0.8);
+      for (let i = 0; i < strokes; i++) {
+        const px = cx + (rng() - 0.5) * r * 1.8;
+        const py = cy + (rng() - 0.5) * r * 1.8;
+        const dist = Math.hypot(px - cx, py - cy);
+        if (dist > r) continue;
+        const a = opacity * (1 - dist / r) * (0.2 + rng() * 0.6);
+        const len = 2 + rng() * 6;
+        const angle = rng() * Math.PI;
+        ctx.strokeStyle = `rgba(${cr},${cg},${cb},${a})`;
+        ctx.lineWidth = 0.5 + rng() * 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
+        ctx.stroke();
+      }
+      break;
+    }
+  }
+  return c;
+}
+
+// Convert world XZ position to paint canvas UV
+function worldToPaintUV(worldPos) {
+  const u = (worldPos.x + PAINT_SIZE / 2) / PAINT_SIZE;
+  const v = (worldPos.z + PAINT_SIZE / 2) / PAINT_SIZE;
+  return { u, v };
+}
+
+function paintAt(worldPos) {
+  const { u, v } = worldToPaintUV(worldPos);
+  const px = u * PAINT_RES;
+  const py = v * PAINT_RES;
+
+  if (isErasing) {
+    const s = brushSize * (PAINT_RES / PAINT_SIZE);
+    paintCtx.save();
+    paintCtx.globalCompositeOperation = "destination-out";
+    const grad = paintCtx.createRadialGradient(px, py, 0, px, py, s / 2);
+    grad.addColorStop(0, `rgba(0,0,0,${brushOpacity})`);
+    grad.addColorStop(1, `rgba(0,0,0,0)`);
+    paintCtx.fillStyle = grad;
+    paintCtx.fillRect(px - s / 2, py - s / 2, s, s);
+    paintCtx.restore();
+  } else {
+    const stampSize = brushSize * (PAINT_RES / PAINT_SIZE);
+    const stamp = makeBrushStamp(stampSize, brushTexture, paintColor, brushOpacity, brushHardness);
+    paintCtx.drawImage(stamp, px - stampSize / 2, py - stampSize / 2, stampSize, stampSize);
+  }
+
+  paintTex.needsUpdate = true;
+}
+
+function saveUndoSnapshot() {
+  if (paintHistory.length > 20) paintHistory.shift();
+  paintHistory.push(paintCtx.getImageData(0, 0, PAINT_RES, PAINT_RES));
+}
+
+// --- paint mode toggle ---
+function setPaintMode(active) {
+  paintMode = active;
+  const ctrl = document.getElementById("paintControls");
+  const btn = document.getElementById("paintToggle");
+  const modeBtn = document.getElementById("paintModeBtn");
+  if (paintMode) {
+    ctrl.classList.add("visible");
+    btn.textContent = "Disable paint (B)";
+    modeBtn.classList.add("active");
+    tcontrols.detach();
+    orbit.enableRotate = true;
+  } else {
+    ctrl.classList.remove("visible");
+    btn.textContent = "Enable paint (B)";
+    modeBtn.classList.remove("active");
+    isPainting = false;
+    document.getElementById("paintCursor").classList.remove("visible");
+  }
+}
+
+document.getElementById("paintToggle").onclick = () => setPaintMode(!paintMode);
+document.getElementById("paintModeBtn").onclick = () => setPaintMode(!paintMode);
+
+document.getElementById("paintErase").onclick = () => {
+  isErasing = !isErasing;
+  document.getElementById("paintErase").classList.toggle("active", isErasing);
+  if (isErasing && !paintMode) setPaintMode(true);
+  updateBrushPreview();
+};
+
+document.getElementById("paintColor").oninput = e => {
+  paintColor = e.target.value;
+  document.getElementById("paintColorHex").textContent = paintColor;
+  updateBrushPreview();
+};
+
+document.getElementById("brushSize").oninput = e => {
+  brushSize = +e.target.value;
+  document.getElementById("brushSizeVal").textContent = brushSize;
+  updateBrushPreview();
+};
+document.getElementById("brushOpacity").oninput = e => {
+  brushOpacity = +e.target.value;
+  document.getElementById("brushOpacityVal").textContent = brushOpacity.toFixed(2);
+  updateBrushPreview();
+};
+document.getElementById("brushHardness").oninput = e => {
+  brushHardness = +e.target.value;
+  document.getElementById("brushHardnessVal").textContent = brushHardness.toFixed(2);
+  updateBrushPreview();
+};
+
+document.querySelectorAll("#brushTextures button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#brushTextures button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    brushTexture = b.dataset.brush;
+    updateBrushPreview();
+  };
+});
+
+function updateBrushPreview() {
+  const preview = document.getElementById("brushPreview");
+  const pctx = preview.getContext("2d");
+  pctx.clearRect(0, 0, 56, 56);
+  pctx.fillStyle = "#1f2532";
+  pctx.fillRect(0, 0, 56, 56);
+  if (isErasing) {
+    pctx.strokeStyle = "#e76f51";
+    pctx.lineWidth = 2;
+    pctx.beginPath();
+    pctx.arc(28, 28, 18, 0, Math.PI * 2);
+    pctx.stroke();
+    pctx.beginPath();
+    pctx.moveTo(14, 14); pctx.lineTo(42, 42);
+    pctx.stroke();
+  } else {
+    const stamp = makeBrushStamp(40, brushTexture, paintColor, brushOpacity, brushHardness);
+    pctx.drawImage(stamp, 8, 8, 40, 40);
+  }
+}
+updateBrushPreview();
+
+document.getElementById("paintUndo").onclick = () => {
+  if (!paintHistory.length) { toast("Nothing to undo"); return; }
+  paintCtx.putImageData(paintHistory.pop(), 0, 0);
+  paintTex.needsUpdate = true;
+  toast("Undo stroke");
+};
+
+document.getElementById("paintClear").onclick = () => {
+  saveUndoSnapshot();
+  paintCtx.clearRect(0, 0, PAINT_RES, PAINT_RES);
+  paintTex.needsUpdate = true;
+  toast("Paint cleared");
+};
+
+document.getElementById("paintSave").onclick = () => {
+  const dataUrl = paintCanvas.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = dataUrl; a.download = "ground_paint.png"; a.click();
+  toast("Saved paint layer");
+};
+
+// --- paint pointer events ---
+const paintRay = new THREE.Raycaster();
+const paintNdc = new THREE.Vector2();
+const paintCursor = document.getElementById("paintCursor");
+let lastPaintPos = null;
+
+function getPaintWorldPos(ev) {
+  const rect = canvas.getBoundingClientRect();
+  paintNdc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  paintNdc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  paintRay.setFromCamera(paintNdc, cam);
+  const hits = paintRay.intersectObject(groundHit);
+  return hits.length ? hits[0].point : null;
+}
+
+function updatePaintCursor(ev) {
+  if (!paintMode) { paintCursor.classList.remove("visible"); return; }
+  // Screen-space size estimate
+  const worldRadius = brushSize / 2;
+  const rect = canvas.getBoundingClientRect();
+  // Project two points to get pixel size
+  const wp = getPaintWorldPos(ev);
+  if (!wp) { paintCursor.classList.remove("visible"); return; }
+  const p1 = wp.clone().project(cam);
+  const p2 = wp.clone(); p2.x += worldRadius; p2.project(cam);
+  const pixelR = Math.abs(p2.x - p1.x) * rect.width / 2;
+  const sz = Math.max(8, pixelR * 2);
+  paintCursor.style.width = sz + "px";
+  paintCursor.style.height = sz + "px";
+  paintCursor.style.left = (ev.clientX - rect.left) + "px";
+  paintCursor.style.top = (ev.clientY - rect.top) + "px";
+  paintCursor.style.borderColor = isErasing ? "var(--danger)" : "var(--accent)";
+  paintCursor.classList.add("visible");
+}
+
+// Interpolate between last and current position for smooth strokes
+function paintStroke(from, to) {
+  const dist = from.distanceTo(to);
+  const step = Math.max(0.3, brushSize * 0.15);
+  const steps = Math.max(1, Math.ceil(dist / step));
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const p = from.clone().lerp(to, t);
+    paintAt(p);
+  }
+}
+
+canvas.addEventListener("pointerdown", ev => {
+  if (!paintMode || ev.button !== 0) return;
+  if (tcontrols.dragging) return;
+  const wp = getPaintWorldPos(ev);
+  if (!wp) return;
+  ev.stopPropagation();
+  isPainting = true;
+  saveUndoSnapshot();
+  lastPaintPos = wp.clone();
+  paintAt(wp);
+}, true);
+
+canvas.addEventListener("pointermove", ev => {
+  updatePaintCursor(ev);
+  if (!paintMode || !isPainting) return;
+  const wp = getPaintWorldPos(ev);
+  if (!wp) return;
+  if (lastPaintPos) {
+    paintStroke(lastPaintPos, wp);
+  } else {
+    paintAt(wp);
+  }
+  lastPaintPos = wp.clone();
+});
+
+canvas.addEventListener("pointerup", ev => {
+  if (isPainting) {
+    isPainting = false;
+    lastPaintPos = null;
+  }
+});
+
+canvas.addEventListener("pointerleave", () => {
+  isPainting = false;
+  lastPaintPos = null;
+  paintCursor.classList.remove("visible");
+});
+
+let lastT = performance.now();
+let frames = 0, fpsAccumT = 0;
+function loop() {
+  resize();
+  orbit.update();
+  composer.render();
+  // fps
+  const now = performance.now();
+  const dt = now - lastT; lastT = now;
+  frames++; fpsAccumT += dt;
+  if (fpsAccumT >= 500) {
+    document.getElementById("fps").textContent = Math.round(1000 * frames / fpsAccumT);
+    frames = 0; fpsAccumT = 0;
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
