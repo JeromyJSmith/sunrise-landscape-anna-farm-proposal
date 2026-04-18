@@ -148,6 +148,12 @@
   <div class="section">
     <h1>ANNA'S FARM — EDITOR v2</h1>
     <p class="tip">PBR-lit edition. Click an object → drag the gizmo or type values on the right. <b>W</b>/<b>E</b>/<b>R</b> = move/rotate/scale. <b>F</b> = focus. <b>X</b> = delete.</p>
+    <h2 style="margin-top:8px">Load site</h2>
+    <div class="grid2">
+      <button id="loadSite1" class="primary">Site 1 — 3,500 sf</button>
+      <button id="loadSite2" class="primary">Site 2 — 1,500 sf</button>
+    </div>
+    <p class="tip" style="margin-top:4px">Auto-loads scene with OpenStreetMap ground tiles</p>
   </div>
 
   <div class="section">
@@ -3687,6 +3693,93 @@ document.getElementById("lineToolBtn").onclick = () => {
   if (lineToolActive && !paintMode) setPaintMode(true);
   toast(lineToolActive ? "Click two points to draw a line" : "Line tool off");
 };
+
+// ===========================================================================
+// SITE AUTO-LOAD — OSM tiles + scene reset
+// ===========================================================================
+const SITES = {
+  site1: {
+    name: "Anna's Farm — Site 1",
+    lat: 39.9936, lng: -105.0897, // Lafayette, CO area
+    area: "3,500 sq ft",
+    zoom: 19,
+    tilesX: 5, tilesY: 5, // 5x5 grid of tiles
+  },
+  site2: {
+    name: "Anna's Farm — Site 2",
+    lat: 39.9932, lng: -105.0893,
+    area: "1,500 sq ft",
+    zoom: 19,
+    tilesX: 4, tilesY: 4,
+  },
+};
+
+// OSM tile math
+function lonToTileX(lon, zoom) { return Math.floor((lon + 180) / 360 * (1 << zoom)); }
+function latToTileY(lat, zoom) { const r = Math.PI / 180 * lat; return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * (1 << zoom)); }
+
+let osmTilePlanes = []; // track for cleanup
+
+function clearOsmTiles() {
+  for (const p of osmTilePlanes) { scene.remove(p); p.geometry.dispose(); p.material.map?.dispose(); p.material.dispose(); }
+  osmTilePlanes = [];
+}
+
+async function loadSite(siteKey) {
+  const site = SITES[siteKey];
+  if (!site) return;
+
+  clearOsmTiles();
+
+  const zoom = site.zoom;
+  const cx = lonToTileX(site.lng, zoom);
+  const cy = latToTileY(site.lat, zoom);
+  const halfX = Math.floor(site.tilesX / 2);
+  const halfY = Math.floor(site.tilesY / 2);
+
+  // Each OSM tile at zoom 19 is ~0.3m/pixel, 256px = ~76.8m
+  const tileWorldSize = 76.8;
+  const loader = new THREE.TextureLoader();
+
+  toast(`Loading ${site.name} map tiles…`);
+
+  for (let dx = -halfX; dx <= halfX; dx++) {
+    for (let dy = -halfY; dy <= halfY; dy++) {
+      const tx = cx + dx;
+      const ty = cy + dy;
+      const url = `https://tile.openstreetmap.org/${zoom}/${tx}/${ty}.png`;
+
+      try {
+        const tex = await new Promise((resolve, reject) => {
+          loader.load(url, resolve, undefined, reject);
+        });
+        tex.colorSpace = THREE.SRGBColorSpace;
+
+        const geo = new THREE.PlaneGeometry(tileWorldSize, tileWorldSize);
+        const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(geo, mat);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.set(dx * tileWorldSize, -0.02, dy * tileWorldSize);
+        plane.receiveShadow = true;
+        scene.add(plane);
+        osmTilePlanes.push(plane);
+      } catch (e) {
+        console.warn(`Failed to load tile ${tx},${ty}`, e);
+      }
+    }
+  }
+
+  // Set project name
+  document.getElementById("projectName").value = site.name;
+
+  // Frame the scene
+  frameAll();
+  hudInfo(`${site.name} — ${site.area}`);
+  toast(`Loaded ${site.name} with ${osmTilePlanes.length} map tiles`);
+}
+
+document.getElementById("loadSite1").onclick = () => loadSite("site1");
+document.getElementById("loadSite2").onclick = () => loadSite("site2");
 
 let lastT = performance.now();
 let frames = 0, fpsAccumT = 0;
