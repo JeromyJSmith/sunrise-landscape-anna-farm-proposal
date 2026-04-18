@@ -3699,18 +3699,20 @@ document.getElementById("lineToolBtn").onclick = () => {
 // ===========================================================================
 const SITES = {
   site1: {
-    name: "Anna's Farm — Site 1",
-    lat: 39.9936, lng: -105.0897, // Lafayette, CO area
-    area: "3,500 sq ft",
+    name: "Anna's Farm — Site 1 (Entry A)",
+    lat: 40.000458, lng: -105.110036,
+    area: "3,500 sq ft — 60×60 ft, 230 ft perimeter, elev 5,360 ft",
     zoom: 19,
-    tilesX: 5, tilesY: 5, // 5x5 grid of tiles
+    tilesX: 5, tilesY: 5,
+    desc: "Flatirons formation hero, dry creek bed, 6 tons boulders, 4 tons flagstone, 10 solar lights",
   },
   site2: {
-    name: "Anna's Farm — Site 2",
-    lat: 39.9932, lng: -105.0893,
-    area: "1,500 sq ft",
+    name: "Anna's Farm — Site 2 (Entry B)",
+    lat: 40.001489, lng: -105.109675,
+    area: "1,500 sq ft — 60×30 ft, 194 ft perimeter, elev 5,350 ft",
     zoom: 19,
     tilesX: 4, tilesY: 4,
+    desc: "Compact Flatirons ridge, simple dry creek, 4 tons boulders, 3 tons flagstone, 10 solar lights",
   },
 };
 
@@ -3775,7 +3777,7 @@ async function loadSite(siteKey) {
   // Frame the scene
   frameAll();
   hudInfo(`${site.name} — ${site.area}`);
-  toast(`Loaded ${site.name} with ${osmTilePlanes.length} map tiles`);
+  toast(`${site.name}: ${site.desc}`);
 }
 
 document.getElementById("loadSite1").onclick = () => loadSite("site1");
