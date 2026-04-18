@@ -257,6 +257,15 @@
   </div>
 
   <div class="section">
+    <h2>Custom assets</h2>
+    <div class="stack">
+      <button id="uploadAssetBtn">Upload GLB/GLTF…</button>
+      <input type="file" id="uploadAsset" accept=".glb,.gltf" hidden>
+      <div id="customAssetList" class="list"></div>
+    </div>
+  </div>
+
+  <div class="section">
     <h2>Ground paint</h2>
     <div class="grid2" style="margin-bottom:8px">
       <button id="paintToggle" class="primary">Enable paint (B)</button>
@@ -301,6 +310,11 @@
         <button id="paintClear" class="danger">Clear paint</button>
       </div>
       <button id="paintSave" style="width:100%">Save paint PNG</button>
+      <div class="grid2" style="margin-top:6px">
+        <button id="uploadBrushBtn">Upload brush…</button>
+        <button id="lineToolBtn">Line tool</button>
+      </div>
+      <input type="file" id="uploadBrush" accept=".png,.jpg,.jpeg,.webp" hidden>
     </div>
   </div>
 
@@ -323,6 +337,7 @@
     <button id="resetCam">Reset view</button>
     <button id="paintModeBtn" data-mode="paint">Paint (B)</button>
     <button id="targetBtn">Target (T)</button>
+    <button id="snapBtn">Snap (G)</button>
   </div>
   <div class="paint-cursor" id="paintCursor"></div>
   <div class="hud" id="hud"><span class="fps" id="fps">--</span> fps · <span id="hudInfo">loading…</span></div>
@@ -345,6 +360,9 @@
     </div>
     <div class="grid2" style="margin-top:6px">
       <button id="dropToGround">Drop to ground</button>
+      <button id="lockBtn">Lock (L)</button>
+    </div>
+    <div class="grid2" style="margin-top:6px">
       <button id="deleteBtn" class="danger">Delete (X)</button>
     </div>
   </div>
@@ -414,6 +432,27 @@
     </div>
   </div>
 
+  <div class="section" id="meshControls" style="display:none">
+    <h2>Dimensions</h2>
+    <div class="stack">
+      <div class="slider">
+        <label>Height</label>
+        <input id="meshHeight" type="range" min="0.3" max="2.0" step="0.01" value="1.0">
+        <span id="meshHeightVal" class="val">1.00</span>
+      </div>
+      <div class="slider">
+        <label>Width</label>
+        <input id="meshWidth" type="range" min="0.15" max="1.0" step="0.01" value="0.5">
+        <span id="meshWidthVal" class="val">0.50</span>
+      </div>
+      <div class="slider">
+        <label>Thickness</label>
+        <input id="meshThickness" type="range" min="0.03" max="0.2" step="0.005" value="0.1">
+        <span id="meshThicknessVal" class="val">0.100</span>
+      </div>
+    </div>
+  </div>
+
   <div class="section" id="lightControls" style="display:none">
     <h2>Light properties</h2>
     <div class="stack">
@@ -451,6 +490,34 @@
         <button id="openProjectBtn">Open…</button>
       </div>
       <div id="projectList" class="list" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Camera</h2>
+    <div class="grid2">
+      <button id="saveViewBtn">Save view</button>
+      <button id="clearViewsBtn">Clear views</button>
+    </div>
+    <div id="bookmarkList" class="list" style="margin-top:6px; max-height:120px"></div>
+    <h2 style="margin-top:8px">Path animation</h2>
+    <div class="grid2">
+      <button id="drawPathBtn">Draw path</button>
+      <button id="clearPathBtn">Clear path</button>
+    </div>
+    <div class="grid2" style="margin-top:4px">
+      <button id="playPathBtn" class="primary">Play</button>
+      <button id="stopPathBtn">Stop</button>
+    </div>
+    <div class="slider">
+      <label>Speed</label>
+      <input id="pathSpeed" type="range" min="0.5" max="5" step="0.1" value="1.5">
+      <span id="pathSpeedVal" class="val">1.5</span>
+    </div>
+    <div class="slider">
+      <label>Height</label>
+      <input id="pathHeight" type="range" min="1" max="10" step="0.5" value="3">
+      <span id="pathHeightVal" class="val">3.0</span>
     </div>
   </div>
 
@@ -707,6 +774,11 @@ const MATS = {
     normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.7, 0.7),
     roughnessMap: noiseTex.rocky.clone(),
   }),
+  stone3: () => new THREE.MeshStandardMaterial({
+    color: 0xb87856, roughness: 0.88, metalness: 0.0,
+    normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.8, 0.8),
+    roughnessMap: noiseTex.rocky.clone(),
+  }),
   boulder: () => new THREE.MeshStandardMaterial({
     color: 0x8a8a87, roughness: 0.95, metalness: 0.0,
     normalMap: normalTex.smooth.clone(), normalScale: new THREE.Vector2(0.5, 0.5),
@@ -718,7 +790,7 @@ const MATS = {
     roughnessMap: noiseTex.smooth.clone(),
   }),
   stripStone: () => new THREE.MeshStandardMaterial({
-    color: 0x7a5232, roughness: 0.88, metalness: 0.0,
+    color: 0xad5a38, roughness: 0.88, metalness: 0.0,
     normalMap: normalTex.rocky.clone(), normalScale: new THREE.Vector2(0.6, 0.6),
     roughnessMap: noiseTex.rocky.clone(),
   }),
@@ -842,65 +914,75 @@ function buildStone(shape) {
   // Resolve shape
   if (!shape || shape === "random") {
     const r = Math.random();
-    if (r < 0.35) shape = "flat";
-    else if (r < 0.70) shape = "sloped";
+    if (r < 0.30) shape = "flat";
+    else if (r < 0.60) shape = "sloped";
     else shape = "pointed";
   }
 
-  const h = THREE.MathUtils.randFloat(0.5, 1.6);
-  const w = THREE.MathUtils.randFloat(0.3, 0.7);
-  const t = THREE.MathUtils.randFloat(0.06, 0.14);
-  const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
+  const h = THREE.MathUtils.randFloat(0.6, 1.8);       // tall upright slab
+  const wTop = THREE.MathUtils.randFloat(0.25, 0.55);   // narrower at top
+  const wBase = wTop * THREE.MathUtils.randFloat(1.25, 1.6); // wider base (flatiron shape)
+  const t = THREE.MathUtils.randFloat(0.06, 0.14);      // thin like real flagstone
+  const geo = new THREE.BoxGeometry(wBase, h, t, 5, 10, 2);
   const pos = geo.attributes.position;
 
-  // Taper — narrow toward the top (applied to all shapes first)
+  // Taper — WIDER at base, NARROWER at top (Flatiron silhouette)
   for (let i = 0; i < pos.count; i++) {
     const y = pos.getY(i);
-    const norm = (y + h / 2) / h;
-    const taper = 1 - 0.3 * Math.max(0, norm);
+    const norm = (y + h / 2) / h; // 0 at bottom, 1 at top
+    const taper = THREE.MathUtils.lerp(1.0, wTop / wBase, norm);
     pos.setX(i, pos.getX(i) * taper);
+    // Slight thickness taper too — thinner at top
+    pos.setZ(i, pos.getZ(i) * THREE.MathUtils.lerp(1.0, 0.7, norm));
   }
 
   // Shape-specific top modifications (before jitter)
   if (shape === "sloped") {
-    const slopeAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(2, 8));
+    const slopeAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(3, 10));
     const slopeDir = Math.random() < 0.5 ? 1 : -1;
     for (let i = 0; i < pos.count; i++) {
-      if (pos.getY(i) > h / 2 - 0.05) {
+      if (pos.getY(i) > h / 2 - 0.08) {
         pos.setY(i, pos.getY(i) + slopeDir * pos.getX(i) * Math.tan(slopeAngle));
       }
     }
-    pos.needsUpdate = true;
-    geo.computeVertexNormals();
   } else if (shape === "pointed") {
-    const peakHeight = THREE.MathUtils.randFloat(0.15, 0.35);
-    const halfW = w / 2;
+    // Pentagonal peak — 5th edge at the top
+    const peakHeight = THREE.MathUtils.randFloat(0.12, 0.30);
+    const topW = wTop * 0.5; // width at the very top after taper
     for (let i = 0; i < pos.count; i++) {
-      if (pos.getY(i) > h / 2 - 0.05) {
-        // How far from center X (0..1, 0 = center, 1 = edge)
-        const edgeFraction = Math.abs(pos.getX(i)) / (halfW + 0.001);
-        // Center gets full peak, edges get none
-        const lift = peakHeight * (1 - Math.min(1, edgeFraction));
+      if (pos.getY(i) > h / 2 - 0.08) {
+        const edgeFrac = Math.abs(pos.getX(i)) / (topW + 0.001);
+        const lift = peakHeight * Math.max(0, 1 - edgeFrac);
         pos.setY(i, pos.getY(i) + lift);
       }
     }
-    pos.needsUpdate = true;
-    geo.computeVertexNormals();
   }
 
-  // Jitter proportional to slab size
-  jitterGeometry(geo, 0.01 + h * 0.015);
+  // Irregular edge offsets — real flagstone has rough natural edges
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    const norm = (y + h / 2) / h;
+    // Random edge wobble that's stronger on the sides
+    const isEdge = Math.abs(pos.getX(i)) > (wBase * 0.3 * (1 - norm * 0.4));
+    if (isEdge) {
+      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * 0.03);
+      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * 0.02);
+    }
+  }
 
-  // Store resolved shape in userData
-  geo.userData = geo.userData || {};
-  geo.userData.slabShape = shape;
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
 
-  const mat = (Math.random() < 0.5 ? MATS.stone() : MATS.stone2());
+  // Finer jitter proportional to slab size
+  jitterGeometry(geo, 0.008 + h * 0.01);
+
+  const r = Math.random();
+  const mat = r < 0.35 ? MATS.stone() : r < 0.7 ? MATS.stone2() : MATS.stone3();
   repeatMap(mat, 1, 2);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.position.y = h / 2;
-  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
@@ -928,17 +1010,39 @@ function buildBoulder() {
 }
 
 function buildStripStone() {
-  const h = THREE.MathUtils.randFloat(0.63, 0.79);   // 0.71 ± 0.08 m (≈28 in)
-  const w = THREE.MathUtils.randFloat(0.20, 0.35);   // 8–14 in
-  const t = THREE.MathUtils.randFloat(0.125, 0.175); // 6 in ± 0.025 m
-  const geo = new THREE.BoxGeometry(w, h, t, 3, 6, 2);
-  jitterGeometry(geo, 0.02);
+  const h = THREE.MathUtils.randFloat(0.55, 0.80);   // ~22-32 inches
+  const w = THREE.MathUtils.randFloat(0.18, 0.35);   // 7-14 inches wide
+  const t = THREE.MathUtils.randFloat(0.04, 0.10);   // 1.5-4 inches THIN like flagstone
+  const geo = new THREE.BoxGeometry(w, h, t, 4, 8, 2);
+  const pos = geo.attributes.position;
+
+  // Slight taper — wider at base like a small flatiron
+  const baseScale = THREE.MathUtils.randFloat(1.1, 1.3);
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    const norm = (y + h / 2) / h; // 0=bottom, 1=top
+    const taper = THREE.MathUtils.lerp(baseScale, 1.0, norm);
+    pos.setX(i, pos.getX(i) * taper);
+  }
+
+  // Rough irregular edges
+  for (let i = 0; i < pos.count; i++) {
+    const isEdge = Math.abs(pos.getX(i)) > w * 0.35 || pos.getY(i) > h * 0.4;
+    if (isEdge) {
+      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * 0.015);
+      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * 0.01);
+    }
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+
+  jitterGeometry(geo, 0.012);
   const mat = MATS.stripStone();
   repeatMap(mat, 1, 2);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true; mesh.receiveShadow = true;
   mesh.position.y = h / 2;
-  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-4, 4));
+  mesh.rotation.z = THREE.MathUtils.degToRad(THREE.MathUtils.randFloat(-3, 3));
   const g = new THREE.Group();
   g.add(mesh);
   g.rotation.y = Math.random() * Math.PI;
@@ -989,19 +1093,68 @@ function buildSign() {
   const grp = new THREE.Group();
   const pierH = 1.5, pierW = 0.55, pierD = 0.55;
   const plaqueW = 2.6, plaqueH = 0.9, plaqueT = 0.12;
-  const stoneMat = MATS.signSt();
-  const plateMat = MATS.signPlt();
-  const left  = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
-  const right = new THREE.Mesh(new THREE.BoxGeometry(pierW, pierH, pierD), stoneMat);
-  const plate = new THREE.Mesh(new THREE.BoxGeometry(plaqueW, plaqueH, plaqueT), plateMat);
-  const cap   = new THREE.Mesh(new THREE.BoxGeometry(plaqueW + 0.1, 0.12, pierD + 0.1), stoneMat);
-  left.position.set(-plaqueW/2 + pierW/2, pierH/2, 0);
-  right.position.set(plaqueW/2 - pierW/2, pierH/2, 0);
-  plate.position.set(0, pierH - plaqueH/2 + 0.05, 0);
-  cap.position.set(0, pierH + 0.15, 0);
-  [left, right, plate, cap].forEach(m => { m.castShadow = true; m.receiveShadow = true; });
-  grp.add(left, right, plate, cap);
+
+  // Merge stone parts into a single geometry for unified selection
+  const leftGeo  = new THREE.BoxGeometry(pierW, pierH, pierD);
+  const rightGeo = new THREE.BoxGeometry(pierW, pierH, pierD);
+  const capGeo   = new THREE.BoxGeometry(plaqueW + 0.1, 0.12, pierD + 0.1);
+
+  // Position geometries before merging (translate in geometry space)
+  leftGeo.translate(-plaqueW/2 + pierW/2, pierH/2, 0);
+  rightGeo.translate(plaqueW/2 - pierW/2, pierH/2, 0);
+  capGeo.translate(0, pierH + 0.15, 0);
+
+  // Merge all stone parts
+  const mergedGeo = mergeGeometries([leftGeo, rightGeo, capGeo]);
+  const stoneMesh = new THREE.Mesh(mergedGeo, MATS.signSt());
+  stoneMesh.castShadow = true; stoneMesh.receiveShadow = true;
+
+  // Plaque as separate mesh (different material) but same group
+  const plateGeo = new THREE.BoxGeometry(plaqueW, plaqueH, plaqueT);
+  plateGeo.translate(0, pierH - plaqueH/2 + 0.05, 0);
+  const plateMesh = new THREE.Mesh(plateGeo, MATS.signPlt());
+  plateMesh.castShadow = true; plateMesh.receiveShadow = true;
+
+  grp.add(stoneMesh, plateMesh);
   return grp;
+}
+
+// Simple geometry merge helper (BufferGeometry concat)
+function mergeGeometries(geos) {
+  let totalVerts = 0, totalIdx = 0;
+  for (const g of geos) {
+    totalVerts += g.attributes.position.count;
+    totalIdx += g.index ? g.index.count : g.attributes.position.count;
+  }
+  const positions = new Float32Array(totalVerts * 3);
+  const normals   = new Float32Array(totalVerts * 3);
+  const indices   = [];
+  let vertOffset = 0, idxOffset = 0;
+  for (const g of geos) {
+    const pos = g.attributes.position;
+    const nor = g.attributes.normal;
+    for (let i = 0; i < pos.count; i++) {
+      positions[(vertOffset + i) * 3]     = pos.getX(i);
+      positions[(vertOffset + i) * 3 + 1] = pos.getY(i);
+      positions[(vertOffset + i) * 3 + 2] = pos.getZ(i);
+      if (nor) {
+        normals[(vertOffset + i) * 3]     = nor.getX(i);
+        normals[(vertOffset + i) * 3 + 1] = nor.getY(i);
+        normals[(vertOffset + i) * 3 + 2] = nor.getZ(i);
+      }
+    }
+    if (g.index) {
+      for (let i = 0; i < g.index.count; i++) indices.push(g.index.array[i] + vertOffset);
+    } else {
+      for (let i = 0; i < pos.count; i++) indices.push(i + vertOffset);
+    }
+    vertOffset += pos.count;
+  }
+  const merged = new THREE.BufferGeometry();
+  merged.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  merged.setAttribute("normal",   new THREE.BufferAttribute(normals, 3));
+  merged.setIndex(indices);
+  return merged;
 }
 
 function buildUpLight() {
@@ -1118,6 +1271,17 @@ const baseObjects = new Set();
 let selected = null;
 let nightMode = false;
 
+// Camera bookmarks (F10)
+const cameraBookmarks = [];
+
+// Camera path (F10)
+let cameraPath = null; // THREE.CatmullRomCurve3
+let cameraPathLine = null; // THREE.Line for visualization
+let pathDrawMode = false;
+let pathPoints = [];
+let pathPlaying = false;
+let pathProgress = 0;
+
 // ===========================================================================
 // undo / redo command stack
 // ===========================================================================
@@ -1197,9 +1361,10 @@ let helpersVisible = true;
 let wireframe = false;
 let pbrEnabled = true;
 let activeFilter = "all";
-let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, uplight: 0, bollard: 0, ground: 0, other: 0 };
+let counters = { stone: 0, boulder: 0, stripStone: 0, cobble: 0, tree: 0, sign: 0, uplight: 0, bollard: 0, ground: 0, other: 0, custom: 0 };
 let currentBg = "sky";
 let slabShape = "random";
+let gridSnap = false;
 
 function familyOf(name) {
   const n = (name || "").toLowerCase();
@@ -1221,7 +1386,7 @@ function familyToMatKey(fam, name) {
   const n = (name || "").toLowerCase();
   if (fam === "uplight") return "uplightHousing";
   if (fam === "bollard") return "bollardPost";
-  if (fam === "stone")   return n.includes("2") ? "stone2" : "stone";
+  if (fam === "stone")   return n.includes("3") ? "stone3" : n.includes("2") ? "stone2" : "stone";
   if (fam === "boulder") return Math.random() < 0.5 ? "boulder" : "boulderW";
   if (fam === "stripStone") return "stripStone";
   if (fam === "cobble")  return "cobble";
@@ -1280,6 +1445,7 @@ const TYPE_ALIASES = {
   uplight:"uplight", uplights:"uplight", "up light":"uplight", "up lights":"uplight",
   spot:"uplight", spots:"uplight",
   bollard:"bollard", bollards:"bollard", "pathway light":"bollard", "path light":"bollard", "bollard light":"bollard",
+  custom:"custom",
 };
 
 function parsePrompt(text) {
@@ -1330,6 +1496,9 @@ function spawnAt(type, basePos = null, options = {}) {
     );
   }
   scene.add(obj);
+  // Auto drop-to-ground: ensure mesh base sits on y=0
+  const spawnBox = new THREE.Box3().setFromObject(obj);
+  if (spawnBox.min.y !== 0) obj.position.y -= spawnBox.min.y;
   registerObject(obj, type, false);
   pushUndo(AddObjectCommand(obj));
 
@@ -1401,9 +1570,19 @@ loader.load("anna_scene.glb", gltf => {
 const ray = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 canvas.addEventListener("pointerdown", ev => {
-  if (paintMode) return;
   if (ev.button !== 0) return;
   if (tcontrols.dragging) return;
+  if (pathDrawMode) {
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    const r = new THREE.Raycaster();
+    r.setFromCamera(new THREE.Vector2(ndcX, ndcY), cam);
+    const hits = r.intersectObject(groundHit);
+    if (hits.length) addPathPoint(hits[0].point);
+    return;
+  }
+  if (paintMode) return;
   const rect = canvas.getBoundingClientRect();
   ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
   ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
@@ -1431,12 +1610,19 @@ canvas.addEventListener("pointerdown", ev => {
 function selectObject(obj) {
   selected = obj;
   if (obj) {
-    tcontrols.attach(obj);
+    if (obj.userData.locked) {
+      tcontrols.detach();
+    } else {
+      tcontrols.attach(obj);
+    }
+    const lockIcon = obj.userData.locked ? " [LOCKED]" : "";
     document.getElementById("selName").innerHTML =
-      `<b>${obj.userData.id || obj.name}</b><br><span class="tip">${obj.userData.family}</span>`;
+      `<b>${obj.userData.id || obj.name}</b>${lockIcon}<br><span class="tip">${obj.userData.family}</span>`;
+    document.getElementById("lockBtn").textContent = obj.userData.locked ? "Unlock (L)" : "Lock (L)";
   } else {
     tcontrols.detach();
     document.getElementById("selName").textContent = "— nothing selected —";
+    document.getElementById("lockBtn").textContent = "Lock (L)";
   }
   syncInputs();
   refreshList();
@@ -1533,10 +1719,42 @@ function syncInputs() {
 
   // Material controls (show for non-light objects)
   if (typeof syncMaterialControls === "function") syncMaterialControls();
+
+  // Mesh dimension controls (stone slab and strip stone only)
+  const meshCtrlEl = document.getElementById("meshControls");
+  if (selected && (fam === "stone" || fam === "stripStone")) {
+    meshCtrlEl.style.display = "";
+    // Populate sliders from userData or estimate from current mesh bounds
+    let mesh = null;
+    selected.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+    if (mesh) {
+      if (!selected.userData.baseDims) {
+        const box = new THREE.Box3().setFromObject(mesh);
+        const size = box.getSize(new THREE.Vector3());
+        selected.userData.baseDims = { w: size.x, h: size.y, t: size.z };
+      }
+      const base = selected.userData.baseDims;
+      const curH = selected.userData.meshHeight ?? (mesh.scale.y * base.h);
+      const curW = selected.userData.meshWidth  ?? (mesh.scale.x * base.w);
+      const curT = selected.userData.meshThickness ?? (mesh.scale.z * base.t);
+      const hEl = document.getElementById("meshHeight");
+      const wEl = document.getElementById("meshWidth");
+      const tEl = document.getElementById("meshThickness");
+      hEl.value = curH.toFixed(2);
+      document.getElementById("meshHeightVal").textContent = (+hEl.value).toFixed(2);
+      wEl.value = curW.toFixed(2);
+      document.getElementById("meshWidthVal").textContent = (+wEl.value).toFixed(2);
+      tEl.value = curT.toFixed(3);
+      document.getElementById("meshThicknessVal").textContent = (+tEl.value).toFixed(3);
+    }
+  } else {
+    meshCtrlEl.style.display = "none";
+  }
 }
 
 function applyInputsToObject() {
   if (!selected) return;
+  if (selected.userData.locked) { syncInputs(); return; }
   const beforePos = selected.position.clone();
   const beforeRot = selected.rotation.clone();
   const beforeScl = selected.scale.clone();
@@ -1719,6 +1937,12 @@ document.getElementById("dropToGround").onclick = () => {
   selected.position.y -= box.min.y;
   syncInputs(); refreshPrompt();
 };
+document.getElementById("lockBtn").onclick = () => {
+  if (!selected) return;
+  selected.userData.locked = !selected.userData.locked;
+  selectObject(selected); // refresh display + gizmo state
+  toast(selected.userData.locked ? `Locked ${selected.userData.id}` : `Unlocked ${selected.userData.id}`);
+};
 document.getElementById("deleteBtn").onclick = deleteSelected;
 document.getElementById("undoBtn").onclick = undo;
 document.getElementById("redoBtn").onclick = redo;
@@ -1763,6 +1987,13 @@ document.getElementById("saveJson").onclick = () => {
         lightAngle:     o.userData.lightAngle,
         lightColor:     o.userData.lightColor,
       } : {}),
+      ...(o.userData.meshHeight != null ? {
+        meshHeight:    o.userData.meshHeight,
+        meshWidth:     o.userData.meshWidth,
+        meshThickness: o.userData.meshThickness,
+        baseDims:      o.userData.baseDims,
+      } : {}),
+      ...(o.userData.locked ? { locked: true } : {}),
     })),
   };
   if (targetActive) {
@@ -1817,6 +2048,26 @@ document.getElementById("loadJson").onchange = async ev => {
         }
       }
     }
+    // Restore mesh dimension overrides (JSON export)
+    if (item.baseDims)      o.userData.baseDims = item.baseDims;
+    if (item.meshHeight != null || item.meshWidth != null || item.meshThickness != null) {
+      o.userData.meshHeight    = item.meshHeight;
+      o.userData.meshWidth     = item.meshWidth;
+      o.userData.meshThickness = item.meshThickness;
+      if (item.baseDims) {
+        let mesh = null;
+        o.traverse(c => { if (!mesh && c.isMesh) mesh = c; });
+        if (mesh) {
+          const base = item.baseDims;
+          const h = item.meshHeight ?? (mesh.scale.y * base.h);
+          const w = item.meshWidth  ?? (mesh.scale.x * base.w);
+          const t = item.meshThickness ?? (mesh.scale.z * base.t);
+          mesh.scale.set(w / base.w, h / base.h, t / base.t);
+          mesh.position.y = h / 2;
+        }
+      }
+    }
+    if (item.locked) o.userData.locked = true;
     updated++;
   }
   if (data.target) {
@@ -1936,19 +2187,35 @@ addEventListener("keydown", e => {
   if (k === "w") tcontrols.setMode("translate");
   if (k === "e") tcontrols.setMode("rotate");
   if (k === "r") tcontrols.setMode("scale");
+  if (k === "g") {
+    gridSnap = !gridSnap;
+    tcontrols.translationSnap = gridSnap ? 0.25 : null;
+    document.getElementById("snapBtn").classList.toggle("active", gridSnap);
+    toast(`Grid snap ${gridSnap ? "on (0.25 m)" : "off"}`);
+  }
   if (k === "b") setPaintMode(!paintMode);
   if (k === "t" && !paintMode) cycleTarget();
+  if (k === "l" && selected) { selected.userData.locked = !selected.userData.locked; selectObject(selected); toast(selected.userData.locked ? `Locked ${selected.userData.id}` : `Unlocked ${selected.userData.id}`); }
   if (k === "f") focusOn(selected);
-  if (k === "x" && !paintMode) deleteSelected();
+  if (k === "x" && !paintMode && selected && !selected.userData.locked) deleteSelected();
   if (k === "escape") { if (paintMode) setPaintMode(false); else selectObject(null); }
   if (k === "[" && paintMode) { brushSize = Math.max(2, brushSize - 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
   if (k === "]" && paintMode) { brushSize = Math.min(120, brushSize + 4); document.getElementById("brushSize").value = brushSize; document.getElementById("brushSizeVal").textContent = brushSize; updateBrushPreview(); }
   if (k === "[" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("left"); }
   if (k === "]" && e.ctrlKey && !paintMode) { e.preventDefault(); sidebarToggle("right"); }
+  if (k >= "1" && k <= "9" && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+    const idx = parseInt(k) - 1;
+    if (cameraBookmarks[idx]) animateCameraTo(cameraBookmarks[idx].position, cameraBookmarks[idx].target);
+  }
 });
+
+// Rotation snap: hold Shift → snap to 15° increments
+addEventListener("keydown", e => { if (e.key === "Shift") tcontrols.rotationSnap = THREE.MathUtils.degToRad(15); });
+addEventListener("keyup",   e => { if (e.key === "Shift") tcontrols.rotationSnap = null; });
 
 function deleteSelected() {
   if (!selected) return;
+  if (selected.userData.locked) { toast("Unlock first (L)"); return; }
   const obj = selected;
   baseObjects.delete(obj);
   const cmd = DeleteObjectCommand(obj);
@@ -1980,6 +2247,13 @@ function cycleTarget() {
 }
 
 document.getElementById("targetBtn").onclick = cycleTarget;
+
+document.getElementById("snapBtn").onclick = () => {
+  gridSnap = !gridSnap;
+  tcontrols.translationSnap = gridSnap ? 0.25 : null;
+  document.getElementById("snapBtn").classList.toggle("active", gridSnap);
+  toast(`Grid snap ${gridSnap ? "on (0.25 m)" : "off"}`);
+};
 
 function focusOn(obj) {
   if (!obj) return;
@@ -2071,6 +2345,9 @@ let brushHardness = 0.5;
 let brushTexture = "solid";
 let paintColor = "#8B4513";
 const paintHistory = []; // snapshot stack for undo
+const customBrushes = []; // { name, img } — F13
+let lineToolActive = false; // F13
+let lineStartPos = null; // F13
 
 // --- brush stamp generators ---
 function makeBrushStamp(size, texture, color, opacity, hardness) {
@@ -2205,6 +2482,27 @@ function makeBrushStamp(size, texture, color, opacity, hardness) {
         ctx.moveTo(px, py);
         ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
         ctx.stroke();
+      }
+      break;
+    }
+    default: {
+      if (typeof texture === "string" && texture.startsWith("custom-")) {
+        const idx = parseInt(texture.split("-")[1]);
+        const custom = customBrushes[idx];
+        if (custom) {
+          ctx.globalAlpha = opacity;
+          ctx.drawImage(custom.img, 0, 0, s, s);
+          ctx.globalCompositeOperation = "destination-in";
+          const grad = ctx.createRadialGradient(cx, cy, r * hardness, cx, cy, r);
+          grad.addColorStop(0, "white");
+          grad.addColorStop(1, "transparent");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, s, s);
+          ctx.globalCompositeOperation = "source-atop";
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.5;
+          ctx.fillRect(0, 0, s, s);
+        }
       }
       break;
     }
@@ -2405,6 +2703,33 @@ canvas.addEventListener("pointerdown", ev => {
   if (tcontrols.dragging) return;
   const wp = getPaintWorldPos(ev);
   if (!wp) return;
+  if (lineToolActive) {
+    if (!lineStartPos) {
+      lineStartPos = wp.clone();
+      toast("Click endpoint");
+    } else {
+      saveUndoSnapshot();
+      const uv1 = worldToPaintUV(lineStartPos);
+      const uv2 = worldToPaintUV(wp);
+      paintCtx.strokeStyle = paintColor;
+      paintCtx.lineWidth = brushSize * (PAINT_RES / PAINT_SIZE) * 0.3;
+      paintCtx.lineCap = "round";
+      paintCtx.globalAlpha = brushOpacity;
+      paintCtx.beginPath();
+      paintCtx.moveTo(uv1.u * PAINT_RES, uv1.v * PAINT_RES);
+      paintCtx.lineTo(uv2.u * PAINT_RES, uv2.v * PAINT_RES);
+      paintCtx.stroke();
+      paintCtx.globalAlpha = 1;
+      paintTex.needsUpdate = true;
+      const dist = lineStartPos.distanceTo(wp);
+      const ft = (dist * 3.28084).toFixed(1);
+      toast(`Line: ${dist.toFixed(2)}m (${ft}ft)`);
+      lineStartPos = null;
+    }
+    ev.stopPropagation();
+    isPainting = false;
+    return;
+  }
   ev.stopPropagation();
   isPainting = true;
   saveUndoSnapshot();
@@ -2620,6 +2945,11 @@ function captureProjectState(name) {
       matTexture:     o.userData.matTexture,
       matTexScaleX:   o.userData.matTexScaleX,
       matTexScaleY:   o.userData.matTexScaleY,
+      meshHeight:    o.userData.meshHeight,
+      meshWidth:     o.userData.meshWidth,
+      meshThickness: o.userData.meshThickness,
+      baseDims:      o.userData.baseDims,
+      locked:        o.userData.locked || false,
     })),
   };
 }
@@ -2762,6 +3092,26 @@ async function applyProject(id) {
     let hasMat = false;
     for (const f of matFields) if (item[f] != null) { o.userData[f] = item[f]; hasMat = true; }
     if (hasMat) applyMaterialOverridesFromUserData(o);
+
+    // Restore mesh dimension overrides
+    if (item.baseDims)      o.userData.baseDims = item.baseDims;
+    if (item.meshHeight != null || item.meshWidth != null || item.meshThickness != null) {
+      o.userData.meshHeight    = item.meshHeight;
+      o.userData.meshWidth     = item.meshWidth;
+      o.userData.meshThickness = item.meshThickness;
+      if (item.baseDims) {
+        let mesh = null;
+        o.traverse(c => { if (!mesh && c.isMesh) mesh = c; });
+        if (mesh) {
+          const base = item.baseDims;
+          const h = item.meshHeight ?? (mesh.scale.y * base.h);
+          const w = item.meshWidth  ?? (mesh.scale.x * base.w);
+          const t = item.meshThickness ?? (mesh.scale.z * base.t);
+          mesh.scale.set(w / base.w, h / base.h, t / base.t);
+          mesh.position.y = h / 2;
+        }
+      }
+    }
   }
 
   // Restore paint
@@ -3064,10 +3414,302 @@ document.getElementById("matResetBtn").onclick = () => {
   scheduleAutoSave();
 };
 
+// ===========================================================================
+// F17 — PER-OBJECT MESH DIMENSIONS
+// ===========================================================================
+function applyMeshDimensions() {
+  if (!selected) return;
+  const h = +document.getElementById("meshHeight").value;
+  const w = +document.getElementById("meshWidth").value;
+  const t = +document.getElementById("meshThickness").value;
+
+  let mesh = null;
+  selected.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) return;
+
+  if (!selected.userData.baseDims) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const size = box.getSize(new THREE.Vector3());
+    selected.userData.baseDims = { w: size.x, h: size.y, t: size.z };
+  }
+  const base = selected.userData.baseDims;
+
+  mesh.scale.set(w / base.w, h / base.h, t / base.t);
+  mesh.position.y = h / 2;
+
+  selected.userData.meshHeight    = h;
+  selected.userData.meshWidth     = w;
+  selected.userData.meshThickness = t;
+
+  syncInputs();
+  if (typeof scheduleAutoSave === "function") scheduleAutoSave();
+}
+
+document.getElementById("meshHeight").addEventListener("input", e => {
+  document.getElementById("meshHeightVal").textContent = (+e.target.value).toFixed(2);
+  applyMeshDimensions();
+});
+document.getElementById("meshWidth").addEventListener("input", e => {
+  document.getElementById("meshWidthVal").textContent = (+e.target.value).toFixed(2);
+  applyMeshDimensions();
+});
+document.getElementById("meshThickness").addEventListener("input", e => {
+  document.getElementById("meshThicknessVal").textContent = (+e.target.value).toFixed(3);
+  applyMeshDimensions();
+});
+
+// ===========================================================================
+// F12 — CUSTOM ASSET UPLOAD
+// ===========================================================================
+const customAssets = []; // { name, dataUrl }
+
+function refreshCustomAssets() {
+  const list = document.getElementById("customAssetList");
+  list.innerHTML = "";
+  for (const asset of customAssets) {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `<span class="name">${asset.name}</span><span class="pill">custom</span>`;
+    el.onclick = () => spawnCustomAsset(asset);
+    list.appendChild(el);
+  }
+}
+
+function spawnCustomAsset(asset) {
+  const binary = atob(asset.dataUrl.split(",")[1]);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.parse(bytes.buffer, "", (gltf) => {
+    const obj = gltf.scene;
+    obj.name = `${asset.name}_${Date.now()}`;
+    obj.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+
+    if (targetActive) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 0.3 + Math.random() * 0.5;
+      obj.position.set(
+        targetGroup.position.x + Math.cos(angle) * dist,
+        0,
+        targetGroup.position.z + Math.sin(angle) * dist,
+      );
+    } else {
+      obj.position.set(
+        THREE.MathUtils.randFloat(-4.5, 4.5),
+        0,
+        THREE.MathUtils.randFloat(-4.5, 4.5),
+      );
+    }
+
+    scene.add(obj);
+    registerObject(obj, "custom", false);
+    selectObject(obj);
+    refreshUi();
+    toast(`Placed ${asset.name}`);
+  }, (err) => {
+    console.error("GLTFLoader parse error:", err);
+    toast(`Failed to load ${asset.name}`);
+  });
+}
+
+document.getElementById("uploadAssetBtn").onclick = () => document.getElementById("uploadAsset").click();
+document.getElementById("uploadAsset").onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const name = file.name.replace(/\.(glb|gltf)$/i, "");
+  const arrayBuffer = await file.arrayBuffer();
+  const blob = new Blob([arrayBuffer]);
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    customAssets.push({ name, dataUrl });
+    refreshCustomAssets();
+    toast(`Added custom asset: ${name}`);
+  };
+  reader.readAsDataURL(blob);
+  // Reset so the same file can be re-uploaded if needed
+  e.target.value = "";
+};
+
+// ===========================================================================
+// F10 — CAMERA BOOKMARKS
+// ===========================================================================
+document.getElementById("saveViewBtn").onclick = () => {
+  const bm = {
+    name: `View ${cameraBookmarks.length + 1}`,
+    position: cam.position.clone(),
+    target: orbit.target.clone(),
+  };
+  cameraBookmarks.push(bm);
+  refreshBookmarks();
+  toast(`Saved ${bm.name}`);
+};
+
+function refreshBookmarks() {
+  const list = document.getElementById("bookmarkList");
+  list.innerHTML = "";
+  cameraBookmarks.forEach((bm, i) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `<span class="name">${bm.name}</span><span class="pill">${i + 1}</span>`;
+    el.onclick = () => animateCameraTo(bm.position, bm.target);
+    list.appendChild(el);
+  });
+}
+
+function animateCameraTo(pos, target, duration = 800) {
+  const startPos = cam.position.clone();
+  const startTarget = orbit.target.clone();
+  const startTime = performance.now();
+  function step() {
+    const t = Math.min(1, (performance.now() - startTime) / duration);
+    const ease = t * (2 - t); // ease-out quad
+    cam.position.lerpVectors(startPos, pos, ease);
+    orbit.target.lerpVectors(startTarget, target, ease);
+    orbit.update();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  step();
+}
+
+document.getElementById("clearViewsBtn").onclick = () => {
+  cameraBookmarks.length = 0;
+  refreshBookmarks();
+  toast("Views cleared");
+};
+
+// ===========================================================================
+// F10 — CAMERA PATH ANIMATION
+// ===========================================================================
+document.getElementById("drawPathBtn").onclick = () => {
+  pathDrawMode = !pathDrawMode;
+  document.getElementById("drawPathBtn").classList.toggle("active", pathDrawMode);
+  if (pathDrawMode) {
+    pathPoints = [];
+    if (cameraPathLine) { scene.remove(cameraPathLine); cameraPathLine = null; }
+    toast("Click ground to add path points. Click Draw Path again to finish.");
+  } else {
+    finalizePath();
+  }
+};
+
+function addPathPoint(worldPos) {
+  pathPoints.push(new THREE.Vector3(worldPos.x, 0.1, worldPos.z));
+  if (cameraPathLine) scene.remove(cameraPathLine);
+  if (pathPoints.length >= 2) {
+    const geo = new THREE.BufferGeometry().setFromPoints(pathPoints);
+    cameraPathLine = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xf4a261, linewidth: 2 }));
+    scene.add(cameraPathLine);
+  }
+}
+
+function finalizePath() {
+  if (pathPoints.length < 2) { toast("Need at least 2 points"); return; }
+  cameraPath = new THREE.CatmullRomCurve3(pathPoints, false, "catmullrom", 0.5);
+  if (cameraPathLine) scene.remove(cameraPathLine);
+  const pts = cameraPath.getPoints(pathPoints.length * 10);
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  cameraPathLine = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xf4a261 }));
+  scene.add(cameraPathLine);
+  toast(`Path created with ${pathPoints.length} points`);
+}
+
+document.getElementById("playPathBtn").onclick = () => {
+  if (!cameraPath) { toast("Draw a path first"); return; }
+  pathPlaying = !pathPlaying;
+  pathProgress = pathPlaying ? 0 : pathProgress;
+  document.getElementById("playPathBtn").textContent = pathPlaying ? "Pause" : "Play";
+  if (pathPlaying) orbit.enabled = false;
+  else orbit.enabled = true;
+};
+
+document.getElementById("stopPathBtn").onclick = () => {
+  pathPlaying = false;
+  pathProgress = 0;
+  orbit.enabled = true;
+  document.getElementById("playPathBtn").textContent = "Play";
+};
+
+document.getElementById("clearPathBtn").onclick = () => {
+  pathPlaying = false;
+  pathProgress = 0;
+  cameraPath = null;
+  pathPoints = [];
+  if (cameraPathLine) { scene.remove(cameraPathLine); cameraPathLine = null; }
+  orbit.enabled = true;
+  document.getElementById("playPathBtn").textContent = "Play";
+  toast("Path cleared");
+};
+
+document.getElementById("pathSpeed").oninput = e => {
+  document.getElementById("pathSpeedVal").textContent = (+e.target.value).toFixed(1);
+};
+document.getElementById("pathHeight").oninput = e => {
+  document.getElementById("pathHeightVal").textContent = (+e.target.value).toFixed(1);
+};
+
+// ===========================================================================
+// F13 — CUSTOM BRUSH UPLOAD
+// ===========================================================================
+document.getElementById("uploadBrushBtn").onclick = () => document.getElementById("uploadBrush").click();
+document.getElementById("uploadBrush").onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const name = file.name.replace(/\.[^.]+$/, "");
+    customBrushes.push({ name, img });
+    const grid = document.getElementById("brushTextures");
+    const btn = document.createElement("button");
+    btn.dataset.brush = `custom-${customBrushes.length - 1}`;
+    btn.textContent = name.slice(0, 6);
+    btn.onclick = () => {
+      grid.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      brushTexture = btn.dataset.brush;
+      updateBrushPreview();
+    };
+    grid.appendChild(btn);
+    toast(`Added brush: ${name}`);
+  };
+  img.src = URL.createObjectURL(file);
+  e.target.value = "";
+};
+
+// ===========================================================================
+// F13 — LINE TOOL
+// ===========================================================================
+document.getElementById("lineToolBtn").onclick = () => {
+  lineToolActive = !lineToolActive;
+  document.getElementById("lineToolBtn").classList.toggle("active", lineToolActive);
+  lineStartPos = null;
+  if (lineToolActive && !paintMode) setPaintMode(true);
+  toast(lineToolActive ? "Click two points to draw a line" : "Line tool off");
+};
+
 let lastT = performance.now();
 let frames = 0, fpsAccumT = 0;
 function loop() {
   resize();
+  if (pathPlaying && cameraPath) {
+    const speed = +document.getElementById("pathSpeed").value;
+    const height = +document.getElementById("pathHeight").value;
+    pathProgress += (speed * 0.0003);
+    if (pathProgress >= 1) {
+      pathProgress = 0;
+      pathPlaying = false;
+      orbit.enabled = true;
+      document.getElementById("playPathBtn").textContent = "Play";
+      toast("Path complete");
+    } else {
+      const pt = cameraPath.getPointAt(pathProgress);
+      cam.position.set(pt.x, pt.y + height, pt.z);
+      const lookT = Math.min(1, pathProgress + 0.02);
+      const lookPt = cameraPath.getPointAt(lookT);
+      cam.lookAt(lookPt.x, lookPt.y + 1, lookPt.z);
+    }
+  }
   orbit.update();
   composer.render();
   // fps
